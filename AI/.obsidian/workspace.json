@@ -1,0 +1,194 @@
+{
+  "main": {
+    "id": "ac399f4618de4c1d",
+    "type": "split",
+    "children": [
+      {
+        "id": "f269ac6bd887d1b8",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b4303372e00c61d8",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "e22f0ca5f1c8f165",
+    "type": "split",
+    "children": [
+      {
+        "id": "9d4afea845f9685f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5875cbfeaec2ecdd",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "2e3a6fa0eb102335",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "ffffe842bdaf02af",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "696a86ee23aff526",
+    "type": "split",
+    "children": [
+      {
+        "id": "19eeacfd46d97160",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a2a88bd53610dbf1",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "AI_100K_BOOTCAMP/README.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for README"
+            }
+          },
+          {
+            "id": "879b51e29768f1a3",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "AI_100K_BOOTCAMP/README.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from README"
+            }
+          },
+          {
+            "id": "47fb63b954f388ec",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "2c24a1fd5c4e2ae6",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "0ed4aae520262a33",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "AI_100K_BOOTCAMP/README.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of README"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "b4303372e00c61d8",
+  "lastOpenFiles": [
+    "AI_100K_BOOTCAMP/Week-01/Daily/DAY-01.md",
+    "AI_100K_BOOTCAMP/README.md",
+    "AI_100K_BOOTCAMP/Week-03/AGENDA.md",
+    "AI_100K_BOOTCAMP/Week-02/AGENDA.md",
+    "AI_100K_BOOTCAMP/Week-01/Module-02_Python-SQL-Data.md",
+    "AI_100K_BOOTCAMP/Week-01/Module-01_Foundation-Workflow.md",
+    "AI_100K_BOOTCAMP/Week-01/AGENDA.md",
+    "AI_100K_BOOTCAMP/Week-01/Tracking/ACTIVE_RECALL.md",
+    "AI_PROJECTS_ROADMAP_100K_JOB.md"
+  ]
+}
