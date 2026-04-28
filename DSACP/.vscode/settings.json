@@ -1,0 +1,5 @@
+{
+  "cursor.terminal.enableAiChecks": false,
+  "cursor.general.enableShadowWorkspace": false,
+  "cursor.general.globalCursorIgnoreList": ["*"]
+}
