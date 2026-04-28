@@ -1,1 +1,5 @@
 .obsidian/
+
+# DSACP: compiled binaries and CPH extension cache (regenerate locally)
+DSACP/**/*.bin
+**/.cph/
