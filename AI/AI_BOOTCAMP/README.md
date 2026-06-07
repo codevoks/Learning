@@ -1,49 +1,65 @@
-# AI 100K Bootcamp (Execution-First)
+# AI_BOOTCAMP — yahan se continue
 
-Ye roadmap ka practical version hai. Isme hum theory + coding + revision + active recall + deliberate practice ko combine karenge.
+**Tumhara goal:** AI applications **engineer** level — demo nahi, **production mindset**.  
+**Bhasha:** poora track **Hinglish** (Roman Hindi + English tech terms).  
+**Ignore:** `ai-engineering-from-scratch` clone — woh reference nahi; yeh bootcamp alag hai.
 
-## End Goal
-- 12 months mein 6-8 production-grade AI projects
-- 3 standout projects: `RAG`, `Agent Workflow`, `LLM Eval/Monitoring`
-- Senior-level hiring signals: shipping + reliability + metrics + communication
+---
 
-## Operating System (Non-Negotiable)
-- Daily minimum deep work: 2 focused blocks (50-10 format)
-- Har study session ka output: code, notes, ya measured practice
-- Spoon-feeding nahi: pehle tum attempt karoge, phir feedback milega
-- Har week: 1 mini shipping outcome + 1 reflection + 1 revision cycle
+## Ye bootcamp ka format kya hai
 
-## ADHD + GAD Friendly Rules
-- Small wins first: task ko 20-40 min chunks mein todna
-- Visible checklist: "Next 1 action" always defined
-- Stress control: "imperfect action > overthinking"
-- Recall loops: same concepts ko spaced revision se lock karna
+Har **lesson** mein roughly yeh hoga:
 
-## Weekly Structure
-- `Week-01`: foundation + execution system setup + data pipeline basics
-- `Week-02`: Python+SQL depth + data cleaning patterns + mini ETL
-- `Week-03`: classical ML fundamentals + leakage-safe workflow
-- `Week-04`: baseline ML project + API serving intro
+| Section | Matlab |
+|--------|--------|
+| **TL;DR** | 2–3 lines — aaj kya seekh rahe ho |
+| **Pehle yeh samjho** | concept, intuition — lambi theory nahi |
+| **Karke dikhao** | concrete steps (terminal / code) |
+| **Homework** | khud karoge — bina iske aage nahi |
+| **Done jab** | checklist — sab tick = next lesson |
 
-Har week folder ke andar:
-- `AGENDA.md`
-- `Module-*` notes
-- `Daily/` action sheets
-- `Tracking/` recall + mistakes + scorecard
+**Rule:** ek lesson khatam → homework karo → chat mein batao / error paste karo → phir next.
 
-## Performance Scorecard (Weekly)
-- Build hours completed (target 10h)
-- Theory hours completed (target 4h)
-- DSA/coding hours completed (target 5h)
-- Shipped features (target 1+)
-- Active recall tests done (target 3+)
-- Revision loops done (target 2+)
+---
 
-## Protocol: Deliberate Practice
-1. Concept read (15-25 min)
-2. Closed-book explain (5 min)
-3. Code from scratch (25-40 min)
-4. Review errors (10 min)
-5. Rebuild cleaner version (15 min)
+## Roadmap (high level)
 
-Progress without discomfort = fake progress.
+| Week | Theme | AI? |
+|------|--------|-----|
+| Week 0 | Setup + mindset | ❌ |
+| Week 1 | Chhota reliable API (validation, errors, logs) | ❌ |
+| Week 2 | Pehla LLM call (timeout, cost awareness) | ✅ start |
+| Week 3 | Structured output (schema, parse fail) | ✅ |
+| Week 4 | Embeddings + vector search (RAG prep) | ✅ |
+| Week 5 | RAG slice + citations + honesty | ✅ |
+| Week 6+ | Evals, gateway, agents (order baad mein fix) | ✅ |
+
+Week 4 ke baad tum portfolio project #1 ki taraf nikal sakte ho (context file jaisa).
+
+---
+
+## Abhi kahan se shuru karna hai
+
+1. Padho: [`CURRENT.md`](./CURRENT.md) — **exact “next lesson”** wahan likha rahega.  
+2. Phir: [`week-00-setup/01-mindset-and-tools.md`](./week-00-setup/01-mindset-and-tools.md)
+
+---
+
+## Cursor mein kaise use karo
+
+Nayi chat kholo toh likh do:
+
+> `AI_BOOTCAMP/CURRENT.md` aur latest lesson padh ke aage continue karo. Main Week X Lesson Y par homework kar raha hoon.
+
+---
+
+## Stack (abhi choose karo — ek hi pakdo)
+
+- **Option A:** TypeScript + Node (Fastify ya Express)  
+- **Option B:** Python + FastAPI  
+
+Dono theek hain. Week 1 ke end mein ek hi choose karke stick raho — beech mein mat badlo.
+
+---
+
+*Changelog: 2026-04-30 — bootcamp folder recreate; format lock.*
