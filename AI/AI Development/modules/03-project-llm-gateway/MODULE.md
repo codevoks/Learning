@@ -1,4 +1,6 @@
-# Module 03 — PROJECT: LLM Gateway
+# Module 03 — LLM Gateway (concepts → Project C)
+
+> **Ship spec**: `@Projects.md` **Project C** (Go). This module teaches gateway patterns; production ship is Go, later in the portfolio order.
 
 > **Agent spawn**: `@Memory.md` + this file + `@modules/03-project-llm-gateway/NOTES.md`  
 > **Nav**: ← [Module 02](../02-llm-infra/MODULE.md) · Next → [Module 04](../04-prompt-engineering/MODULE.md)
@@ -10,7 +12,7 @@
 | Prerequisites | Modules 01–02 · `@Projects.md` |
 | Duration | ~2–3 weeks |
 | Project? | Yes |
-| Exit test | Gateway milestones M1–M7 · `@Projects.md` |
+| Exit test | Gateway concept milestones · ship as **Project C** per `@Projects.md` |
 
 ## Visual map
 

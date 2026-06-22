@@ -69,12 +69,22 @@ Use these jab bhi naya concept samjhana ho — Vansh ka existing brain yahi se c
 | Bank recon 4-strategy cascade | Fallback chains when LLM provider fails |
 | CSV import + chunked writes | Batch embedding / RAG ingestion pipelines |
 
-## Projects (ship order)
+## Portfolio projects (ship order — `@Projects.md`)
 
-1. **LLM Gateway** (`modules/03-project-llm-gateway`) — pehle; lowest risk, DS skills direct map
-2. **Agentic Workflow Engine** (`modules/11-project-agentic-workflow`) — Zapier clone + LangGraph + MCP + evals
+Har project = **real SaaS** (multi-tenancy, usage metering, Stripe billing, per-tenant cost). **Phased build**: phase 1 = core single-user, phase 2 = SaaS spine wrap. Ek codebase, do phases — throwaway demo nahi.
 
-Details: `@Projects.md`
+| Order | Project | Stack | Learning modules that feed it |
+|-------|---------|-------|-------------------------------|
+| 1 | **A — Financial Document Intelligence** (agentic RAG SaaS) | FastAPI, pgvector + Pinecone, ragas | 04, 05, 10 (+ spine built here first) |
+| 2 | **B — AI Workflow Automation** (Zapier clone + agents) | FastAPI, LangGraph, MCP, outbox/Kafka | 06–11 |
+| 3 | **C — LLM Gateway as a Service** | **Go**, Redis, OTEL | 01–03 concepts → ship in Go |
+
+**Ship one fully before the next.** Shared SaaS spine (tenant isolation, exactly-once metering, Stripe) reuse across A → B → C.
+
+**Build session prompt**: paste `@Projects.md` at start, name project A/B/C, architecture first then code.
+
+**Coach persona** (Hinglish, no full code): `@Prompt.md`  
+**Full SaaS spec + bullet shapes**: `@Projects.md`
 
 ## Module map & agent routing
 
@@ -93,7 +103,7 @@ Details: `@Projects.md`
 |---|--------|-------------|---------|
 | 01 | `modules/01-llm-apis` | Tokens, messages, streaming, cost math | Everything LLM |
 | 02 | `modules/02-llm-infra` | Rate limits, semantic cache, circuit breakers | Project 1 prep |
-| 03 | `modules/03-project-llm-gateway` | **Ship Project 1** | Production LLM infra cred |
+| 03 | `modules/03-project-llm-gateway` | Gateway patterns (routing, cache, breaker) | **Project C** prep — ship in Go later |
 | 04 | `modules/04-prompt-engineering` | System prompts, few-shot, JSON mode | RAG + agents quality |
 | 05 | `modules/05-rag-pgvector` | Embeddings, chunking, retrieval, pgvector | Domain Q&A |
 | 06 | `modules/06-tools-function-calling` | Tool schemas, structured outputs | Agents |
@@ -101,7 +111,7 @@ Details: `@Projects.md`
 | 08 | `modules/08-mcp` | Model Context Protocol, tool servers | Interop |
 | 09 | `modules/09-multi-agent-hitl` | Orchestration, approval gates | Safe agents |
 | 10 | `modules/10-evals-llmops` | DeepEval, Langfuse, regression | Production agents |
-| 11 | `modules/11-project-agentic-workflow` | **Ship Project 2** | Portfolio killer |
+| 11 | `modules/11-project-agentic-workflow` | **Ship Project B** (workflow SaaS) | Portfolio killer |
 
 ## Prerequisites honesty
 
@@ -174,6 +184,15 @@ Session end: "Redraw challenge" assign karo.
 - [ ] Langfuse vs self-hosted OTEL only for Project 1
 - [ ] Semantic cache: embedding model choice (cost vs quality)
 
+## Key files
+
+| File | Role |
+|------|------|
+| `@Prompt.md` | Coach persona — Hinglish, active recall, no full code (renamed from `PROMPT.md`) |
+| `@Projects.md` | SaaS portfolio spec — Projects A/B/C, phased build, spine, CV bullets |
+| `@Memory.md` | Shared rules, CV hooks, module routing (this file) |
+| `@LEARNING-PLAN.md` | Full curriculum syllabus |
+
 ## Last updated
 
-2026-06-21 — Visual learner optimization: Visual map in all 15 modules + VISUAL-STUDY-GUIDE.md
+2026-06-22 — Projects.md → 3 SaaS portfolio (A RAG → B Workflow → C Go Gateway); Prompt.md rename; spine + phased build
