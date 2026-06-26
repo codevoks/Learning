@@ -65,3 +65,8 @@ Iterator / Mediator / Memento / Visitor
 - [ ] Each intent + UML from memory
 - [ ] A1–A4 coded
 - [ ] NOTES.md updated
+
+## Reference code (study material)
+
+Canonical runnable C++ in [`LLD/examples/patterns/behavioral/`](../../examples/patterns/behavioral/) — strategy, observer, state, command, template_method, iterator, chain_of_responsibility, mediator, memento, visitor.
+Pehle khud likhne ki koshish karo (struggle-first), phir reference se compare. Build: `g++ -std=c++17 file.cpp -o ex && ./ex`.

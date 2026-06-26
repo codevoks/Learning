@@ -59,3 +59,8 @@ classDiagram
 - [ ] 5 principles + violation each from memory
 - [ ] A1–A4 coded
 - [ ] NOTES.md updated
+
+## Reference code (study material)
+
+Canonical runnable C++ in [`LLD/examples/solid/`](../../examples/solid/) — each SOLID principle: ❌ violation + ✅ fix.
+Pehle khud likhne ki koshish karo (struggle-first), phir reference se compare. Build: `g++ -std=c++17 file.cpp -o ex && ./ex`.

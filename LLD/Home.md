@@ -10,6 +10,7 @@
 | [[LLD/LEARNING-PLAN\|LEARNING-PLAN]] | **Full syllabus** — OOP, SOLID, all patterns, case studies |
 | [[LLD/VISUAL-STUDY-GUIDE\|VISUAL-STUDY-GUIDE]] | UML + pattern map + spaced-rep |
 | [[LLD/problems/README\|Problems index]] 🔥 | C++ design problems with starter stubs |
+| [[LLD/examples/README\|Examples library]] 🔥 | **Reference C++**: OOP, SOLID, all 23 GoF patterns (runnable) |
 
 ## Modules
 | # | Syllabus | Notes | Focus |

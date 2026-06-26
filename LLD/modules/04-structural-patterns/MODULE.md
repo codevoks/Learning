@@ -58,3 +58,8 @@ Flyweight : shared state, memory bachao
 - [ ] Each intent + UML from memory
 - [ ] A1–A3 coded
 - [ ] NOTES.md updated
+
+## Reference code (study material)
+
+Canonical runnable C++ in [`LLD/examples/patterns/structural/`](../../examples/patterns/structural/) — adapter, decorator, facade, composite, proxy, bridge, flyweight.
+Pehle khud likhne ki koshish karo (struggle-first), phir reference se compare. Build: `g++ -std=c++17 file.cpp -o ex && ./ex`.

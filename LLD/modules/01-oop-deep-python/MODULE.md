@@ -60,3 +60,8 @@ favor COMPOSITION over inheritance (has-a > is-a) when reuse without tight coupl
 - [ ] 4 pillars from memory
 - [ ] A1, A2 coded
 - [ ] NOTES.md updated
+
+## Reference code (study material)
+
+Canonical runnable C++ in [`LLD/examples/oop/`](../../examples/oop/) — encapsulation/abstraction/inheritance/polymorphism + composition_vs_inheritance.
+Pehle khud likhne ki koshish karo (struggle-first), phir reference se compare. Build: `g++ -std=c++17 file.cpp -o ex && ./ex`.

@@ -54,3 +54,8 @@ Object = state (data) + behavior (methods)
 - [ ] Class vs object from memory
 - [ ] A1, A2 coded
 - [ ] NOTES.md updated
+
+## Reference code (study material)
+
+Canonical runnable C++ in [`LLD/examples/oop/`](../../examples/oop/) — OOP pillars in runnable C++.
+Pehle khud likhne ki koshish karo (struggle-first), phir reference se compare. Build: `g++ -std=c++17 file.cpp -o ex && ./ex`.
