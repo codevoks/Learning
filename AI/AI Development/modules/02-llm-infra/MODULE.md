@@ -245,7 +245,8 @@ Module 03 gateway in dono ko wire karega.
 
 ## Practice
 
-> Code **tum** likhoge Cursor mein. Stubs `practice/` mein hain.  
+> **Saare assignments ek jagah**: [`practice/README.md`](practice/README.md) — problem statements, instructions, pass criteria.  
+> Code **tum** likhoge Cursor mein. Stubs `practice/` mein hain (`TODO` search).  
 > Stuck? Chat: `@modules/02-llm-infra/MODULE.md` + error paste karo.
 
 | # | File | Kya karna hai | Pass when |

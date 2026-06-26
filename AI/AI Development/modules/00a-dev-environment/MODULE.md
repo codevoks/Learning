@@ -249,7 +249,8 @@ Abhi `practice/` mein 00a exercises. Baad mein `services/` mein real projects.
 
 ## Practice
 
-> Code **tum** likhoge Cursor mein. Stubs `practice/` mein hain.  
+> **Saare assignments ek jagah**: [`practice/README.md`](practice/README.md) — problem statements, instructions, pass criteria.  
+> Code **tum** likhoge Cursor mein. Stubs `practice/` mein hain (`TODO` search).  
 > Stuck? Chat: `@modules/00a-dev-environment/MODULE.md` + error paste karo.
 
 | # | File | Kya karna hai | Pass when |

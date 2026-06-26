@@ -13,6 +13,7 @@
                     ↓
 ┌──────────────────────────────────────────┐
 │  practice/  — CODE (yahin likho)         │
+│  README.md = saare assignments ek jagah │
 │  Stubs with gaps · Passing criteria      │
 └──────────────────────────────────────────┘
                     ↓
@@ -28,7 +29,7 @@
 |------|-----|-------|
 | 1 | Visual map | MODULE.md top |
 | 2 | **Theory** padho — section by section | MODULE.md `## Theory` |
-| 3 | **Practice** — stub complete karo | `modules/XX/practice/` |
+| 3 | **Practice** — stub complete karo | `modules/XX/practice/README.md` pehle, phir code |
 | 4 | Doubt / code check | Cursor chat `@MODULE.md` |
 | 5 | Redraw challenge | Excalidraw → NOTES |
 | 6 | NOTES update | `NOTES.md` |

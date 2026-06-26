@@ -228,7 +228,8 @@ Interview: "Latency spike = cache miss rate up OR Opus routing up."
 
 ## Practice
 
-> Code **tum** likhoge Cursor mein. Stubs `practice/` mein hain — yeh Module 03 learning sandbox hai; ship `@Projects.md` Project C (Go) alag repo mein.  
+> **Saare assignments ek jagah**: [`practice/README.md`](practice/README.md) — problem statements, instructions, pass criteria.  
+> Code **tum** likhoge Cursor mein. Stubs `practice/` mein hain (`TODO` search) — learning sandbox; ship `@Projects.md` Project C (Go) alag repo mein.  
 > Stuck? Chat: `@modules/03-project-llm-gateway/MODULE.md @Projects.md`
 
 | # | File | Kya karna hai | Pass when |

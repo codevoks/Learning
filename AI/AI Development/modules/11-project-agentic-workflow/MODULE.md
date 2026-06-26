@@ -222,7 +222,8 @@ Combine: distributed systems (outbox/Kafka) + agents (LangGraph/MCP) + evals (tr
 
 ## Practice
 
-> Code **tum** likhoge Cursor mein. Stubs `practice/` mein hain — learning sandbox; ship `@Projects.md` Project B in main codebase.  
+> **Saare assignments ek jagah**: [`practice/README.md`](practice/README.md) — problem statements, instructions, pass criteria.  
+> Code **tum** likhoge Cursor mein. Stubs `practice/` mein hain (`TODO` search) — learning sandbox; ship `@Projects.md` Project B in main codebase.  
 > Stuck? Chat: `@modules/11-project-agentic-workflow/MODULE.md @Projects.md`
 
 | # | File | Kya karna hai | Pass when |
