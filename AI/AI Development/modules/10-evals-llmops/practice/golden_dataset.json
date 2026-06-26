@@ -1,0 +1,8 @@
+[
+  {
+    "id": "q1",
+    "input": "TODO: example question",
+    "expected_output": "TODO: golden answer",
+    "metadata": { "topic": "example" }
+  }
+]

@@ -1,6 +1,7 @@
 # Module 10 — Evals & LLMOps
 
-> **Agent spawn**: `@Memory.md` + this file + `@modules/10-evals-llmops/NOTES.md`  
+> **Padho**: Isi file mein **Theory** — bahar mat jao.  
+> **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
 > **Nav**: ← [Module 09](../09-multi-agent-hitl/MODULE.md) · Next → [Module 11](../11-project-agentic-workflow/MODULE.md)
 
 ## At a glance
@@ -13,8 +14,6 @@
 | Exit test | Golden dataset + eval CI threshold bina notes ke |
 
 ## Visual map
-
-> **Kaise padho**: Pehle diagram dekho → topics padho → session end pe "Redraw challenge" bina dekhe draw karo
 
 ```mermaid
 flowchart LR
@@ -39,26 +38,17 @@ flowchart LR
     deploy
 ```
 
-### Mental model (1 line)
+**Mental model**: Har prompt/model change eval se guzarta hai — trace dikhao, CI threshold fail ho to ship mat karo.
 
-Har prompt/model change eval se guzarta hai — trace dikhao, CI threshold fail ho to ship mat karo.
+**Redraw challenge**: Build → eval → trace → regression CI loop (fail arrow wapas build pe) bina dekhe draw karo.
 
-### Redraw challenge
-
-Build → eval → trace → regression CI loop (fail arrow wapas build pe) bina dekhe draw karo.
+---
 
 ## Read order
 
-1. Visual map → 2. **Padhai kahan se** (links padho) → 3. Topics tick → 4. Coach recall → 5. Assignments
+1. Visual map → 2. **Theory** (neeche) → 3. **Practice** → 4. Chat agar doubt → 5. NOTES
 
-**Prerequisites**: Module 09  
-**Duration**: ~4–6 sessions
-
-## Objectives
-
-1. LLM apps ko **test** karna — unit tests insufficient
-2. Trajectory + outcome evals
-3. Production monitoring loop
+---
 
 ## Learning hooks
 
@@ -70,66 +60,154 @@ Build → eval → trace → regression CI loop (fail arrow wapas build pe) bina
 | Trace analysis | Prometheus alert on error rate |
 | Cost dashboard | Exchange fee monitoring |
 
-## Padhai kahan se (Study material)
+---
 
-> **Topics = checklist. Neeche padho → phir Coach → phir Assignment.**  
-> Poora flow: [[HOW-TO-STUDY|HOW-TO-STUDY.md]]
+## Theory
 
-### Session 1 (~50 min) — Tracing + datasets
-
-| # | Topic (checklist) | Padho yahan | Time |
-|---|-------------------|-------------|------|
-| 1 | Langfuse intro | [Langfuse — Documentation](https://langfuse.com/docs) — traces, scores, datasets overview | 25 min |
-| 2 | Golden datasets | Topics — golden Q&A mindset + production data separation | 15 min |
-| 3 | SLIs | Topics — latency, cost/request, eval pass rate skim | 10 min |
-
-**Session 1 ke baad Coach se pucho:** "Eval dataset production data se kaise alag rakho?" (Active recall Q2)
-
-### Session 2 (~45 min) — Eval frameworks + CI
-
-| # | Topic (checklist) | Padho yahan | Time |
-|---|-------------------|-------------|------|
-| 1 | DeepEval quickstart | [DeepEval — Getting started](https://docs.confident-ai.com/docs/getting-started) — first test | 20 min |
-| 2 | LLM-as-judge | [OpenAI — Eval best practices](https://platform.openai.com/docs/guides/evals) — when to use judges | 15 min |
-| 3 | Regression CI | Topics — prompt change → eval → threshold fail | 10 min |
-
-**Session 2 ke baad:** Assignment A1 + A3 start (Cursor)
-
-### Coach prompt (padhai ke baad)
+### 1. Unit tests LLM ke liye kyun kaafi nahi
 
 ```
-@Memory.md @modules/10-evals-llmops/MODULE.md
-
-Maine Session 1–2 resources padh liye. Flowchart ke saath explain karo:
-build → eval → trace → CI regression loop. Phir LLM-as-judge bias — 2 examples.
-Code mat likh.
+assert response == "exact string"  ← flaky, model updates break tests
 ```
 
-## Topics
+LLM apps need **probabilistic evals** — score distributions, thresholds, golden sets.
 
-- Exact match vs LLM-as-judge evals
-- DeepEval / custom scorers
-- Langfuse: traces, scores, datasets
-- Prompt/version pinning
-- Canary deployments for prompt changes
-- SLIs: latency, cost/request, eval pass rate
+---
 
-## Assignments
+### 2. Outcome eval vs trajectory eval
 
-| # | Task | Passing criteria |
-|---|------|------------------|
-| A1 | 10 golden Q&A pairs for RAG or agent | JSON dataset committed |
-| A2 | Scorer stub: trajectory steps match expected | Pass/fail report |
-| A3 | CI script runs evals on prompt change | Fails if score drops > threshold |
+```mermaid
+flowchart TB
+    subgraph outcome["Outcome eval"]
+        Q[Input] --> Final[Final answer correct?]
+    end
+    subgraph trajectory["Trajectory eval"]
+        Q2[Input] --> Steps[Right tools in right order?]
+        Steps --> Final2[Final answer correct?]
+    end
+```
 
-## Active recall
+| Type | Measures | Example |
+|------|----------|---------|
+| **Outcome** | final answer quality | RAG answer matches golden |
+| **Trajectory** | steps taken | called `search` before `refund`, not skipped HITL |
+
+**Agent apps:** trajectory critical — sahi jawab galat process se aaya = production incident baad mein.
+
+---
+
+### 3. Scorers — exact match vs LLM-as-judge
+
+```
+Exact match:     output == expected_string     (classification)
+Regex/JSON:      schema valid + key fields      (structured)
+LLM-as-judge:    rubric score 1-5              (open-ended quality)
+```
+
+*(Active recall Q1: judge bias — judge favors verbose, same model family, position bias)*
+
+**Mitigations:** separate judge model, blind comparison, human audit sample.
+
+---
+
+### 4. Langfuse — traces, scores, datasets
+
+```mermaid
+flowchart LR
+    App["Your app"] --> SDK["Langfuse SDK"]
+    SDK --> Trace["Trace: spans per LLM call"]
+    SDK --> Score["Scores attached to trace"]
+    SDK --> DS["Dataset runs"]
+```
+
+```
+Production trace:
+  span: rag.query
+    ├── retrieval (chunks, scores)
+    ├── llm.generate (prompt, completion, tokens)
+    └── score: faithfulness = 0.85
+```
+
+**Datasets:** golden Q&A JSON → batch run → compare scores across prompt versions.
+
+---
+
+### 5. CI regression — prompt change gate
+
+```bash
+# PR opens → run evals
+python run_evals.py --dataset golden.json --threshold 0.9
+# exit 1 if pass_rate < baseline - delta
+```
+
+```
+baseline v1.2: pass_rate 92%
+PR changes prompt
+new run: 87%  → CI FAIL → no merge
+```
+
+**Pin prompt version** in trace metadata — reproduce failures.
+
+---
+
+### 6. Online vs offline evals
+
+*(Active recall Q3)*
+
+| Offline | Online |
+|---------|--------|
+| golden dataset, CI | production sample, user thumbs |
+| pre-deploy | drift detection post-deploy |
+| cheap batch | expensive, privacy care |
+
+*(Active recall Q2: eval data ≠ production PII — synthetic + sanitized subset)*
+
+---
+
+### 7. SLIs to track
+
+- latency p50/p99
+- cost per request
+- eval pass rate
+- cache hit rate (gateway)
+- HITL approval rate
+
+---
+
+## Practice
+
+> Code **tum** likhoge Cursor mein. Stubs `practice/` mein hain.  
+> Stuck? Chat: `@modules/10-evals-llmops/MODULE.md` + error paste karo.
+
+| # | File | Kya karna hai | Pass when |
+|---|------|---------------|-----------|
+| A1 | `practice/golden_dataset.json` | 10 golden Q&A pairs | JSON committed |
+| A2 | `practice/trajectory_scorer.py` | Steps match expected | Pass/fail report |
+| A3 | `practice/ci_eval.sh` | Eval on prompt change | Fails if score drops > threshold |
+
+---
+
+## Active recall (khud jawab likho NOTES mein)
 
 1. LLM-as-judge bias kya hai?
 2. Eval dataset production data se kaise alag rakho?
 3. Online vs offline evals — kab kya?
 
+**Chat drill** (optional): "Module 10 — outcome vs trajectory eval"
+
+---
+
 ## Progress checklist
 
-- [ ] Objectives recall bina notes ke
-- [ ] Assignments A1–A3 pass
-- [ ] NOTES.md session log updated
+- [ ] Theory Section 1–7 padh liya
+- [ ] Redraw challenge kiya
+- [ ] Practice A1–A3 pass
+- [ ] Active recall NOTES mein likha
+- [ ] NOTES session log updated
+
+---
+
+## Optional appendix (zarurat ho tab)
+
+- [Langfuse Docs](https://langfuse.com/docs) — traces + datasets
+- [DeepEval Getting started](https://docs.confident-ai.com/docs/getting-started) — scorer examples

@@ -1,6 +1,7 @@
 # Module 09 — Multi-Agent & Human-in-the-Loop
 
-> **Agent spawn**: `@Memory.md` + this file + `@modules/09-multi-agent-hitl/NOTES.md`  
+> **Padho**: Isi file mein **Theory** — bahar mat jao.  
+> **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
 > **Nav**: ← [Module 08](../08-mcp/MODULE.md) · Next → [Module 10](../10-evals-llmops/MODULE.md)
 
 ## At a glance
@@ -13,8 +14,6 @@
 | Exit test | HITL gate + supervisor routing bina notes ke |
 
 ## Visual map
-
-> **Kaise padho**: Pehle diagram dekho → topics padho → session end pe "Redraw challenge" bina dekhe draw karo
 
 ```mermaid
 flowchart TB
@@ -35,26 +34,17 @@ Planner ──► Worker A ──┐
                         └─────────┘ (back to planner)
 ```
 
-### Mental model (1 line)
+**Mental model**: Planner workers ko task deta hai, lekin risky action HITL gate se guzarna zaroori — human approve kare tab hi execute.
 
-Planner workers ko task deta hai, lekin risky action HITL gate se guzarna zaroori — human approve kare tab hi execute.
+**Redraw challenge**: Planner → workers → HITL gate → execute flow (reject arrow wapas planner pe) bina dekhe draw karo.
 
-### Redraw challenge
-
-Planner → workers → HITL gate → execute flow (reject arrow wapas planner pe) bina dekhe draw karo.
+---
 
 ## Read order
 
-1. Visual map → 2. **Padhai kahan se** (links padho) → 3. Topics tick → 4. Coach recall → 5. Assignments
+1. Visual map → 2. **Theory** (neeche) → 3. **Practice** → 4. Chat agar doubt → 5. NOTES
 
-**Prerequisites**: Module 08  
-**Duration**: ~4–6 sessions
-
-## Objectives
-
-1. Multi-agent orchestration patterns
-2. HITL before irreversible actions
-3. Safety vs latency trade-offs
+---
 
 ## Learning hooks
 
@@ -66,64 +56,143 @@ Planner → workers → HITL gate → execute flow (reject arrow wapas planner p
 | Agent handoff | Stage output → next stage input |
 | Rollback on reject | Savepoint rollback |
 
-## Padhai kahan se (Study material)
+---
 
-> **Topics = checklist. Neeche padho → phir Coach → phir Assignment.**  
-> Poora flow: [[HOW-TO-STUDY|HOW-TO-STUDY.md]]
+## Theory
 
-### Session 1 (~50 min) — Multi-agent patterns
-
-| # | Topic (checklist) | Padho yahan | Time |
-|---|-------------------|-------------|------|
-| 1 | Multi-agent concepts | [LangGraph — Multi-agent](https://langchain-ai.github.io/langgraph/concepts/multi_agent/) — supervisor, handoffs | 25 min |
-| 2 | Supervisor pattern | Topics — planner/worker + specialist agents skim | 15 min |
-| 3 | Cost control | Active recall Q3 prep — delegation boundaries | 10 min |
-
-**Session 1 ke baad Coach se pucho:** "Critic agent kab worth it vs overhead?" (Active recall Q2)
-
-### Session 2 (~45 min) — Human-in-the-loop
-
-| # | Topic (checklist) | Padho yahan | Time |
-|---|-------------------|-------------|------|
-| 1 | HITL in LangGraph | [LangGraph — Human-in-the-loop](https://langchain-ai.github.io/langgraph/how-tos/human_in_the_loop/) — interrupt + resume | 25 min |
-| 2 | Approval gates | Topics — timeout, audit log, rollback on reject | 20 min |
-
-**Session 2 ke baad:** Assignment A2 start (Cursor)
-
-### Coach prompt (padhai ke baad)
+### 1. Multi-agent kyun — ek agent sab nahi kar sakta
 
 ```
-@Memory.md @modules/09-multi-agent-hitl/MODULE.md
-
-Maine Session 1–2 resources padh liye. Flowchart ke saath explain karo:
-planner → workers → HITL gate → execute (reject loops back). Phir sync vs async HITL product impact.
-Code mat likh.
+Single agent problems:
+  - prompt bloat (too many tools)
+  - role confusion
+  - cost (big model for simple routing)
 ```
 
-## Topics
+**Split roles:** planner routes, specialists execute.
 
-- Supervisor pattern
-- Specialist agents (researcher, executor, critic)
-- Approval gates & timeout
-- Audit log of agent decisions
-- Delegation boundaries
+---
 
-## Assignments
+### 2. Supervisor pattern
 
-| # | Task | Passing criteria |
-|---|------|------------------|
-| A1 | Supervisor routes to 2 specialist stubs | Correct routing 8/10 tasks |
-| A2 | HITL pause: irreversible action needs approve | Reject → rollback path works |
-| A3 | Audit log schema + write on each agent step | Queryable decision trail |
+```mermaid
+flowchart TB
+    Sup["Supervisor LLM"] --> R{"Route?"}
+    R --> Res["Researcher agent"]
+    R --> Ex["Executor agent"]
+    R --> Cr["Critic agent"]
+    Res --> Sup
+    Ex --> Sup
+    Cr --> Sup
+    Sup --> Out["Final output"]
+```
 
-## Active recall
+```
+Supervisor reads task + worker outputs
+  → assigns next worker OR finishes
+```
+
+**Tera hook:** Kafka orchestrator — message type decide karke right worker ko bhejo.
+
+**Cost control:** *(Active recall Q3)*
+- small model supervisor, big model only for hard steps
+- max delegation depth
+- cache researcher results
+
+---
+
+### 3. Specialist agents
+
+| Agent | Role |
+|-------|------|
+| Researcher | gather context, read-only tools |
+| Executor | write tools, side effects |
+| Critic | review before ship — optional overhead |
+
+*(Active recall Q2: critic worth it jab high-stakes output; skip for simple FAQ)*
+
+---
+
+### 4. HITL gates — irreversible actions pe
+
+```mermaid
+stateDiagram-v2
+    [*] --> Proposed
+    Proposed --> AwaitingHuman: destructive action
+    AwaitingHuman --> Approved: human approves
+    AwaitingHuman --> Rejected: human rejects
+    Approved --> Executed
+    Rejected --> Replan
+    Executed --> [*]
+```
+
+**LangGraph:** `interrupt_before` node — graph pause, state persisted, resume on approve.
+
+```
+Actions needing HITL:
+  - send money, delete data, external webhook
+  - NOT: read search, summarize
+```
+
+*(Active recall Q1: sync HITL = user waits in UI, high trust, bad for async jobs; async HITL = queue approval, email/Slack, better for long workflows)*
+
+---
+
+### 5. Audit log — har step traceable
+
+```json
+{
+  "run_id": "run_abc",
+  "step": 3,
+  "agent": "executor",
+  "action": "propose_refund",
+  "payload": {"order_id": "o_1", "amount": 500},
+  "hitl_status": "approved",
+  "approved_by": "user_42",
+  "timestamp": "2026-06-26T10:00:00Z"
+}
+```
+
+Interview: "Show me why this refund happened" → audit trail.
+
+**Rollback on reject:** savepoint — proposed action never executed, state wapas planner pe.
+
+---
+
+## Practice
+
+> Code **tum** likhoge Cursor mein. Stubs `practice/` mein hain.  
+> Stuck? Chat: `@modules/09-multi-agent-hitl/MODULE.md` + error paste karo.
+
+| # | File | Kya karna hai | Pass when |
+|---|------|---------------|-----------|
+| A1 | `practice/supervisor_router.py` | Route to 2 specialists | Correct routing 8/10 tasks |
+| A2 | `practice/hitl_gate.py` | Pause before irreversible action | Reject → rollback path |
+| A3 | `practice/audit_log.py` | Log each agent step | Queryable decision trail |
+
+---
+
+## Active recall (khud jawab likho NOTES mein)
 
 1. HITL sync vs async approval — product impact?
 2. Critic agent kab worth it vs overhead?
 3. Multi-agent cost control strategies?
 
+**Chat drill** (optional): "Module 09 — HITL flow whiteboard"
+
+---
+
 ## Progress checklist
 
-- [ ] Objectives recall bina notes ke
-- [ ] Assignments A1–A3 pass
-- [ ] NOTES.md session log updated
+- [ ] Theory Section 1–5 padh liya
+- [ ] Redraw challenge kiya
+- [ ] Practice A1–A3 pass
+- [ ] Active recall NOTES mein likha
+- [ ] NOTES session log updated
+
+---
+
+## Optional appendix (zarurat ho tab)
+
+- [LangGraph Multi-agent](https://langchain-ai.github.io/langgraph/concepts/multi_agent/) — supervisor patterns
+- [LangGraph Human-in-the-loop](https://langchain-ai.github.io/langgraph/how-tos/human_in_the_loop/) — interrupt API

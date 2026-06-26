@@ -1,6 +1,7 @@
 # Module 08 — MCP (Model Context Protocol)
 
-> **Agent spawn**: `@Memory.md` + this file + `@modules/08-mcp/NOTES.md`  
+> **Padho**: Isi file mein **Theory** — bahar mat jao.  
+> **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
 > **Nav**: ← [Module 07](../07-agents-langgraph/MODULE.md) · Next → [Module 09](../09-multi-agent-hitl/MODULE.md)
 
 ## At a glance
@@ -13,8 +14,6 @@
 | Exit test | MCP vs inline tools + threat model bina notes ke |
 
 ## Visual map
-
-> **Kaise padho**: Pehle diagram dekho → topics padho → session end pe "Redraw challenge" bina dekhe draw karo
 
 ```mermaid
 flowchart LR
@@ -34,26 +33,17 @@ Host (Cursor IDE)
                     └── tool: run_query
 ```
 
-### Mental model (1 line)
+**Mental model**: Host MCP Client se baat karta hai, Client Server se — tools process ke bahar, protocol se plug-in hote hain.
 
-Host MCP Client se baat karta hai, Client Server se — tools process ke bahar, protocol se plug-in hote hain.
+**Redraw challenge**: Host ↔ Client ↔ MCP Server ↔ Tools chain bina dekhe draw karo.
 
-### Redraw challenge
-
-Host ↔ Client ↔ MCP Server ↔ Tools chain bina dekhe draw karo.
+---
 
 ## Read order
 
-1. Visual map → 2. **Padhai kahan se** (links padho) → 3. Topics tick → 4. Coach recall → 5. Assignments
+1. Visual map → 2. **Theory** (neeche) → 3. **Practice** → 4. Chat agar doubt → 5. NOTES
 
-**Prerequisites**: Module 07  
-**Duration**: ~3–5 sessions
-
-## Objectives
-
-1. MCP architecture: hosts, clients, servers
-2. Tools/resources expose karna standard protocol se
-3. Zapier-style integrations ko MCP tools banao
+---
 
 ## Learning hooks
 
@@ -64,68 +54,155 @@ Host ↔ Client ↔ MCP Server ↔ Tools chain bina dekhe draw karo.
 | Resource URIs | REST resource paths |
 | Auth | JWT-scoped integrations |
 
-## Padhai kahan se (Study material)
+---
 
-> **Topics = checklist. Neeche padho → phir Coach → phir Assignment.**  
-> Poora flow: [[HOW-TO-STUDY|HOW-TO-STUDY.md]]
+## Theory
 
-### Session 1 (~50 min) — MCP architecture
+### 1. MCP kya solve karta hai
 
-| # | Topic (checklist) | Padho yahan | Time |
-|---|-------------------|-------------|------|
-| 1 | MCP overview | [Model Context Protocol — Introduction](https://modelcontextprotocol.io/introduction) — hosts, clients, servers | 20 min |
-| 2 | Core concepts | [MCP — Architecture](https://modelcontextprotocol.io/docs/concepts/architecture) — tools, resources, transports | 20 min |
-| 3 | vs inline tools | Topics — MCP vs inline function definitions | 10 min |
-
-**Session 1 ke baad Coach se pucho:** "MCP kab use karoge vs hardcoded Python functions?" (Active recall Q1)
-
-### Session 2 (~40 min) — Building + security
-
-| # | Topic (checklist) | Padho yahan | Time |
-|---|-------------------|-------------|------|
-| 1 | Build a server | [MCP — Build server quickstart](https://modelcontextprotocol.io/docs/develop/build-server) — Python skim | 25 min |
-| 2 | Security | Topics — sandbox, allowlists + threat model mindset | 15 min |
-
-**Session 2 ke baad:** Assignment A1 start (Cursor)
-
-### Optional video (1 dekh lo, 1x speed ok)
-
-- [MCP Explained](https://www.youtube.com/watch?v=7j_NE6Pjv-E) — visual learner ke liye Host ↔ Client ↔ Server chain
-
-### Coach prompt (padhai ke baad)
+Har integration ke liye custom Python function likhoge → N agents × M tools = spaghetti.
 
 ```
-@Memory.md @modules/08-mcp/MODULE.md
-
-Maine Session 1–2 resources padh liye. Flowchart ke saath explain karo:
-Host ↔ MCP Client ↔ MCP Server ↔ Tools. Phir 3 security risks + mitigations.
-Code mat likh.
+MCP = USB-C for AI tools
+  - standard discovery (list tools)
+  - standard invoke (call tool)
+  - standard resources (read context)
 ```
 
-## Topics
+*(Active recall Q1: MCP vs hardcoded — jab third-party tools, multiple hosts, team-shared integrations)*
 
-- MCP vs inline function definitions
-- stdio vs SSE transport
-- Building a minimal MCP server (Python)
-- Connecting LangGraph / gateway to MCP tools
-- Security: sandbox, allowlists
+---
 
-## Assignments
+### 2. Host, Client, Server — roles
 
-| # | Task | Passing criteria |
-|---|------|------------------|
-| A1 | MCP server: `read_db` + `write_webhook` stubs | Client discovers + invokes both |
-| A2 | Wire MCP tool into agent from Module 07 | Agent uses external MCP tool |
-| A3 | Threat model doc | 5 risks + mitigations |
+```mermaid
+flowchart TB
+    Host["Host — Cursor, Claude Desktop, your agent app"]
+    Client["MCP Client — SDK in host process"]
+    Server["MCP Server — separate process, owns tools"]
+    Host --> Client
+    Client <-->|JSON-RPC over transport| Server
+```
 
-## Active recall
+| Component | Kaam |
+|-----------|------|
+| **Host** | UI + orchestration — user interact karta hai |
+| **Client** | Protocol client — connect, list, invoke |
+| **Server** | Tools/resources implement — DB, files, APIs |
+
+**Cursor example:** Cursor = Host, built-in MCP Client, tumhara `postgres-mcp` = Server.
+
+---
+
+### 3. Tools vs Resources
+
+```
+Tools     = actions  → search_db(query), send_webhook(url)
+Resources = read-only context → file://docs/policy.md, db://schema
+```
+
+Agent pehle resources padh sakta hai, phir tool call kare.
+
+---
+
+### 4. Transports — stdio vs SSE/HTTP
+
+```mermaid
+flowchart LR
+    subgraph stdio["stdio (local)"]
+        C1[Client] <-->|stdin/stdout| S1[Server process]
+    end
+    subgraph remote["SSE / HTTP (remote)"]
+        C2[Client] <-->|HTTP| S2[Remote server]
+    end
+```
+
+| Transport | Kab |
+|-----------|-----|
+| `stdio` | Local dev, Cursor config, subprocess spawn |
+| `SSE` / `HTTP` | Remote shared server, team infra |
+
+```
+# Cursor mcp.json mental model
+{
+  "mcpServers": {
+    "my-db": {
+      "command": "python",
+      "args": ["server.py"]
+    }
+  }
+}
+```
+
+---
+
+### 5. LangGraph / gateway se wire karna
+
+```
+Agent graph node "tools"
+  → MCP Client.list_tools()
+  → LLM picks tool
+  → MCP Client.call_tool(name, args)
+  → result back to agent state
+```
+
+Inline Python tools se farq: server alag deploy, version, auth scope.
+
+---
+
+### 6. Security — threat model
+
+```mermaid
+flowchart TD
+    Risk1["Tool over-permission"] --> Mit1["Allowlist + least privilege"]
+    Risk2["Server compromise"] --> Mit2["Sandbox, no root"]
+    Risk3["Prompt injection → tool abuse"] --> Mit3["Human approval for writes"]
+    Risk4["Data exfiltration"] --> Mit4["Network egress rules"]
+```
+
+| Risk | Mitigation |
+|------|------------|
+| Excessive agency | write tools behind HITL (Module 09) |
+| Server crash | *(Active recall Q2)* graceful degrade — agent informs user, retry |
+| Name collision | *(Active recall Q3)* prefix tools `servername_tool` |
+| Untrusted MCP | vet server code, pin versions |
+
+---
+
+## Practice
+
+> Code **tum** likhoge Cursor mein. Stubs `practice/` mein hain.  
+> Stuck? Chat: `@modules/08-mcp/MODULE.md` + error paste karo.
+
+| # | File | Kya karna hai | Pass when |
+|---|------|---------------|-----------|
+| A1 | `practice/mcp_server.py` | `read_db` + `write_webhook` stubs | Client discovers + invokes both |
+| A2 | `practice/agent_mcp_wire.py` | Wire MCP into agent | Agent uses external MCP tool |
+| A3 | `practice/THREAT_MODEL.md` | 5 risks + mitigations | Review complete |
+
+---
+
+## Active recall (khud jawab likho NOTES mein)
 
 1. MCP kab use karoge vs hardcoded Python functions?
 2. MCP server crash — agent behavior kya honi chahiye?
 3. Multiple MCP servers — tool name collision kaise handle?
 
+**Chat drill** (optional): "Module 08 — MCP security 3 risks"
+
+---
+
 ## Progress checklist
 
-- [ ] Objectives recall bina notes ke
-- [ ] Assignments A1–A3 pass
-- [ ] NOTES.md session log updated
+- [ ] Theory Section 1–6 padh liya
+- [ ] Redraw challenge kiya
+- [ ] Practice A1–A3 pass
+- [ ] Active recall NOTES mein likha
+- [ ] NOTES session log updated
+
+---
+
+## Optional appendix (zarurat ho tab)
+
+- [MCP Introduction](https://modelcontextprotocol.io/introduction) — protocol overview
+- [MCP Build server](https://modelcontextprotocol.io/docs/develop/build-server) — Python quickstart

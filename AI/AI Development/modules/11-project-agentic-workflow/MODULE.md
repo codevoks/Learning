@@ -1,7 +1,10 @@
 # Module 11 — PROJECT: Agentic Workflow (→ Project B)
 
-> **Agent spawn**: `@Memory.md` + this file + `@modules/11-project-agentic-workflow/NOTES.md`  
+> **Padho**: Isi file mein **Theory** — bahar mat jao.  
+> **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
 > **Nav**: ← [Module 10](../10-evals-llmops/MODULE.md) · End
+
+> **Ship spec**: `@Projects.md` **Project B** — AI Workflow Automation SaaS.
 
 ## At a glance
 
@@ -10,11 +13,9 @@
 | Prerequisites | Modules 01–10 · `@Projects.md` |
 | Duration | ~3–4 weeks |
 | Project? | Yes |
-| Exit test | Workflow milestones · `@Projects.md` **Project B** |
+| Exit test | Workflow milestones · Project B defend bina notes ke |
 
 ## Visual map
-
-> **Kaise padho**: Pehle diagram dekho → topics padho → session end pe "Redraw challenge" bina dekhe draw karo
 
 ```mermaid
 flowchart TB
@@ -39,62 +40,19 @@ User NL query
                          execute + audit log
 ```
 
-### Mental model (1 line)
+**Mental model**: NL se plan banta hai, LangGraph orchestrate karta hai, MCP tools + Kafka outbox + HITL sab ek workflow engine mein milte hain.
 
-NL se plan banta hai, LangGraph orchestrate karta hai, MCP tools + Kafka outbox + HITL sab ek workflow engine mein milte hain.
+**Redraw challenge**: NL → plan → LangGraph → MCP + outbox/Kafka → HITL → execute full architecture bina dekhe draw karo.
 
-### Redraw challenge
-
-NL → plan → LangGraph → MCP + outbox/Kafka → HITL → execute full architecture bina dekhe draw karo.
+---
 
 ## Read order
 
-1. Visual map → 2. **Padhai kahan se** (links padho) → 3. Topics tick → 4. Coach recall → 5. Assignments
+1. Visual map → 2. **Theory** (neeche) → 3. **Practice** → 4. Chat agar doubt → 5. NOTES
 
-**Prerequisites**: Modules 01–10  
-**Duration**: ~3–4 weeks  
-**Reference**: `@Projects.md` Project 2
+---
 
-## Padhai kahan se (Study material)
-
-> **Topics = checklist. Neeche padho → phir Coach → phir Assignment.**  
-> Poora flow: [[HOW-TO-STUDY|HOW-TO-STUDY.md]]
-
-### Session 1 (~50 min) — LangGraph + outbox backbone
-
-| # | Topic (checklist) | Padho yahan | Time |
-|---|-------------------|-------------|------|
-| 1 | Project B spec | [[Projects|Projects.md]] — Project B: NL workflow, outbox, HITL, billing | 20 min |
-| 2 | LangGraph orchestration | [LangGraph — Introduction](https://langchain-ai.github.io/langgraph/) — state machine for workflows | 15 min |
-| 3 | Outbox pattern | [[Projects|Projects.md]] — outbox + exactly-once sections + [Microservices.io — Transactional outbox](https://microservices.io/patterns/data/transactional-outbox.html) skim | 15 min |
-
-**Session 1 ke baad Coach se pucho:** "Outbox exactly-once execution aur billing guarantee kaise link hote hain?"
-
-### Session 2 (~40 min) — Integration patterns
-
-| # | Topic (checklist) | Padho yahan | Time |
-|---|-------------------|-------------|------|
-| 1 | HITL + MCP | Module 09 HITL recap + Module 08 MCP recap (5 min each) | 10 min |
-| 2 | Eval harness | Module 10 — Langfuse traces + regression mindset | 15 min |
-| 3 | Feature matrix | Re-read Feature matrix — map unfair advantages to milestones | 15 min |
-
-**Session 2 ke baad:** Milestone M1 start (Cursor + `@Projects.md`)
-
-### Coach prompt (padhai ke baad)
-
-```
-@Memory.md @modules/11-project-agentic-workflow/MODULE.md @Projects.md
-
-Maine Session 1–2 resources padh liye. Architecture diagram ke saath explain karo:
-NL → LangGraph → MCP + outbox/Kafka → HITL → execute. Phir CV narrative — 3 defendable bullets.
-Code mat likh.
-```
-
-## Objectives
-
-Zapier clone ke upar **AI orchestration layer** — highest-premium portfolio piece.
-
-## Feature matrix
+## Learning hooks
 
 | Feature | Your unfair advantage |
 |---------|----------------------|
@@ -104,30 +62,202 @@ Zapier clone ke upar **AI orchestration layer** — highest-premium portfolio pi
 | HITL checkpoints | Rootstock savepoint mindset |
 | Outbox + Kafka execution | Already built in Zapier clone |
 | Eval harness | Trajectory scoring |
-| Domain: payments/refunds | Interview domain depth |
 
-## Milestones
+---
 
-| M | Deliverable | Pass |
-|---|-------------|------|
-| M1 | NL intent → structured workflow JSON | Valid schema 90%+ on test phrases |
-| M2 | LangGraph executes linear workflow | 3-step workflow completes |
-| M3 | MCP + custom tools wired | External + DB tools work |
-| M4 | HITL on destructive steps | Pause → approve/reject |
-| M5 | Outbox exactly-once execution | Duplicate webhook → single effect |
-| M6 | Eval suite + Langfuse traces | Regression catches bad plan |
-| M7 | Demo: "refund workflow" end-to-end | Recordable demo + README |
+## Theory
 
-## CV narrative
+### 1. Project B thesis — `@Projects.md`
 
-Combine: distributed systems (Rootstock + Zapier clone) + agents (LangGraph + MCP + evals).
+**AI Workflow Automation SaaS:** users natural language mein automation describe karein, agent plan + connect tools + run safely.
+
+```
+Product pitch:
+  "Runs are billed and executed exactly once — never dropped, never doubled."
+```
+
+Billable unit: **task runs**. Tiers by monthly volume.  
+Yeh tumhara Zapier clone + AI orchestration layer.
+
+---
+
+### 2. End-to-end architecture
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant API as FastAPI
+    participant P as Planner
+    participant G as LangGraph
+    participant M as MCP tools
+    participant O as Outbox
+    participant K as Kafka
+    participant H as HITL
+    U->>API: NL request
+    API->>P: decompose intent
+    P->>G: workflow JSON + graph run
+    G->>M: tool calls (read)
+    G->>O: enqueue destructive step
+    O->>K: event
+    K->>H: await approval
+    H->>G: approve/reject
+    G->>M: execute write tools
+    G-->>U: result + audit trail
+```
+
+---
+
+### 3. NL → structured workflow plan (M1)
+
+```
+User: "When invoice overdue 30 days, email client and create Slack task"
+
+Planner output (JSON schema):
+{
+  "trigger": "schedule_daily",
+  "steps": [
+    {"id": "s1", "tool": "query_overdue_invoices", "args": {"days": 30}},
+    {"id": "s2", "tool": "send_email", "args": {...}, "needs_hitl": false},
+    {"id": "s3", "tool": "create_slack_task", "args": {...}, "needs_hitl": true}
+  ]
+}
+```
+
+**Pydantic validation** — invalid plan reject before run.  
+Eval: 90%+ valid schema on test phrases (M1 pass criteria).
+
+---
+
+### 4. LangGraph orchestration (M2–M4)
+
+```mermaid
+stateDiagram-v2
+    [*] --> Plan
+    Plan --> ExecuteStep
+    ExecuteStep --> HITL: destructive?
+    ExecuteStep --> ExecuteStep: next step
+    HITL --> ExecuteStep: approved
+    HITL --> Plan: rejected
+    ExecuteStep --> [*]: done
+```
+
+- Linear workflow pehle (M2)
+- MCP + custom tools wire (M3)
+- HITL on destructive steps (M4) — Module 09 patterns
+
+---
+
+### 5. Outbox + Kafka — exactly-once execution (M5)
+
+```
+Tera existing pattern (Zapier clone):
+
+  BEGIN TX
+    UPDATE workflow_run SET status='pending_execute'
+    INSERT INTO outbox (event_type, payload, idempotency_key)
+  COMMIT
+
+  Worker reads outbox → Kafka → execute once
+  idempotency_key unique → duplicate webhook = no-op
+```
+
+**Billing link:** completed run metered **exactly once** — double execution = double charge + angry customer.
+
+Interview defend: outbox = source of truth; Kafka = delivery; worker idempotency = effect once.
+
+---
+
+### 6. MCP integration (M3)
+
+External tools via MCP servers — Slack, DB, webhooks.  
+Credential vault per tenant (encrypted) — Projects.md spine.
+
+```
+workflow step → MCP client.call_tool("slack_post", args)
+             → NOT raw API key in prompt
+```
+
+---
+
+### 7. HITL + audit (M4)
+
+Destructive steps: `send_payment`, `delete_record`, `write_webhook`  
+Pause graph → notify human → approve/reject → resume or replan.
+
+Audit log every step — Module 09 schema.
+
+---
+
+### 8. Eval harness + Langfuse (M6)
+
+```
+Golden NL phrases → expected workflow JSON (trajectory)
+Golden runs → expected tool order (trajectory eval)
+Regression: bad planner change caught before deploy
+```
+
+Langfuse traces per run — cost per task, debug failed plans.
+
+---
+
+### 9. Milestones map
+
+| M | Deliverable |
+|---|-------------|
+| M1 | NL → workflow JSON 90%+ valid |
+| M2 | LangGraph linear 3-step workflow |
+| M3 | MCP + custom tools |
+| M4 | HITL destructive steps |
+| M5 | Outbox exactly-once |
+| M6 | Eval suite + Langfuse |
+| M7 | Demo: refund workflow E2E |
+
+---
+
+### 10. CV narrative
+
+Combine: distributed systems (outbox/Kafka) + agents (LangGraph/MCP) + evals (trajectory) + fintech domain (refund demo).
+
+---
+
+## Practice
+
+> Code **tum** likhoge Cursor mein. Stubs `practice/` mein hain — learning sandbox; ship `@Projects.md` Project B in main codebase.  
+> Stuck? Chat: `@modules/11-project-agentic-workflow/MODULE.md @Projects.md`
+
+| # | File | Kya karna hai | Pass when |
+|---|------|---------------|-----------|
+| M1 | `practice/nl_to_workflow.py` | NL → workflow JSON | 90%+ valid on test set |
+| M2 | `practice/linear_workflow_graph.py` | 3-step LangGraph | Completes E2E |
+| M3 | `practice/mcp_tools_wire.py` | MCP + custom tools | External + DB tools work |
+| M4 | `practice/hitl_destructive.py` | HITL pause/approve | Reject replans |
+| M5 | `practice/outbox_stub.py` | Idempotent execution | Duplicate → single effect |
+| M6 | `practice/eval_harness.py` | Trajectory regression | Bad plan fails CI |
+| M7 | `practice/demo_refund/` | Refund workflow demo | Recordable + README |
+
+---
+
+## Active recall (khud jawab likho NOTES mein)
+
+1. Outbox exactly-once execution aur billing guarantee kaise link hote hain?
+2. HITL checkpoint destructive steps pe kyun mandatory?
+3. CV narrative — 3 defendable bullets?
+
+**Chat drill** (optional): "Module 11 — full architecture whiteboard"
+
+---
 
 ## Progress checklist
 
-- [ ] Objectives recall bina notes ke
-- [ ] Milestones M1–M7 pass
-- [ ] NOTES.md session log updated
+- [ ] Theory Section 1–10 padh liya
+- [ ] Redraw challenge kiya
+- [ ] Practice M1–M7 pass
+- [ ] Active recall NOTES mein likha
+- [ ] NOTES architecture + eval scores logged
 
-## NOTES.md
+---
 
-Architecture diagrams, eval scores over time, failure postmortems.
+## Optional appendix (zarurat ho tab)
+
+- [`@Projects.md` Project B](../../Projects.md) — full ship spec
+- [Transactional outbox pattern](https://microservices.io/patterns/data/transactional-outbox.html) — exactly-once deep dive
