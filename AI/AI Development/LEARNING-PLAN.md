@@ -5,7 +5,9 @@
 
 ## North star
 
-Seekh kar **do defendable projects** ship karo jo CV pe likh sako aur interview mein depth se bacha sako.
+Seekh kar **teen defendable SaaS products** ship karo (Projects A → B → C) jo CV pe likh sako aur interview mein depth se bacha sako. Full spec: `@Projects.md`. Coach style: `@Prompt.md`.
+
+**Curriculum** (modules 00→11) = concept order. **Ship order** = A (RAG SaaS) → B (Workflow SaaS) → C (Go Gateway SaaS). Dono alag rakho — module 03 gateway seekhne ke liye hai, Project C baad mein Go mein ship hoga.
 
 ---
 
@@ -23,9 +25,10 @@ mindmap
       Semantic Cache
       Circuit Breakers
       OTEL / Langfuse
-    Project1
-      LLM Gateway
-      Model Router
+    Portfolio SaaS
+      Project A RAG
+      Project B Workflow
+      Project C Go Gateway
     Intelligence
       Prompt Engineering
       RAG pgvector
@@ -37,9 +40,6 @@ mindmap
     Production
       Evals
       LLMOps
-    Project2
-      Agentic Workflow
-      Outbox Exactly Once
 ```
 
 ## Dependency graph (kya pehle, kya baad)
@@ -87,7 +87,7 @@ Docker, Postgres, Redis, Python venv, `.env` hygiene.
 ### Module 00c — FastAPI
 
 **Folder**: `modules/00c-fastapi`  
-Routes, `Depends`, middleware, SSE stub — **Project 1 ka stack**.
+Routes, `Depends`, middleware, SSE stub — **Project A/B ka FastAPI stack**.
 
 ### Module 00d — ML & AI Foundations (TensorFlow intro)
 
@@ -144,9 +144,9 @@ Pehle `00a-dev-environment` MODULE follow karo — wahi Phase 0 ka kaam hai.
 
 ---
 
-## Module 03 — PROJECT: LLM Gateway
+## Module 03 — LLM Gateway (concepts → Project C)
 
-**Agent folder**: `modules/03-project-llm-gateway` · **Ref**: `@Projects.md` Project 1
+**Agent folder**: `modules/03-project-llm-gateway` · **Ship spec**: `@Projects.md` **Project C** (Go). Yeh module gateway patterns seekhata hai; production ship Go mein baad mein.
 
 **Features checklist**
 
@@ -297,9 +297,9 @@ Pehle `00a-dev-environment` MODULE follow karo — wahi Phase 0 ka kaam hai.
 
 ---
 
-## Module 11 — PROJECT: Agentic Workflow Engine
+## Module 11 — PROJECT: Agentic Workflow (→ Project B)
 
-**Agent folder**: `modules/11-project-agentic-workflow` · **Ref**: `@Projects.md` Project 2
+**Agent folder**: `modules/11-project-agentic-workflow` · **Ship spec**: `@Projects.md` **Project B**
 
 **Features checklist**
 
@@ -345,6 +345,8 @@ Pehle `00a-dev-environment` MODULE follow karo — wahi Phase 0 ka kaam hai.
 ```
 Module 01 agent: @Memory.md @LEARNING-PLAN.md @modules/01-llm-apis/MODULE.md
 Module 03 agent: @Memory.md @Projects.md @modules/03-project-llm-gateway/MODULE.md
+Build agent: @Projects.md (paste full spec) — name Project A, B, or C
+Coach persona: @Prompt.md @Memory.md
 ...
 ```
 

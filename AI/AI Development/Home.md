@@ -10,7 +10,8 @@
 | [[VISUAL-STUDY-GUIDE]] | **Visual learner master map** — poori journey diagrams |
 | [[diagrams/README\|Excalidraw diagrams]] | Redraw challenges — hand-drawn sketches |
 | [[LEARNING-PLAN]] | Full syllabus + mind map |
-| [[Projects]] | Project 1 Gateway + Project 2 Workflow |
+| [[Projects]] | SaaS portfolio — Project A (RAG) → B (Workflow) → C (Go Gateway) |
+| [[Prompt]] | Coach persona prompt (Hinglish, active recall, no full code) |
 | [[modules/README\|Module index]] | Folder overview |
 
 ## Modules (click MODULE → padho, NOTES → likho)
@@ -30,7 +31,7 @@
 |---|----------|----------|-------|
 | 01 | [[modules/01-llm-apis/MODULE\|LLM APIs]] | [[modules/01-llm-apis/NOTES]] | Tokens, streaming, cost |
 | 02 | [[modules/02-llm-infra/MODULE\|LLM Infra]] | [[modules/02-llm-infra/NOTES]] | Rate limit, cache, breaker |
-| 03 | [[modules/03-project-llm-gateway/MODULE\|LLM Gateway 🚀]] | [[modules/03-project-llm-gateway/NOTES]] | **Ship Project 1** |
+| 03 | [[modules/03-project-llm-gateway/MODULE\|LLM Gateway]] | [[modules/03-project-llm-gateway/NOTES]] | Gateway patterns → **Project C** (Go) |
 | 04 | [[modules/04-prompt-engineering/MODULE\|Prompts]] | [[modules/04-prompt-engineering/NOTES]] | System prompts, injection |
 | 05 | [[modules/05-rag-pgvector/MODULE\|RAG]] | [[modules/05-rag-pgvector/NOTES]] | pgvector, chunking |
 | 06 | [[modules/06-tools-function-calling/MODULE\|Tools]] | [[modules/06-tools-function-calling/NOTES]] | Function calling |
@@ -38,7 +39,7 @@
 | 08 | [[modules/08-mcp/MODULE\|MCP]] | [[modules/08-mcp/NOTES]] | Tool protocol |
 | 09 | [[modules/09-multi-agent-hitl/MODULE\|Multi-agent]] | [[modules/09-multi-agent-hitl/NOTES]] | HITL, safety |
 | 10 | [[modules/10-evals-llmops/MODULE\|Evals]] | [[modules/10-evals-llmops/NOTES]] | LLMOps, regression |
-| 11 | [[modules/11-project-agentic-workflow/MODULE\|Workflow 🚀]] | [[modules/11-project-agentic-workflow/NOTES]] | **Ship Project 2** |
+| 11 | [[modules/11-project-agentic-workflow/MODULE\|Workflow 🚀]] | [[modules/11-project-agentic-workflow/NOTES]] | **Ship Project B** (workflow SaaS) |
 
 ## Reading workflow (Obsidian) — visual learner
 

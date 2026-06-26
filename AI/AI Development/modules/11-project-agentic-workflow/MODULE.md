@@ -1,4 +1,4 @@
-# Module 11 — PROJECT: Agentic Workflow Engine
+# Module 11 — PROJECT: Agentic Workflow (→ Project B)
 
 > **Agent spawn**: `@Memory.md` + this file + `@modules/11-project-agentic-workflow/NOTES.md`  
 > **Nav**: ← [Module 10](../10-evals-llmops/MODULE.md) · End
@@ -10,7 +10,7 @@
 | Prerequisites | Modules 01–10 · `@Projects.md` |
 | Duration | ~3–4 weeks |
 | Project? | Yes |
-| Exit test | Workflow milestones M1–M7 · `@Projects.md` |
+| Exit test | Workflow milestones · `@Projects.md` **Project B** |
 
 ## Visual map
 
