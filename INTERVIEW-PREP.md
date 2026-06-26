@@ -3,7 +3,7 @@
 > Top-quality, **visual-first**, Obsidian-friendly prep for **OpenAI · Anthropic · MAANG · top YC startups**.
 > Coding language = **C++**. Har domain ka apna mini-vault hai — same DNA as `AI/AI Development`.
 
-## The 6 domains
+## The 7 domains
 
 | # | Domain | Folder | Type | Start here |
 |---|--------|--------|------|-----------|
@@ -11,8 +11,9 @@
 | 2 | **Computer Networks** | `Network/` | Theory + sockets | [[Network/Home\|Network Home]] |
 | 3 | **Database (DBMS)** | `Database/` | Theory + heavy SQL | [[Database/Home\|DB Home]] |
 | 4 | **System Design (HLD)** | `System Design(HLD)/` | Design + case studies | [[System Design(HLD)/Home\|HLD Home]] |
-| 5 | **Low Level Design (LLD)** | `LLD/` | **Heavy C++ coding** | [[LLD/Home\|LLD Home]] |
-| 6 | **Machine Coding** | `Machine Code/` | **Heavy C++ coding** | [[Machine Code/Home\|Machine Coding Home]] |
+| 5 | **OOP in C++ (OOPS)** | `OOPS/` | **Heavy C++ coding** (foundation for LLD/MC) | [[OOPS/Home\|OOPS Home]] |
+| 6 | **Low Level Design (LLD)** | `LLD/` | **Heavy C++ coding** | [[LLD/Home\|LLD Home]] |
+| 7 | **Machine Coding** | `Machine Code/` | **Heavy C++ coding** | [[Machine Code/Home\|Machine Coding Home]] |
 
 ## How this vault works (read once)
 
@@ -33,6 +34,7 @@ flowchart LR
     end
     subgraph DESIGN["Design + Code"]
         HLD[System Design HLD]
+        OOPS[OOP in C++]
         LLD[LLD - C++]
         MC[Machine Coding - C++]
     end
@@ -41,7 +43,9 @@ flowchart LR
     DB --> HLD
     DB --> LLD
     HLD --> LLD
+    OOPS --> LLD
     LLD --> MC
+    style OOPS fill:#fef3cd,stroke:#b45309
     style LLD fill:#fef3cd,stroke:#b45309
     style MC fill:#fef3cd,stroke:#b45309
     style HLD fill:#e8f4ea,stroke:#2d6a4f
@@ -97,12 +101,13 @@ mindmap
 - [ ] Network — modules 00–10
 - [ ] Database — modules 00–10
 - [ ] System Design (HLD) — modules 00–10
-- [ ] LLD — modules 00–08 + problems
+- [ ] OOP in C++ (OOPS) — modules 00–10 + examples
+- [ ] LLD — modules 00–08 + problems + examples
 - [ ] Machine Coding — modules 00–03 + problems
 
 ---
 
-> Tip: Yeh poora `Learning/` ek hi Obsidian vault hai — wikilinks sab folders ke beech kaam karte hain. Graph view kholo → 6 clusters dikhenge.
+> Tip: Yeh poora `Learning/` ek hi Obsidian vault hai — wikilinks sab folders ke beech kaam karte hain. Graph view kholo → clusters dikhenge.
 
 ---
 
