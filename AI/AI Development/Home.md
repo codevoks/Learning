@@ -6,6 +6,7 @@
 
 | Doc | Kya hai |
 |-----|---------|
+| [[HOW-TO-STUDY]] | **Pehle yeh padho** — Topics vs study links vs coach |
 | [[Memory]] | Shared rules, CV hooks, coach format |
 | [[VISUAL-STUDY-GUIDE]] | **Visual learner master map** — poori journey diagrams |
 | [[diagrams/README\|Excalidraw diagrams]] | Redraw challenges — hand-drawn sketches |
@@ -41,16 +42,15 @@
 | 10 | [[modules/10-evals-llmops/MODULE\|Evals]] | [[modules/10-evals-llmops/NOTES]] | LLMOps, regression |
 | 11 | [[modules/11-project-agentic-workflow/MODULE\|Workflow 🚀]] | [[modules/11-project-agentic-workflow/NOTES]] | **Ship Project B** (workflow SaaS) |
 
-## Reading workflow (Obsidian) — visual learner
+## Reading workflow
 
-1. **Home** → current module ka **MODULE** kholo
-2. **Visual map pehle** dekho (2 min) — mermaid + ASCII
-3. Topics padho — har topic ko diagram se map karo
-4. Session end: **Redraw challenge** — bina dekhe draw karo → `NOTES.md` → `## My diagrams`
-5. Active recall / drills → Cursor agent
-6. Progress checklist tick karo
+1. [[HOW-TO-STUDY]] — ek jagah padhai model
+2. MODULE.md → **Theory** padho (Obsidian)
+3. `practice/` → code likho (Cursor)
+4. Doubt / review → Cursor chat `@MODULE.md`
+5. NOTES + redraw
 
-> Tip: **Excalidraw** installed — `Cmd+P` → `Excalidraw: Create new drawing` → save in `diagrams/` → link in NOTES → My diagrams
+> **Bahar mat jao** — theory MODULE mein hai. Chat sirf teacher jaisa.
 
 ## Cursor kab kholo
 

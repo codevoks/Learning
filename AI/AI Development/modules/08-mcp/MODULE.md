@@ -44,7 +44,7 @@ Host ↔ Client ↔ MCP Server ↔ Tools chain bina dekhe draw karo.
 
 ## Read order
 
-1. Objectives → 2. Learning hooks → 3. Topics → 4. Assignments → 5. Coach se active recall
+1. Visual map → 2. **Padhai kahan se** (links padho) → 3. Topics tick → 4. Coach recall → 5. Assignments
 
 **Prerequisites**: Module 07  
 **Duration**: ~3–5 sessions
@@ -63,6 +63,44 @@ Host ↔ Client ↔ MCP Server ↔ Tools chain bina dekhe draw karo.
 | Tool listing | API discovery / swagger |
 | Resource URIs | REST resource paths |
 | Auth | JWT-scoped integrations |
+
+## Padhai kahan se (Study material)
+
+> **Topics = checklist. Neeche padho → phir Coach → phir Assignment.**  
+> Poora flow: [[HOW-TO-STUDY|HOW-TO-STUDY.md]]
+
+### Session 1 (~50 min) — MCP architecture
+
+| # | Topic (checklist) | Padho yahan | Time |
+|---|-------------------|-------------|------|
+| 1 | MCP overview | [Model Context Protocol — Introduction](https://modelcontextprotocol.io/introduction) — hosts, clients, servers | 20 min |
+| 2 | Core concepts | [MCP — Architecture](https://modelcontextprotocol.io/docs/concepts/architecture) — tools, resources, transports | 20 min |
+| 3 | vs inline tools | Topics — MCP vs inline function definitions | 10 min |
+
+**Session 1 ke baad Coach se pucho:** "MCP kab use karoge vs hardcoded Python functions?" (Active recall Q1)
+
+### Session 2 (~40 min) — Building + security
+
+| # | Topic (checklist) | Padho yahan | Time |
+|---|-------------------|-------------|------|
+| 1 | Build a server | [MCP — Build server quickstart](https://modelcontextprotocol.io/docs/develop/build-server) — Python skim | 25 min |
+| 2 | Security | Topics — sandbox, allowlists + threat model mindset | 15 min |
+
+**Session 2 ke baad:** Assignment A1 start (Cursor)
+
+### Optional video (1 dekh lo, 1x speed ok)
+
+- [MCP Explained](https://www.youtube.com/watch?v=7j_NE6Pjv-E) — visual learner ke liye Host ↔ Client ↔ Server chain
+
+### Coach prompt (padhai ke baad)
+
+```
+@Memory.md @modules/08-mcp/MODULE.md
+
+Maine Session 1–2 resources padh liye. Flowchart ke saath explain karo:
+Host ↔ MCP Client ↔ MCP Server ↔ Tools. Phir 3 security risks + mitigations.
+Code mat likh.
+```
 
 ## Topics
 

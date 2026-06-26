@@ -1,0 +1,16 @@
+"""Pydantic request/response models for practice routes."""
+
+from pydantic import BaseModel, Field
+
+# TODO A1: ChatMessage body — message: str, Field(min_length=1)
+
+
+class ChatMessage(BaseModel):
+    pass
+
+
+# TODO A1: ChatEcho response — reply: str, echoed: bool = True
+
+
+class ChatEcho(BaseModel):
+    pass

@@ -45,7 +45,7 @@ Planner → workers → HITL gate → execute flow (reject arrow wapas planner p
 
 ## Read order
 
-1. Objectives → 2. Learning hooks → 3. Topics → 4. Assignments → 5. Coach se active recall
+1. Visual map → 2. **Padhai kahan se** (links padho) → 3. Topics tick → 4. Coach recall → 5. Assignments
 
 **Prerequisites**: Module 08  
 **Duration**: ~4–6 sessions
@@ -65,6 +65,40 @@ Planner → workers → HITL gate → execute flow (reject arrow wapas planner p
 | Excessive agency | Atomic deactivation safety |
 | Agent handoff | Stage output → next stage input |
 | Rollback on reject | Savepoint rollback |
+
+## Padhai kahan se (Study material)
+
+> **Topics = checklist. Neeche padho → phir Coach → phir Assignment.**  
+> Poora flow: [[HOW-TO-STUDY|HOW-TO-STUDY.md]]
+
+### Session 1 (~50 min) — Multi-agent patterns
+
+| # | Topic (checklist) | Padho yahan | Time |
+|---|-------------------|-------------|------|
+| 1 | Multi-agent concepts | [LangGraph — Multi-agent](https://langchain-ai.github.io/langgraph/concepts/multi_agent/) — supervisor, handoffs | 25 min |
+| 2 | Supervisor pattern | Topics — planner/worker + specialist agents skim | 15 min |
+| 3 | Cost control | Active recall Q3 prep — delegation boundaries | 10 min |
+
+**Session 1 ke baad Coach se pucho:** "Critic agent kab worth it vs overhead?" (Active recall Q2)
+
+### Session 2 (~45 min) — Human-in-the-loop
+
+| # | Topic (checklist) | Padho yahan | Time |
+|---|-------------------|-------------|------|
+| 1 | HITL in LangGraph | [LangGraph — Human-in-the-loop](https://langchain-ai.github.io/langgraph/how-tos/human_in_the_loop/) — interrupt + resume | 25 min |
+| 2 | Approval gates | Topics — timeout, audit log, rollback on reject | 20 min |
+
+**Session 2 ke baad:** Assignment A2 start (Cursor)
+
+### Coach prompt (padhai ke baad)
+
+```
+@Memory.md @modules/09-multi-agent-hitl/MODULE.md
+
+Maine Session 1–2 resources padh liye. Flowchart ke saath explain karo:
+planner → workers → HITL gate → execute (reject loops back). Phir sync vs async HITL product impact.
+Code mat likh.
+```
 
 ## Topics
 

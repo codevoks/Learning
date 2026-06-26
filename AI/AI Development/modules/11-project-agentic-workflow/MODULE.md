@@ -49,11 +49,46 @@ NL → plan → LangGraph → MCP + outbox/Kafka → HITL → execute full archi
 
 ## Read order
 
-1. Objectives → 2. Feature matrix → 3. Milestones → 4. CV narrative
+1. Visual map → 2. **Padhai kahan se** (links padho) → 3. Topics tick → 4. Coach recall → 5. Assignments
 
 **Prerequisites**: Modules 01–10  
 **Duration**: ~3–4 weeks  
 **Reference**: `@Projects.md` Project 2
+
+## Padhai kahan se (Study material)
+
+> **Topics = checklist. Neeche padho → phir Coach → phir Assignment.**  
+> Poora flow: [[HOW-TO-STUDY|HOW-TO-STUDY.md]]
+
+### Session 1 (~50 min) — LangGraph + outbox backbone
+
+| # | Topic (checklist) | Padho yahan | Time |
+|---|-------------------|-------------|------|
+| 1 | Project B spec | [[Projects|Projects.md]] — Project B: NL workflow, outbox, HITL, billing | 20 min |
+| 2 | LangGraph orchestration | [LangGraph — Introduction](https://langchain-ai.github.io/langgraph/) — state machine for workflows | 15 min |
+| 3 | Outbox pattern | [[Projects|Projects.md]] — outbox + exactly-once sections + [Microservices.io — Transactional outbox](https://microservices.io/patterns/data/transactional-outbox.html) skim | 15 min |
+
+**Session 1 ke baad Coach se pucho:** "Outbox exactly-once execution aur billing guarantee kaise link hote hain?"
+
+### Session 2 (~40 min) — Integration patterns
+
+| # | Topic (checklist) | Padho yahan | Time |
+|---|-------------------|-------------|------|
+| 1 | HITL + MCP | Module 09 HITL recap + Module 08 MCP recap (5 min each) | 10 min |
+| 2 | Eval harness | Module 10 — Langfuse traces + regression mindset | 15 min |
+| 3 | Feature matrix | Re-read Feature matrix — map unfair advantages to milestones | 15 min |
+
+**Session 2 ke baad:** Milestone M1 start (Cursor + `@Projects.md`)
+
+### Coach prompt (padhai ke baad)
+
+```
+@Memory.md @modules/11-project-agentic-workflow/MODULE.md @Projects.md
+
+Maine Session 1–2 resources padh liye. Architecture diagram ke saath explain karo:
+NL → LangGraph → MCP + outbox/Kafka → HITL → execute. Phir CV narrative — 3 defendable bullets.
+Code mat likh.
+```
 
 ## Objectives
 

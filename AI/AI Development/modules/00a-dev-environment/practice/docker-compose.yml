@@ -1,0 +1,19 @@
+# postgres + redis — complete the TODOs
+
+services:
+  postgres:
+    image: postgres:16
+    # TODO: ports — host 5432 → container 5432
+    environment:
+      # TODO: POSTGRES_PASSWORD, POSTGRES_DB (use aidev)
+    volumes:
+      # TODO: named volume pgdata mounted at /var/lib/postgresql/data
+    # TODO (optional): healthcheck using pg_isready
+
+  redis:
+    image: redis:7
+    # TODO: port 6379
+    # TODO (optional): healthcheck redis-cli ping
+
+volumes:
+  # TODO: declare pgdata

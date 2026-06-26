@@ -1,5 +1,17 @@
-# Obsidian — user-specific UI state (don't commit)
+# Obsidian — user-specific UI state (parent .gitignore also ignores .obsidian/)
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json
 .obsidian/cache
 .trash
+
+# Secrets & local env
+.env
+.env.local
+!.env.example
+**/.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
