@@ -88,8 +88,8 @@ flowchart TD
 **Exit**: forward vs reverse proxy; CDN cache-control; L4 vs L7; SSL termination where.
 
 ## Module 09 — Sockets & Practical
-**Topics**: Berkeley sockets API; TCP server/client lifecycle (socket/bind/listen/accept/connect/send/recv/close); blocking vs non-blocking; `select`/`epoll` (C10k); Python `socket` + `asyncio`; tools: `dig`, `curl`, `netstat`/`ss`, `tcpdump`/`Wireshark`, `traceroute`, `ping`, `nc`.
-**Assignments (Python)**: A1 TCP echo server + client (stub + gaps); A2 concurrent server with `asyncio`/`select` (handle N clients); A3 capture + read a `tcpdump` of a handshake.
+**Topics**: Berkeley sockets API; TCP server/client lifecycle (socket/bind/listen/accept/connect/send/recv/close); blocking vs non-blocking; `select`/`epoll` (C10k); BSD sockets (`<sys/socket.h>`); tools: `dig`, `curl`, `netstat`/`ss`, `tcpdump`/`Wireshark`, `traceroute`, `ping`, `nc`.
+**Assignments (C++)**: A1 TCP echo server + client (stub + gaps); A2 concurrent server with `select`/`epoll` (handle N clients); A3 capture + read a `tcpdump` of a handshake.
 **Exit**: socket lifecycle; blocking vs non-blocking; C10k + epoll; read a packet capture.
 
 ## Module 10 — Interview Rapid-fire 🔥

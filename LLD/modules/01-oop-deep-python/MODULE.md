@@ -1,4 +1,4 @@
-# Module 01 — OOP Deep (Python)
+# Module 01 — OOP Deep (C++)
 
 > **Agent spawn**: `@Memory.md` + `@Prompt.md` + this file + `@NOTES.md`
 > **Nav**: ← [00 Foundations](../00-foundations-oop/MODULE.md) · Next → [02 SOLID](../02-solid/MODULE.md)
@@ -32,7 +32,7 @@ favor COMPOSITION over inheritance (has-a > is-a) when reuse without tight coupl
 **Redraw challenge**: Shape hierarchy + composition-vs-inheritance example.
 
 ## Objectives
-1. Encapsulation, Abstraction, Inheritance, Polymorphism in Python
+1. Encapsulation, Abstraction, Inheritance, Polymorphism in C++
 2. Composition vs inheritance
 3. Dunder methods; dataclasses; enums
 
@@ -51,7 +51,7 @@ favor COMPOSITION over inheritance (has-a > is-a) when reuse without tight coupl
 | A2 | Refactor `Car` to compose `Engine` (not inherit) | Swap engine without changing Car interface |
 
 ## Active recall bank
-1. 4 pillars + Python mechanism each?
+1. 4 pillars + C++ mechanism each?
 2. Composition over inheritance — kyun?
 3. `__eq__` ke saath `__hash__` kyun?
 4. Duck typing kya?

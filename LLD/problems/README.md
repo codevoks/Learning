@@ -1,13 +1,13 @@
-# LLD Problems — Python Practice 🔥
+# LLD Problems — C++ Practice 🔥
 
-> Har problem ka apna folder: `README.md` (requirements + passing criteria) + `solution.py` (starter stub jise tum complete karoge). **Coach poora code nahi dega** — tum likhoge, review hoga.
+> Har problem ka apna folder: `README.md` (requirements + passing criteria) + `solution.cpp` (starter stub jise tum complete karoge). **Coach poora code nahi dega** — tum likhoge, review hoga.
 
 ## How to attack each problem
 1. `README.md` padho → requirements clarify karo (coach se)
-2. Entities + class diagram banao (`NOTES` / Excalidraw)
+2. Entities + class diagram banao (NOTES / Excalidraw)
 3. Patterns chuno + justify (kaunsa SOLID)
-4. `solution.py` ke `TODO` complete karo
-5. `python solution.py` chalao → demo/asserts pass hone chahiye
+4. `solution.cpp` ke `// TODO` complete karo
+5. Compile + run: `g++ -std=c++17 solution.cpp -o sol && ./sol` → asserts pass + prints `PASS`
 6. Extensibility: "naya requirement aaye toh kitna change?" — defend
 
 ## Problem set
@@ -25,5 +25,12 @@
 | 10 | Logging Framework | Chain of Responsibility | `logging-framework/` |
 | 11 | Chess | polymorphism | `chess/` |
 | 12 | Food Delivery | Strategy (assignment) | `food-delivery-system/` |
+| 13 | Cab Booking (Uber/Ola) | Strategy (matching+pricing), State | `cab-booking/` |
+| 14 | Hotel Booking | Strategy (pricing), concurrency | `hotel-booking/` |
+| 15 | Stack Overflow | composition, voting | `stack-overflow/` |
+| 16 | Online Shopping Cart (Amazon) | Strategy (discount/payment), State | `online-shopping-cart/` |
 
-> Difficulty ramp: start 3 (Vending) → 6 (Tic-Tac-Toe) → 1 (Parking) → 4 (Splitwise) → 9 (ATM) → 5 (BookMyShow) → 11 (Chess).
+> Difficulty ramp: 3 Vending → 6 Tic-Tac-Toe → 1 Parking → 4 Splitwise → 9 ATM → 13 Cab → 5 BookMyShow → 11 Chess → 16 Shopping.
+
+## Design principles to apply everywhere
+OOP 4 pillars · **SOLID** · **DRY** (no duplication) · **KISS** (simplest that works) · **YAGNI** (build only what's needed) · favor **composition over inheritance** · program to **interfaces** · **dependency injection** (pass collaborators in, don't `new` inside).

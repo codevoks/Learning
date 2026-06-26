@@ -29,20 +29,20 @@ flowchart LR
 ## Objectives
 1. Berkeley socket API + lifecycle
 2. Blocking vs non-blocking; select/epoll (C10k)
-3. Python socket + asyncio
+3. BSD sockets (`<sys/socket.h>`) + select/epoll
 4. CLI tools: dig/curl/ss/tcpdump/traceroute
 
 ## Topics
 - Socket API: socket/bind/listen/accept/connect/send/recv/close
 - Blocking vs non-blocking; select/poll/epoll; C10k problem
-- Python `socket` + `asyncio`
+- BSD sockets (`<sys/socket.h>`, `<arpa/inet.h>`) + `select`/`epoll`
 - Tools: `dig`, `curl`, `netstat`/`ss`, `tcpdump`/Wireshark, `traceroute`, `ping`, `nc`
 
-## Assignments (Python)
+## Assignments (C++)
 | # | Task | Passing criteria |
 |---|------|------------------|
 | A1 | TCP echo server + client (stub + gaps) | Echoes correctly, clean close |
-| A2 | Concurrent server (asyncio/select) for N clients | Handles many clients, no blocking |
+| A2 | Concurrent server (`select`/`epoll`) for N clients | Handles many clients, no blocking |
 | A3 | `tcpdump` a handshake, read it | SYN/SYN-ACK/ACK identified |
 
 ## Active recall bank

@@ -14,7 +14,7 @@
 ```mermaid
 flowchart LR
     R[Requirements + clarify] --> E[Entities/classes] --> U[UML class diagram]
-    U --> P[Identify patterns + SOLID] --> C[Code in Python] --> T[Tests] --> X[Extensibility Q]
+    U --> P[Identify patterns + SOLID] --> C[Code in C++] --> T[Tests] --> X[Extensibility Q]
 ```
 **Mental model**: LLD interview ka asli round. Process har baar: requirements clarify → entities → class diagram → patterns chuno (justify) → code → test → "naya feature aaye toh kitna change". Pattern recognize karo: state machines (vending/ATM/order) → State; pluggable rules (pricing/split) → Strategy; handler chains (logging/approval) → CoR.
 

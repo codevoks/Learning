@@ -29,12 +29,12 @@ Edge cases   ▢▢▢▢▢  invalid/empty/concurrency
 
 ## Reusable building blocks
 ```
-In-memory Repository : dict[id]->obj + indexes; add/get/query
-ID gen               : itertools.count() or uuid4()
+In-memory Repository : unordered_map<id,obj> + indexes; add/get/query
+ID gen               : static counter / random id
 Clock injection      : pass a now() callable → testable time logic
 State machine        : Enum + dict transitions (or State pattern)
 Strategy             : pluggable algorithm (pricing/split/assignment)
-Concurrency          : threading.Lock per resource / queue.Queue
+Concurrency          : std::mutex per resource / std::queue + condition_variable
 ```
 
 ## CV → Machine-coding bridge
@@ -49,7 +49,7 @@ Refund state machine      ──► Vending / ATM / order state problems
 ```
 HashMap key->node  +  Doubly Linked List (MRU head ... LRU tail)
 get: move node to head | put: insert head, if over capacity evict tail
-(Python shortcut: collections.OrderedDict.move_to_end + popitem)
+(C++: std::list + unordered_map<key,list::iterator>)
 ```
 
 ## Spaced-rep recall bank

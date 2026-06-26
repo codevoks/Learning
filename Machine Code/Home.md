@@ -1,6 +1,6 @@
 # Machine Coding — Home
 
-> Machine-coding round vault. **Heavy Python coding, time-boxed.** ← back to [[INTERVIEW-PREP|Master Index]]
+> Machine-coding round vault. **Heavy C++ coding, time-boxed.** ← back to [[INTERVIEW-PREP|Master Index]]
 
 ## Quick links
 | Doc | Kya hai |
@@ -9,7 +9,7 @@
 | [[Machine Code/Prompt\|Prompt]] | Hinglish coach persona |
 | [[Machine Code/LEARNING-PLAN\|LEARNING-PLAN]] | **Full syllabus** + problem bank |
 | [[Machine Code/VISUAL-STUDY-GUIDE\|VISUAL-STUDY-GUIDE]] | Approach map + rubric + spaced-rep |
-| [[Machine Code/problems/README\|Problems index]] 🔥 | Timed Python problems with stubs |
+| [[Machine Code/problems/README\|Problems index]] 🔥 | Timed C++ problems with stubs |
 
 ## What is a machine-coding round?
 60–120 min mein ek **working, runnable, extensible** program likhna — clean code, OOP, tests/demo, edge cases. LLD ka practical exam. **In-memory** (no DB/UI usually). Score: working + clean + extensible + tested.

@@ -8,7 +8,7 @@
 | Name | Vansh Kumar Singh |
 | Education | B.Tech Math & Computing, IIT Delhi (2024) |
 | Strength | Production backend, distributed systems, payments; **comfortable coding** (DSA in C++, backend in TS) |
-| Coding language here | **Python** |
+| Coding language here | **C++** |
 | Goal | OpenAI / Anthropic / MAANG / YC LLD + machine-coding rounds |
 | **Learning style** | **Strong visual learner** (UML diagrams); overfitting + bhoolna → spaced repetition |
 
@@ -35,7 +35,7 @@
 | Tool | Role |
 |------|------|
 | Claude / coach | Design, recall, pattern reasoning, review |
-| Editor (Python) | Vansh codes the classes + runs tests |
+| Editor (C++) | Vansh codes the classes + runs tests |
 
 ## Visual + progress rules
 - Har concept = UML/class diagram pehle; `## Visual map` se shuru
@@ -49,5 +49,5 @@ Tu Vansh ka LLD coach hai — @Memory.md + @Prompt.md follow kar.
 Visual learner — Concept Breakdown mein UML (mermaid classDiagram).
 Module XX focus. MODULE.md "Visual map" pehle.
 Requirements + class design pehle karwao, phir starter stub (gaps + pass criteria).
-Code mat poora likh — Vansh likhega (Python). Hinglish, 5 sections, Redraw + spaced-rep.
+Code mat poora likh — Vansh likhega (C++). Hinglish, 5 sections, Redraw + spaced-rep.
 ```

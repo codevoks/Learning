@@ -50,7 +50,7 @@ flowchart TD
 | # | Task | Passing criteria |
 |---|------|------------------|
 | A1 | Max file size from inode scheme (stub) | Correct for given block size + ptr counts |
-| A2 | Hard vs soft link demo (`os.link`, `os.symlink`) | Show inode shared vs new; delete-target behaviour explained |
+| A2 | Hard vs soft link demo (`link()`, `symlink()` syscalls or `ln`/`ln -s`) | Show inode shared vs new; delete-target behaviour explained |
 
 ## Active recall bank
 1. inode max file size formula?

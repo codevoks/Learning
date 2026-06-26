@@ -49,7 +49,7 @@ mode bit = 1 (USER)  ── trap ──►  mode bit = 0 (KERNEL)
 | # | Task | Passing criteria |
 |---|------|------------------|
 | A1 | List 8 syscalls aur category tag karo | Har ek correct category + 1-line kaam |
-| A2 | `strace python3 -c "print(1)"` chalao | Top 5 syscalls identify + explain |
+| A2 | `strace ./a.out` chalao | Top 5 syscalls identify + explain |
 
 ## Active recall bank
 1. User program directly hardware kyun nahi touch kar sakta?

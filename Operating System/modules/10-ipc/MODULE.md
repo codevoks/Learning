@@ -47,7 +47,7 @@ Signals: async notifications (SIGTERM catchable, SIGKILL not)
 ## Assignments
 | # | Task | Passing criteria |
 |---|------|------------------|
-| A1 | Cross-process producer/consumer via `multiprocessing.Queue`/`Pipe` | No data loss; clean shutdown |
+| A1 | Cross-process producer/consumer via POSIX `pipe()` / shared memory (`fork()`) | No data loss; clean shutdown |
 | A2 | Signal handler for graceful shutdown (SIGTERM) | Cleans up resources, ignores or handles correctly |
 
 ## Active recall bank

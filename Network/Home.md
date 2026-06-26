@@ -22,13 +22,13 @@
 | 06 | [[Network/modules/06-tls-security/MODULE\|TLS & Security]] | [[Network/modules/06-tls-security/NOTES\|NOTES]] | TLS handshake, certs |
 | 07 | [[Network/modules/07-dns-deepdive/MODULE\|DNS Deep Dive]] | [[Network/modules/07-dns-deepdive/NOTES\|NOTES]] | Resolution, records |
 | 08 | [[Network/modules/08-cdn-lb-proxies/MODULE\|CDN, LB & Proxies]] | [[Network/modules/08-cdn-lb-proxies/NOTES\|NOTES]] | CDN, proxy, LB (→HLD) |
-| 09 | [[Network/modules/09-sockets-practical/MODULE\|Sockets & Practical]] | [[Network/modules/09-sockets-practical/NOTES\|NOTES]] | Python sockets, tcpdump |
+| 09 | [[Network/modules/09-sockets-practical/MODULE\|Sockets & Practical]] | [[Network/modules/09-sockets-practical/NOTES\|NOTES]] | C++ sockets, tcpdump |
 | 10 | [[Network/modules/10-interview-rapidfire/MODULE\|Interview Rapid-fire]] 🔥 | [[Network/modules/10-interview-rapidfire/NOTES\|NOTES]] | "type google.com" |
 
 ## Reading workflow
 1. **Module 00 (OSI/TCP-IP) pehle** — har baat layer se map hoti
 2. Har module → Visual map → topics
-3. Module 09 mein Python socket khud likho; `dig`/`curl`/`tcpdump` chalao
+3. Module 09 mein C++ socket khud likho; `dig`/`curl`/`tcpdump` chalao
 4. Redraw challenge → `NOTES.md → My diagrams`
 5. Coach: `@Memory.md @Prompt.md @modules/XX/MODULE.md`
 

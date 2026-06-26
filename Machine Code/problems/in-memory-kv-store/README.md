@@ -17,4 +17,4 @@ A key-value store with TTL expiry and simple transactions (begin/commit/rollback
 - commit persists
 
 ## Drill
-Timer ON → 5-min plan → complete `TODO`s (core first) → `python solution.py` (asserts pass) → self-score on rubric → log time-leak in NOTES.
+Timer ON → 5-min plan → complete `TODO`s (core first) → `g++ -std=c++17 solution.cpp -o sol && ./sol` (asserts pass) → self-score on rubric → log time-leak in NOTES.

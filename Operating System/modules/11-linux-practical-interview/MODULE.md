@@ -40,13 +40,13 @@ flowchart LR
 - `strace`/`ltrace`; load average; OOM killer; `nice`/`renice`
 - File descriptors + `lsof`; ulimits
 - cgroups + namespaces → Docker/containers
-- **FAQ**: process vs thread, deadlock, paging vs segmentation, virtual memory, context-switch cost, mutex vs semaphore, GIL, fork vs exec, what happens on `malloc`, zombie/orphan
+- **FAQ**: process vs thread, deadlock, paging vs segmentation, virtual memory, context-switch cost, mutex vs semaphore, threads vs processes (Python GIL trivia), fork vs exec, what happens on `malloc`, zombie/orphan
 
 ## Assignments
 | # | Task | Passing criteria |
 |---|------|------------------|
 | A1 | Read a real `top` output — explain CPU/mem/load | Each field explained correctly |
-| A2 | `strace` a Python script, identify syscalls | Top syscalls named + categorized |
+| A2 | `strace` a C++ script, identify syscalls | Top syscalls named + categorized |
 
 ## Active recall bank (rapid-fire — bina notes ke)
 1. Load average 3 numbers?

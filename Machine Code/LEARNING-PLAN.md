@@ -39,21 +39,21 @@ mindmap
 **Exit**: recite the playbook + rubric; turn requirements into a prioritized feature list + class sketch fast.
 
 ## Module 02 — Building Blocks (reusable)
-**Topics**: In-memory data store patterns (dict-backed repository, indexes); ID generation (counter, uuid); clock injection (for testability of time-based logic); enums for states; the Repository pattern; in-memory pub/sub; thread-safety (`threading.Lock`, `queue.Queue`) when concurrency asked; pluggable strategies (recall from LLD). CV hooks: in-memory matching engine, token-bucket limiter, queue workers.
-**Assignments (Python)**: A1 a generic in-memory `Repository[T]` with add/get/query (stub); A2 an injectable `Clock` + a TTL cache using it.
+**Topics**: In-memory data store patterns (`std::unordered_map`-backed repository, indexes); ID generation (static counter / random id); clock injection (for testability of time-based logic); enums for states; the Repository pattern; in-memory pub/sub; thread-safety (`std::mutex`, `std::queue`) when concurrency asked; pluggable strategies (recall from LLD). CV hooks: in-memory matching engine, token-bucket limiter, queue workers.
+**Assignments (C++)**: A1 a generic in-memory `Repository[T]` with add/get/query (stub); A2 an injectable `Clock` + a TTL cache using it.
 **Exit**: spin up an in-memory store + indexes fast; inject a clock for time logic; know when to add a lock.
 
 ## Module 03 — Clean Code & Testing
 **Topics**: Readable naming, small functions, no deep nesting, early returns; separation (model vs service vs IO); meaningful errors/exceptions; `unittest`/`pytest` basics; writing 3–5 high-value tests fast; a runnable `if __name__ == "__main__"` demo; what to NOT over-engineer under time pressure.
-**Assignments (Python)**: A1 refactor a messy snippet for readability; A2 write a minimal `unittest` suite for one `problems/` solution.
+**Assignments (C++)**: A1 refactor a messy snippet for readability; A2 write a minimal `unittest` suite for one `problems/` solution.
 **Exit**: write clean, tested, runnable code under time; know the over-engineering line.
 
 ---
 
-## Problem bank (`problems/` — TIMED, Python)
+## Problem bank (`problems/` — TIMED, C++)
 | # | Problem | Target time | Key idea |
 |---|---------|-------------|----------|
-| 1 | LRU Cache | 30 min | dict + doubly linked list / OrderedDict |
+| 1 | LRU Cache | 30 min | hashmap + doubly linked list (`std::list`) |
 | 2 | LFU Cache | 45 min | freq buckets |
 | 3 | Rate Limiter | 30 min | token bucket / sliding window (CV) |
 | 4 | In-memory KV store | 45 min | dict, TTL, optional transactions |

@@ -1,7 +1,7 @@
 # 🎯 Interview Prep — Master Index (CS Fundamentals)
 
 > Top-quality, **visual-first**, Obsidian-friendly prep for **OpenAI · Anthropic · MAANG · top YC startups**.
-> Coding language = **Python**. Har domain ka apna mini-vault hai — same DNA as `AI/AI Development`.
+> Coding language = **C++**. Har domain ka apna mini-vault hai — same DNA as `AI/AI Development`.
 
 ## The 6 domains
 
@@ -11,8 +11,8 @@
 | 2 | **Computer Networks** | `Network/` | Theory + sockets | [[Network/Home\|Network Home]] |
 | 3 | **Database (DBMS)** | `Database/` | Theory + heavy SQL | [[Database/Home\|DB Home]] |
 | 4 | **System Design (HLD)** | `System Design(HLD)/` | Design + case studies | [[System Design(HLD)/Home\|HLD Home]] |
-| 5 | **Low Level Design (LLD)** | `LLD/` | **Heavy Python coding** | [[LLD/Home\|LLD Home]] |
-| 6 | **Machine Coding** | `Machine Code/` | **Heavy Python coding** | [[Machine Code/Home\|Machine Coding Home]] |
+| 5 | **Low Level Design (LLD)** | `LLD/` | **Heavy C++ coding** | [[LLD/Home\|LLD Home]] |
+| 6 | **Machine Coding** | `Machine Code/` | **Heavy C++ coding** | [[Machine Code/Home\|Machine Coding Home]] |
 
 ## How this vault works (read once)
 
@@ -21,7 +21,7 @@ Same philosophy as your AI vault — proven, so we reuse it:
 1. **Visual learner first.** Har module mein `## Visual map` — mermaid + ASCII. Pehle diagram, phir text.
 2. **Coach teaches, tum code likhte ho.** `Prompt.md` = Hinglish coach persona. No full code upfront — active recall → exercise → review.
 3. **Active recall + spaced repetition** built into every module — kyunki overfitting aur bhoolna dono se ladna hai.
-4. **Assignments = starter stub + gaps + passing criteria.** Coding-heavy domains (LLD, Machine Coding) mein actual Python stub files `problems/` mein.
+4. **Assignments = starter stub + gaps + passing criteria.** Coding-heavy domains (LLD, Machine Coding) mein actual C++ stub files `problems/` mein.
 5. **Redraw challenge** har session end — diagram bina dekhe banao → `NOTES.md → My diagrams`.
 
 ```mermaid
@@ -33,8 +33,8 @@ flowchart LR
     end
     subgraph DESIGN["Design + Code"]
         HLD[System Design HLD]
-        LLD[LLD - Python]
-        MC[Machine Coding - Python]
+        LLD[LLD - C++]
+        MC[Machine Coding - C++]
     end
     OS --> HLD
     NET --> HLD
@@ -77,7 +77,7 @@ mindmap
   root((Crack the loop))
     OpenAI / Anthropic
       Systems depth
-      Python fluency
+      C++ fluency
       Concurrency
       Pragmatic LLD
     MAANG

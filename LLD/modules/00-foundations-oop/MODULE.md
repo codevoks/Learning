@@ -1,12 +1,12 @@
 # Module 00 — Foundations & OOP
 
 > **Agent spawn**: `@Memory.md` + `@Prompt.md` + this file + `@NOTES.md`
-> **Nav**: Next → [01 OOP Deep (Python)](../01-oop-deep-python/MODULE.md)
+> **Nav**: Next → [01 OOP Deep (C++)](../01-oop-deep-python/MODULE.md)
 
 ## At a glance
 | | |
 |---|---|
-| Prerequisites | Python basics |
+| Prerequisites | C++ basics |
 | Duration | ~1 session |
 | Exit test | Class vs object + when OOP helps |
 

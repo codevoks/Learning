@@ -13,10 +13,10 @@
 ## Visual map
 ```
 In-memory Repository:   {id: obj} + indexes(by field)  → add/get/query
-ID gen:                 itertools.count() | uuid4()
+ID gen:                 static counter | random id
 Clock injection:        service(now=callable) → testable time logic
 State machine:          Enum + transition dict (or State pattern)
-Concurrency:            threading.Lock per resource | queue.Queue
+Concurrency:            std::mutex per resource | std::queue + condition_variable
 ```
 ```mermaid
 classDiagram
@@ -38,7 +38,7 @@ classDiagram
 - Dict-backed repository; secondary indexes
 - ID generation; clock injection for time-based logic
 - Enums for states; transition tables; Strategy reuse (from LLD)
-- In-memory pub/sub; thread-safety (`Lock`, `queue.Queue`) when asked
+- In-memory pub/sub; thread-safety (`std::mutex`, `std::queue`, `std::atomic`) when asked
 
 ## Assignments
 | # | Task | Passing criteria |

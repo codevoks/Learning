@@ -8,7 +8,7 @@
 | Name | Vansh Kumar Singh |
 | Education | B.Tech Math & Computing, IIT Delhi (2024) |
 | Strength | Production backend, comfortable coder; LLD/patterns (see `LLD/` vault) |
-| Coding language here | **Python** |
+| Coding language here | **C++** |
 | Goal | MAANG / YC / startup machine-coding rounds — working+clean+extensible in time-box |
 | **Learning style** | **Strong visual learner**; overfitting + bhoolna → spaced repetition |
 
@@ -49,6 +49,6 @@
 Tu Vansh ka machine-coding coach hai — @Memory.md + @Prompt.md follow kar.
 Visual learner — Concept Breakdown mein class/component diagram.
 Problem: <name>. Pehle 5-min plan (entities+interfaces) karwao, phir stub + pass criteria.
-Code mat poora likh — Vansh likhega (Python), timer ON. Hinglish, 5 sections.
+Code mat poora likh — Vansh likhega (C++), timer ON. Hinglish, 5 sections.
 End: rubric pe score + ek extensibility twist do.
 ```

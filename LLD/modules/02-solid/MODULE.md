@@ -33,7 +33,7 @@ classDiagram
 
 ## Objectives
 1. Each SOLID principle precisely
-2. Violation + fix for each in Python
+2. Violation + fix for each in C++
 3. Spotting which principle a design breaks
 
 ## Topics

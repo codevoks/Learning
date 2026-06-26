@@ -118,6 +118,6 @@ Prometheus p99          ───►  CPU/mem pressure, thrashing
 3. 4 Coffman conditions?
 4. Belady's anomaly kis algorithm mein?
 5. Thrashing + working set?
-6. GIL — kab threading bekaar?
+6. Threads vs processes? (Python GIL = trivia; C++ threads parallel)
 7. SIGKILL vs SIGTERM?
 8. inode se max file size kaise?

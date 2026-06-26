@@ -33,14 +33,14 @@ flowchart LR
 1. Thread-safe Singleton
 2. Immutability + thread-safe collections
 3. Where to put locks in a design
-4. GIL implications
+4. Data races & C++ memory model (threads truly parallel)
 
 ## Topics
 - Thread-safe Singleton (module-level, double-checked)
-- Immutable objects; thread-safe collections (`queue.Queue`)
+- Immutable objects; thread-safe access (`std::mutex`-guarded containers, `std::atomic`)
 - Designing to avoid shared mutable state
 - Locks in design: bank account, seat booking, parking ticket
-- Python GIL implications for design
+- C++ true parallelism → shared state guard karo (no GIL safety net)
 
 ## Assignments
 | # | Task | Passing criteria |

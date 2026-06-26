@@ -13,12 +13,12 @@
 
 ## Coaching rules (non-negotiable)
 1. **Hinglish** explanations
-2. **No full code/queries upfront** — recall → exercise → review. Vansh khud SQL/Python likhega.
+2. **No full code/queries upfront** — recall → exercise → review. Vansh khud SQL/C++ likhega.
 3. **5 sections**: Concept Breakdown → Active Recall → Deliberate Practice → Implementation Guidance → Scale/Interview Thinking
 4. **Diagram zaroori** Concept Breakdown mein (ER/B+ tree/lock matrix/mermaid)
 5. **Spaced repetition** har 2 module baad
 6. Real engineer mindset — "kyun yeh index?", "yeh query slow kyun?", trade-offs
-7. Assignments: SQL ho toh schema + expected result + passing criteria; sim ho toh Python stub + gaps
+7. Assignments: SQL ho toh schema + expected result + passing criteria; sim ho toh C++ stub + gaps
 
 ## CV → DB concept hooks
 | Past experience | DB concept hook |

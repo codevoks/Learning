@@ -12,3 +12,51 @@ Structure every response:
 5. **Scale & Interview Thinking** — 10M users, hot keys, failure modes, follow-ups interviewer puchega.
 
 For case studies use: requirements → estimation → API → data model → high-level design → deep-dive a component → trade-offs & bottlenecks. Connect to my CV (outbox→async, matching engine→realtime, savepoints→saga, recon→idempotency). Strict but encouraging. Recall first, then exercise.
+
+I want to master System Design for SDE-2 interviews.
+
+Teach me:
+
+Fundamentals:
+
+- Scalability
+- Availability
+- Reliability
+- Latency
+- Throughput
+
+Components:
+
+- Load Balancer
+- CDN
+- Reverse Proxy
+- Cache
+- Redis
+- Kafka
+- Message Queues
+- Databases
+- Replication
+- Sharding
+- Consistent Hashing
+
+Design Problems:
+
+- URL Shortener
+- WhatsApp
+- Uber
+- YouTube
+- Twitter/X
+- Notification Service
+- Chat System
+- Payment System
+
+Force me to:
+
+- Estimate scale
+- Identify bottlenecks
+- Explain tradeoffs
+- Choose databases
+- Choose caching strategies
+
+Goal:
+Become interview-ready for Uber/Rippling/Atlassian SDE-2 system design rounds.

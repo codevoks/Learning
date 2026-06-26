@@ -8,7 +8,7 @@
 |---|---|
 | Prerequisites | 00 |
 | Duration | ~1–2 sessions |
-| Exit test | Process state diagram + zombie/orphan + GIL |
+| Exit test | Process state diagram + zombie/orphan + thread vs process |
 
 ## Visual map
 ```mermaid
@@ -35,7 +35,7 @@ PROCESS = address space + 1..N threads
 1. Process vs program vs thread; PCB contents
 2. Process states + transitions; context switch cost
 3. fork/exec/wait/exit; zombie & orphan
-4. User vs kernel threads; 1:1 / M:N; Python GIL reality
+4. User vs kernel threads; 1:1 / M:N; true parallelism in C++ (vs Python's GIL — interview trivia)
 
 ## Topics
 - Process vs program vs thread; PCB
@@ -43,20 +43,20 @@ PROCESS = address space + 1..N threads
 - Context switch — kya save hota, kyun mehnga
 - `fork()` (COW), `exec()`, `wait()`, `exit()`; zombie/orphan; reaping
 - Thread models; thread pool; benefits vs overhead
-- GIL — kyun CPU-bound threading Python mein bekaar, I/O-bound mein theek
+- Python GIL (interview trivia): CPU-bound threading Python mein bekaar; C++ mein threads truly parallel hote
 
 ## Assignments
 | # | Task | Passing criteria |
 |---|------|------------------|
 | A1 | Process state-transition simulator (stub) | Valid transitions allow, invalid reject |
-| A2 | `threading` vs `multiprocessing` benchmark | CPU-bound: MP faster; I/O-bound: threads ok — measured |
+| A2 | `std::thread` (shared mem) vs `fork()` processes benchmark | CPU-bound speedup measured; isolation trade-off explained |
 | A3 | Zombie/orphan demo + explanation | Code creates each, you explain reaping |
 
 ## Active recall bank
 1. Context switch mein exactly kya save/restore hota hai?
 2. Zombie kaun reap karta? Orphan kisko adopt hota?
 3. fork ke baad COW kaise kaam karta?
-4. GIL hote hue threading kab useful hai?
+4. C++ threads vs processes — kab kaunsa? (Python GIL = trivia)
 
 ## Progress checklist
 - [ ] State diagram from memory

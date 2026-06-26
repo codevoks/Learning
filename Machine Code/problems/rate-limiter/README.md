@@ -17,4 +17,4 @@ Implement a token-bucket rate limiter (CV anchor). allow(key) returns True/False
 - clock injected
 
 ## Drill
-Timer ON → 5-min plan → complete `TODO`s (core first) → `python solution.py` (asserts pass) → self-score on rubric → log time-leak in NOTES.
+Timer ON → 5-min plan → complete `TODO`s (core first) → `g++ -std=c++17 solution.cpp -o sol && ./sol` (asserts pass) → self-score on rubric → log time-leak in NOTES.
