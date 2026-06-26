@@ -57,14 +57,21 @@ MODULE.md (theory, Hinglish, diagrams)  →  practice/ (stubs, tum complete)
 | Claude / learning agent | Seekhna, recall, exercises, architecture thinking |
 | Cursor | Build, ship, implement projects |
 
-## Stack (learning + projects)
+## Stack (learning + projects) — polyglot locked
 
-- **Backend pivot**: FastAPI (Node se switch soch rahe ho)
-- **Data**: Postgres (+ pgvector), Redis, Kafka
-- **Obs**: OpenTelemetry, Langfuse, Prometheus patterns
-- **LLM**: OpenAI + Anthropic SDKs
-- **Agents**: LangGraph, MCP, structured outputs (Pydantic)
-- **Monorepo (existing projects)**: Turborepo + pnpm + Next.js
+| Layer | Language | Modules |
+|-------|----------|---------|
+| **Platform / app API** | **Go** (chi, pgx, Redis) | **00e**, 03 patterns → Project C + phase 2 spine |
+| **AI services** | **Python / FastAPI** | 00c, 04–11 → Projects A/B AI cores |
+| **Data** | Postgres (+ pgvector), Redis, Kafka | 00a |
+| **Obs** | OpenTelemetry, Langfuse, Prometheus | 02, 10 |
+| **Frontend** (optional) | Next.js | existing skill |
+
+```
+Client → Go platform API → Python AI service → LLM providers
+```
+
+**Go nahi aati** — module **00e-go-platform** pehle Project phase 2 se pehle. Phase 1 AI demos Python-only OK.
 
 ## CV anchors → AI learning hooks
 
@@ -86,13 +93,15 @@ Use these jab bhi naya concept samjhana ho — Vansh ka existing brain yahi se c
 
 Har project = **real SaaS** (multi-tenancy, usage metering, Stripe billing, per-tenant cost). **Phased build**: phase 1 = core single-user, phase 2 = SaaS spine wrap. Ek codebase, do phases — throwaway demo nahi.
 
-| Order | Project | Stack | Learning modules that feed it |
-|-------|---------|-------|-------------------------------|
-| 1 | **A — Financial Document Intelligence** (agentic RAG SaaS) | FastAPI, pgvector + Pinecone, ragas | 04, 05, 10 (+ spine built here first) |
-| 2 | **B — AI Workflow Automation** (Zapier clone + agents) | FastAPI, LangGraph, MCP, outbox/Kafka | 06–11 |
-| 3 | **C — LLM Gateway as a Service** | **Go**, Redis, OTEL | 01–03 concepts → ship in Go |
+| Order | Project | Go (platform) | Python (AI) | Modules |
+|-------|---------|---------------|-------------|---------|
+| 1 | **A — Financial Document Intelligence** | Phase 2: spine | Phase 1+2: RAG/agents | 04, 05, 10, **00e** |
+| 2 | **B — AI Workflow Automation** | Reuse A platform | LangGraph, MCP, eval | 06–11 |
+| 3 | **C — LLM Gateway as a Service** | **Full gateway** | N/A (proxy only) | 01–03, **00e** |
 
-**Ship one fully before the next.** Shared SaaS spine (tenant isolation, exactly-once metering, Stripe) reuse across A → B → C.
+**Ship one fully before the next.** Shared SaaS spine reuse across A → B → C.
+
+**Topic coverage**: `@TOPIC-COVERAGE.md` — **Prompt.md ke saare hot topics; kuch chhodna nahi.**
 
 **Build session prompt**: paste `@Projects.md` at start, name project A/B/C, architecture first then code.
 
@@ -108,29 +117,30 @@ Har project = **real SaaS** (multi-tenancy, usage metering, Stripe billing, per-
 | 00a | `modules/00a-dev-environment` | Docker, Postgres, Redis, Python venv | 00b |
 | 00b | `modules/00b-python-async` | async/await, Pydantic (= Zod) | 00c |
 | 00c | `modules/00c-fastapi` | Routes, Depends, middleware, SSE stub | 00d, Project 1 |
-| 00d | `modules/00d-ml-ai-foundations` | ML basics, embeddings, **TensorFlow intro** | 01, 05 RAG |
+| 00d | `modules/00d-ml-ai-foundations` | ML basics, embeddings, **TensorFlow intro** | 00e, 01 |
+| 00e | `modules/00e-go-platform` | **Go platform API**, proxy to Python, metering mindset | 01, Project phase 2 |
 
-### Track 1 — LLM & projects
+### Track 1 — LLM & AI (Python services)
 
 | # | Folder | Agent focus | Unlocks |
 |---|--------|-------------|---------|
 | 01 | `modules/01-llm-apis` | Tokens, messages, streaming, cost math | Everything LLM |
-| 02 | `modules/02-llm-infra` | Rate limits, semantic cache, circuit breakers | Project 1 prep |
-| 03 | `modules/03-project-llm-gateway` | Gateway patterns (routing, cache, breaker) | **Project C** prep — ship in Go later |
-| 04 | `modules/04-prompt-engineering` | System prompts, few-shot, JSON mode | RAG + agents quality |
-| 05 | `modules/05-rag-pgvector` | Embeddings, chunking, retrieval, pgvector | Domain Q&A |
+| 02 | `modules/02-llm-infra` | Rate limits, semantic cache, circuit breakers | 03, Project C |
+| 03 | `modules/03-project-llm-gateway` | Gateway patterns — **ship in Go** (Project C) | Project C |
+| 04 | `modules/04-prompt-engineering` | System prompts, few-shot, JSON mode | Project A |
+| 05 | `modules/05-rag-pgvector` | RAG pipeline — **Python service** | Project A phase 1 |
 | 06 | `modules/06-tools-function-calling` | Tool schemas, structured outputs | Agents |
-| 07 | `modules/07-agents-langgraph` | State machines, loops, memory | Project 2 core |
+| 07 | `modules/07-agents-langgraph` | State machines, loops, memory | Project B AI |
 | 08 | `modules/08-mcp` | Model Context Protocol, tool servers | Interop |
 | 09 | `modules/09-multi-agent-hitl` | Orchestration, approval gates | Safe agents |
 | 10 | `modules/10-evals-llmops` | DeepEval, Langfuse, regression | Production agents |
-| 11 | `modules/11-project-agentic-workflow` | **Ship Project B** (workflow SaaS) | Portfolio killer |
+| 11 | `modules/11-project-agentic-workflow` | **Project B** — Python agents + Go platform | Portfolio |
 
 ## Prerequisites honesty
 
-- **FastAPI**: Track 0 module **00c** — Project 1 stack yahi hai, pehle seekho
-- **TensorFlow**: Track 0 module **00d** — interview + RAG foundation; daily ship path mostly **API inference**, full TF training nahi
-- **Python**: 00b enough agar IIT-level Python rust hai; nahi toh extra drills
+- **FastAPI**: **00c** — Python **AI services** only (RAG, agents, eval)
+- **Go**: **00e** — **platform backend** (auth, billing, metering, gateway) — **nahi aati abhi, is module se seekho**
+- **TensorFlow**: **00d** — interview + RAG foundation; inference mostly API
 - **Visual learning**: Har module `## Visual map` + `@VISUAL-STUDY-GUIDE.md` — diagram pehle, redraw se recall
 
 Full curriculum + hooks: `@LEARNING-PLAN.md`
@@ -208,4 +218,4 @@ Session end: "Redraw challenge" assign karo.
 
 ## Last updated
 
-2026-06-22 — Projects.md → 3 SaaS portfolio (A RAG → B Workflow → C Go Gateway); Prompt.md rename; spine + phased build
+2026-06-22 — Polyglot locked: Go platform (00e) + Python AI; Projects A/B/C updated

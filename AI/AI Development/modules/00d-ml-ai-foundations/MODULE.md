@@ -2,7 +2,7 @@
 
 > **Padho**: Isi file mein **Theory** — bahar mat jao.  
 > **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
-> **Nav**: ← [Module 00c](../00c-fastapi/MODULE.md) · Next → [Module 01](../01-llm-apis/MODULE.md)
+> **Nav**: ← [Module 00c](../00c-fastapi/MODULE.md) · Next → [Module 00e Go Platform](../00e-go-platform/MODULE.md)
 
 ## At a glance
 

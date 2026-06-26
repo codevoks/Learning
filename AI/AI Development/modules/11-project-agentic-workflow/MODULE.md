@@ -2,9 +2,8 @@
 
 > **Padho**: Isi file mein **Theory** — bahar mat jao.  
 > **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
-> **Nav**: ← [Module 10](../10-evals-llmops/MODULE.md) · End
-
-> **Ship spec**: `@Projects.md` **Project B** — AI Workflow Automation SaaS.
+> **Nav**: ← [Module 10](../10-evals-llmops/MODULE.md) · End  
+> **Ship**: **Python** agents in `services/agent/` · **Go** platform from Project A (`@Projects.md` Project B).
 
 ## At a glance
 

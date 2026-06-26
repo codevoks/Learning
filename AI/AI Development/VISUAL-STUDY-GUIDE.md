@@ -9,23 +9,25 @@ flowchart LR
     subgraph T0["Track 0 — Build skills"]
         A[00a Dev Env]
         B[00b Async]
-        C[00c FastAPI]
+        C[00c FastAPI AI]
         D[00d ML/TF]
+        E[00e Go Platform]
     end
     subgraph T1["Track 1 — LLM engineer"]
-        E[01 APIs]
-        F[02 Infra]
-        G[03 Gateway 🚀]
-        H[04-06 Intelligence]
-        I[07-09 Agents]
-        J[10 Evals]
-        K[11 Workflow 🚀]
+        F[01 APIs]
+        G[02 Infra]
+        H[03 Gateway Go]
+        I[04-06 Intelligence Py]
+        J[07-09 Agents Py]
+        K[10 Evals]
+        L[11 Workflow]
     end
     A --> B --> C
     B --> D
     C --> E
     D --> E
-    E --> F --> G --> H --> I --> J --> K
+    E --> F
+    F --> G --> H --> I --> J --> K --> L
 ```
 
 ## CV → AI (visual bridge)
@@ -66,7 +68,8 @@ Bank recon cascade      ───►  Provider fallback
 |--------|--------------|-------------------|
 | 00a | Box architecture | Docker + DB stack |
 | 00b | Timeline | Sync vs async |
-| 00c | Request pipeline | FastAPI layers |
+| 00e | Box architecture | **Go → Python split** |
+| 00c | Request pipeline | FastAPI **AI service** |
 | 00d | 2-path fork | Training vs API inference |
 | 01 | Sequence | Token stream |
 | 02 | Flow | Cache + breaker |

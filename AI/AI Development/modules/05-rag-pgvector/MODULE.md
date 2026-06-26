@@ -2,6 +2,7 @@
 
 > **Padho**: Isi file mein **Theory** — bahar mat jao.  
 > **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
+> **Ship**: **Python** `services/rag/` — Go platform phase 2 pe proxy karega (`@Projects.md` Project A).  
 > **Nav**: ← [Module 04](../04-prompt-engineering/MODULE.md) · Next → [Module 06](../06-tools-function-calling/MODULE.md)
 
 ## At a glance

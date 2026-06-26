@@ -41,24 +41,74 @@ I can defend this whole spine from day one because it is payments and reconcilia
 
 Build the MVP that proves the core value plus the spine above. Do not build a full company. Skip the marketing site, complex onboarding, and deep team-permission matrices. Two real demo tenants with live usage and a working Stripe test-mode invoice is enough to tell the whole story. One project fully, with the spine, before the next.
 
-## Polyglot architecture (deliberate, not keyword collecting)
+## Polyglot architecture (deliberate — Go platform + Python AI)
 
-- **Go** for performance-critical infra: the LLM Gateway and future microservices. Plays to my infra strength and is the right tool for a high-throughput proxy.
-- **Python / FastAPI** for AI services: RAG, agents, eval, where the LangGraph / ragas / pgvector ecosystem lives.
-- **Node / TypeScript** for the existing real-time and WebSocket layer.
+**Decision (locked):** App/platform backend **Go**. AI workloads **Python / FastAPI**. Node optional for real-time UI later.
 
-This mirrors the dominant 2026 production pattern. I sell it as "right tool per workload," never as "I know three languages."
+```
+┌─────────────────────────────────────────────────────────┐
+│  GO — Platform API (public, multi-tenant SaaS spine)     │
+│  auth · API keys · tenants · metering · Stripe · quotas  │
+│  proxies to Python · Project C gateway lives here too      │
+└───────────────────────────┬─────────────────────────────┘
+                            │ internal HTTP (Docker network)
+┌───────────────────────────▼─────────────────────────────┐
+│  PYTHON — AI microservices (not public-facing)           │
+│  Project A: RAG + agentic retrieval + eval               │
+│  Project B: LangGraph agents + MCP + trajectory eval     │
+└─────────────────────────────────────────────────────────┘
+```
+
+- **Go** for performance-critical infra and **everything customers hit**: LLM Gateway (Project C), billing, metering, tenant isolation. Plays to distributed-systems strength; learn via module **00e** then ship.
+- **Python / FastAPI** for AI services only: RAG, agents, eval, where LangGraph / ragas / pgvector live. Learn via **00c** + modules **04–11**.
+- **Node / TypeScript** optional for existing real-time / WebSocket layer — not the AI spine.
+
+**Phased build per project:**
+
+| Phase | Go | Python |
+|-------|-----|--------|
+| **Phase 1** (core value) | Skip or minimal `/health` | Full AI core — learn + ship working demo |
+| **Phase 2** (SaaS spine) | **Platform wrap** — auth, metering, Stripe, tenant isolation | Same Python services, called internally |
+
+This mirrors the dominant 2026 production pattern. Interview line: *"Right tool per workload — platform in Go, agents in Python, contract via internal API."*
 
 ## Build order (do not parallelize)
 
-1. FastAPI fundamentals, about one week. This unlocks the AI projects, which is my actual CV gap.
-2. **Project A — Financial Document Intelligence** (FastAPI). Build the spine here first since A needs it; reuse it in B and C.
-3. **Project B — AI Workflow Automation** (FastAPI, extends my Zapier clone).
-4. **Project C — LLM Gateway as a Service** (Go). Learn Go through this build. Goroutines and channels are the only genuinely new part, and my Kafka/async background covers the concurrency mental model.
+1. **Track 0 + 00e Go** + FastAPI fundamentals (~2 weeks). Unlocks polyglot projects.
+2. **Project A — Financial Document Intelligence** — Phase 1 Python RAG → Phase 2 Go platform spine (build spine here first; reuse in B and C).
+3. **Project B — AI Workflow Automation** — Python agents + existing outbox/Kafka; Go platform from A reused.
+4. **Project C — LLM Gateway** — **Go** (routing, cache, budgets) — concepts from module 03, ship in `platform/` or `services/gateway/`.
 
 Ship one project fully before starting the next.
 
-## Phased build (one codebase, two phases per project)
+## Zero topic left behind (`@TOPIC-COVERAGE.md`)
+
+**Rule:** Everything in `@Prompt.md` hot topics must ship in **A + B + C combined** — RAG, LangGraph, agents, function calling, structured outputs, pgvector, MCP, prompt engineering, memory, tools, multi-agent, LLMOps, evals, multimodal basics, plus Postgres/Redis/Kafka/observability/cost control.
+
+Before calling portfolio “done”: walk the master checklist in `TOPIC-COVERAGE.md` — **no empty rows**.
+
+## Monorepo layout (Turborepo + pnpm + polyglot)
+
+One repo. All topics. One spine.
+
+```
+portfolio/
+├── apps/
+│   └── web/                    # Next.js — dashboard, HITL UI, tenant admin, demo
+├── platform/                   # GO — auth, tenants, metering, Stripe, BFF
+├── services/
+│   ├── rag/                    # PYTHON — Project A
+│   ├── agent/                  # PYTHON — Project B (LangGraph, MCP)
+│   └── gateway/                # GO — Project C
+├── packages/
+│   └── shared-types/           # OpenAPI / JSON schemas (Go ↔ Python contract)
+├── docker-compose.yml
+├── turbo.json
+├── pnpm-workspace.yaml
+└── TOPIC-COVERAGE.md           # checkbox master — don't ship until green
+```
+
+**Turborepo**: `pnpm turbo dev` runs web + services. **Prompt.md stack** = covered.
 
 Each project is built in two phases inside the same repo. Do not write a throwaway learning version and then restart for the SaaS version. The learning version is literally phase 1 of the SaaS version.
 
@@ -83,11 +133,15 @@ When I name a project, build phase 1 first. Only move to phase 2 once phase 1 wo
 - Pluggable vector store behind one interface, with two backends: pgvector (Postgres extension, my strength) and Pinecone (managed). Run the same retrieval against both, benchmark recall and latency, and document when each wins. Default to pgvector, keep Pinecone swappable by config.
 - Per-tenant isolation in the vector layer: pgvector scoped by tenant_id with enforced row-level checks, Pinecone via per-tenant namespaces. Cross-tenant leakage is a first-class eval case, not an afterthought.
 - Agentic RAG: query planning, adaptive retrieval, self-correction. Not naive chunk-stuffing.
+- **LangChain**: document loaders + text splitters for ingest; **LangGraph** for agentic retrieval loop (query plan → retrieve → grade → rewrite).
+- **Function calling + structured outputs**: agent tools (`search_docs`, `get_line_items`) return Pydantic schemas with citations.
+- **Memory**: per-tenant conversation threads (Postgres or Redis) — follow-up questions without re-upload.
+- **Multimodal basics**: scanned invoices / PDF images via vision API (GPT-4o or Claude) → OCR text → same RAG pipeline.
 - Guardrails: indirect prompt-injection defense from retrieved content, structured outputs with citations.
 - Eval pipeline: groundedness, answer relevance, hallucination rate via ragas or DeepEval. Offline set of about 200 cases plus LLM-as-judge on production traces. Alarm on regression, not on absolute thresholds. Cross-tenant leakage test must always pass.
 - Spine: meter documents and queries per tenant, attribute LLM cost per tenant, Stripe metered billing.
 
-**Stack:** FastAPI, pgvector + Pinecone (pluggable), BM25, cross-encoder reranker, Anthropic + OpenAI APIs, ragas/DeepEval, Langfuse, Stripe.
+**Stack:** **Python** — FastAPI, pgvector + Pinecone, BM25, cross-encoder, Anthropic + OpenAI, ragas/DeepEval, Langfuse. **Go** (phase 2) — platform API, metering, Stripe, tenant isolation, proxy to RAG service.
 
 **What I must be able to defend:** why hybrid retrieval over dense-only, the chunking choice, eval design, the injection mitigations, the managed vs self-hosted vector store tradeoff (when pgvector is enough vs when Pinecone earns its cost: scale, ops burden, filtering, hybrid search, latency), and how tenant isolation is enforced and tested.
 
@@ -101,9 +155,11 @@ When I name a project, build phase 1 first. Only move to phase 2 once phase 1 wo
 
 **Build:**
 
-- Multi-agent orchestration with LangGraph or the OpenAI Agents SDK.
+- Multi-agent orchestration with **LangGraph** (primary — not optional).
+- **LangChain** utilities where LangGraph doesn't cover (loaders, parsers) — same Python service.
 - Tool-calling with Pydantic structured outputs.
-- MCP integration for connecting tools.
+- **MCP** integration for connecting tools (at least 2 MCP servers: read + write).
+- **Memory**: workflow run state + user automation history across sessions (Postgres).
 - Human-in-the-loop checkpoints before any irreversible action (leverages my savepoint/rollback experience).
 - Idempotency and exactly-once execution via my existing outbox pattern. This is also the billing guarantee: each completed run is metered exactly once.
 - Per-tenant workflow isolation and execution quotas.
@@ -112,7 +168,7 @@ When I name a project, build phase 1 first. Only move to phase 2 once phase 1 wo
 - Least-privilege tool design and a kill switch. This is the OWASP LLM06 "Excessive Agency" mitigation.
 - Spine: meter task runs per tenant, attribute LLM cost per run, Stripe metered billing, per-tenant budgets with hard stop.
 
-**Stack:** FastAPI, LangGraph or OpenAI Agents SDK, MCP, my Postgres outbox/Kafka, DeepEval/Langfuse, Stripe.
+**Stack:** **Python** — FastAPI, LangGraph or OpenAI Agents SDK, MCP, DeepEval/Langfuse. **Go** — platform API (reuse Project A spine), outbox/Kafka workers can stay Go or existing stack. Postgres outbox/Kafka for exactly-once.
 
 **What I must be able to defend:** why exactly-once matters for both execution and billing, how the outbox guarantees it, where the human-in-loop checkpoint sits and why, the excessive-agency mitigations, and how the credential vault isolates tenants.
 

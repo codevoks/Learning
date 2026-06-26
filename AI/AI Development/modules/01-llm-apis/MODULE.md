@@ -2,13 +2,13 @@
 
 > **Padho**: Isi file mein **Theory** — bahar mat jao.  
 > **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
-> **Nav**: ← [00d ML Foundations](../00d-ml-ai-foundations/MODULE.md) · Next → [Module 02](../02-llm-infra/MODULE.md)
+> **Nav**: ← [00e Go Platform](../00e-go-platform/MODULE.md) · Next → [Module 02](../02-llm-infra/MODULE.md)
 
 ## At a glance
 
 | | |
 |---|---|
-| Prerequisites | **00a–00d** (dev env, Python async, FastAPI, ML basics) |
+| Prerequisites | **00a–00e** (env, Python async, FastAPI, ML basics, Go platform intro) |
 | Duration | ~3–5 sessions |
 | Project? | No |
 | Exit test | Token cost estimate + streaming trade-offs bina notes ke |

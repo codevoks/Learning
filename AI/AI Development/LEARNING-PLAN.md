@@ -5,9 +5,10 @@
 
 ## North star
 
-Seekh kar **teen defendable SaaS products** ship karo (Projects A → B → C) jo CV pe likh sako aur interview mein depth se bacha sako. Full spec: `@Projects.md`. Coach style: `@Prompt.md`.
+Seekh kar **teen defendable SaaS products** ship karo — **har `@Prompt.md` hot topic** covered (`@TOPIC-COVERAGE.md`). CV pe likh sako aur interview mein depth se bacha sako. Full spec: `@Projects.md`. Coach style: `@Prompt.md`.
 
-**Curriculum** (modules 00→11) = concept order. **Ship order** = A (RAG SaaS) → B (Workflow SaaS) → C (Go Gateway SaaS). Dono alag rakho — module 03 gateway seekhne ke liye hai, Project C baad mein Go mein ship hoga.
+**Curriculum** (modules 00a→00e→11) = concept order. **Ship order** = A (RAG) → B (Workflow) → C (Go Gateway).  
+**Polyglot**: Go = platform spine · Python = AI services (`@Projects.md`).
 
 ---
 
@@ -47,23 +48,25 @@ mindmap
 ```mermaid
 flowchart TD
     M00a[00a Dev Environment] --> M00b[00b Python Async]
-    M00b --> M00c[00c FastAPI]
+    M00b --> M00c[00c FastAPI AI layer]
     M00b --> M00d[00d ML + TF intro]
-    M00c --> M01[01 LLM APIs]
-    M00d --> M01
+    M00c --> M00e[00e Go Platform]
+    M00d --> M00e
+    M00e --> M01[01 LLM APIs]
     M01 --> M02[02 LLM Infra]
-    M02 --> M03[03 Project: LLM Gateway]
+    M02 --> M03[03 Gateway → Go ship]
     M03 --> M04[04 Prompt Engineering]
-    M04 --> M05[05 RAG pgvector]
-    M05 --> M06[06 Tools & Function Calling]
-    M06 --> M07[07 Agents LangGraph]
+    M04 --> M05[05 RAG Python service]
+    M05 --> M06[06 Tools]
+    M06 --> M07[07 LangGraph]
     M07 --> M08[08 MCP]
-    M08 --> M09[09 Multi-Agent & HITL]
-    M09 --> M10[10 Evals & LLMOps]
-    M10 --> M11[11 Project: Agentic Workflow]
+    M08 --> M09[09 Multi-Agent HITL]
+    M09 --> M10[10 Evals]
+    M10 --> M11[11 Project B]
 
     style M00c fill:#fef3cd,stroke:#b45309
     style M00d fill:#fef3cd,stroke:#b45309
+    style M00e fill:#dbeafe,stroke:#1d4ed8
     style M03 fill:#e8f4ea,stroke:#2d6a4f
     style M11 fill:#e8f4ea,stroke:#2d6a4f
 ```
@@ -72,7 +75,7 @@ flowchart TD
 
 ## Track 0 — Prerequisites (~2 weeks)
 
-> **00a → 00b → 00c + 00d (parallel ok) → 01**
+> **00a → 00b → 00c + 00d → 00e Go → 01**
 
 ### Module 00a — Dev Environment
 
@@ -93,7 +96,12 @@ Routes, `Depends`, middleware, SSE stub — **Project A/B ka FastAPI stack**.
 
 **Folder**: `modules/00d-ml-ai-foundations`  
 Training vs inference, embeddings, NumPy, TensorFlow/Keras hello world.  
-**Honest scope**: interview + RAG prep — daily ship mostly OpenAI API, not TF training.
+**Honest scope**: interview + RAG prep — inference mostly OpenAI API, not TF training.
+
+### Module 00e — Go Platform Backend
+
+**Folder**: `modules/00e-go-platform`  
+Go HTTP (chi), middleware, goroutines, proxy to Python. **Platform spine** — auth, metering, billing, public API. Project C gateway ship yahi stack.
 
 ---
 

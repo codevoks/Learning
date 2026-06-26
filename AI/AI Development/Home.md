@@ -6,12 +6,13 @@
 
 | Doc | Kya hai |
 |-----|---------|
+| [[TOPIC-COVERAGE]] | **Prompt topics checklist** — kuch chhodna nahi |
 | [[HOW-TO-STUDY]] | **Pehle yeh padho** — Topics vs study links vs coach |
 | [[Memory]] | Shared rules, CV hooks, coach format |
 | [[VISUAL-STUDY-GUIDE]] | **Visual learner master map** — poori journey diagrams |
 | [[diagrams/README\|Excalidraw diagrams]] | Redraw challenges — hand-drawn sketches |
 | [[LEARNING-PLAN]] | Full syllabus + mind map |
-| [[Projects]] | SaaS portfolio — Project A (RAG) → B (Workflow) → C (Go Gateway) |
+| [[Projects]] | SaaS portfolio — **Go platform** + **Python AI** |
 | [[Prompt]] | Coach persona prompt (Hinglish, active recall, no full code) |
 | [[modules/README\|Module index]] | Folder overview |
 
@@ -25,8 +26,9 @@
 | 00b | [[modules/00b-python-async/MODULE\|Python Async]] | [[modules/00b-python-async/NOTES]] | async, Pydantic (= Zod) |
 | 00c | [[modules/00c-fastapi/MODULE\|FastAPI]] | [[modules/00c-fastapi/NOTES]] | Routes, middleware, SSE |
 | 00d | [[modules/00d-ml-ai-foundations/MODULE\|ML + TensorFlow intro]] | [[modules/00d-ml-ai-foundations/NOTES]] | Embeddings, TF hello world |
+| 00e | [[modules/00e-go-platform/MODULE\|Go Platform]] | [[modules/00e-go-platform/NOTES]] | **App backend — auth, billing, proxy** |
 
-### Track 1 — LLM engineering
+### Track 1 — LLM engineering (Python AI + Go gateway)
 
 | # | Syllabus | My notes | Focus |
 |---|----------|----------|-------|
