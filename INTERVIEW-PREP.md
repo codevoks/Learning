@@ -103,3 +103,10 @@ mindmap
 ---
 
 > Tip: Yeh poora `Learning/` ek hi Obsidian vault hai — wikilinks sab folders ke beech kaam karte hain. Graph view kholo → 6 clusters dikhenge.
+
+---
+
+## 🖥️ Backend frameworks track
+Beyond CS fundamentals, a polyglot backend track lives in **[[Backend/README|Backend/]]** — best-per-language frameworks chosen for AI-infra/platform goals:
+**Python → FastAPI** · **Go → Gin** · **Rust → Axum** · **Java → Spring Boot**.
+Same 11-module visual-first path each (routing → validation → middleware → DB → auth → concurrency → resilience → testing → observability → deploy → capstone).
