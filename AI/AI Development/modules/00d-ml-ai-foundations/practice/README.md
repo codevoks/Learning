@@ -11,7 +11,7 @@ Order: A1 → A5. Code files mein `TODO` search karo.
 - [ ] A1 — `cosine_similarity.py`
 - [ ] A2 — training vs inference diagram (paper/Excalidraw)
 - [ ] A3 — `tf_hello.py`
-- [ ] A4 — `embeddings_stub.py`
+- [ ] A4 — `embeddings_local.py` **or** `embeddings_api.py`
 - [ ] A5 — TF kahan nahi chahiye (NOTES, ~200 words)
 - [ ] Active recall → NOTES
 - [ ] Redraw challenge
@@ -92,21 +92,25 @@ python tf_hello.py
 
 | | |
 |---|---|
-| **File** | `embeddings_stub.py` |
+| **Files** | `embeddings_local.py` (B) **or** `embeddings_api.py` (A) |
+| **Shared** | `embeddings_common.py` — `best_pair()` TODO |
 | **Kya** | 3 sentences → top similar pair |
-| **Pass** | Similar pair ranks highest |
+| **Pass** | Similar pair ranks highest (indices 0 & 1) |
 
-### Run
+### Run (pick one)
 
 ```bash
-python embeddings_stub.py
+python embeddings_local.py    # Option B — recommended, no API key
+# OR
+python embeddings_api.py      # Option A — needs OPENAI_API_KEY in .env
 ```
 
 ### Hints
 
-- **Option A:** OpenAI API + cosine
-- **Option B:** `sentence-transformers` local
-- 2 similar topic sentences + 1 random
+- **Option A (`embeddings_api.py`):** OpenAI + cosine — `pip install openai python-dotenv`
+- **Option B (`embeddings_local.py`):** `sentence-transformers` — `pip install sentence-transformers`
+- `best_pair()` ek baar `embeddings_common.py` mein — dono options share karte hain
+- A1 ka `cosine_similarity` import karo pair compare ke liye
 
 ---
 
@@ -133,7 +137,9 @@ python embeddings_stub.py
 | File | Assignment |
 |------|------------|
 | `cosine_similarity.py` | A1 |
-| `tf_hello.py` | A3 |
-| `embeddings_stub.py` | A4 |
+| `tf_hello.py` | A3 (optional — skip OK) |
+| `embeddings_common.py` | A4 shared — `best_pair()` |
+| `embeddings_local.py` | A4 Option B (recommended) |
+| `embeddings_api.py` | A4 Option A |
 
 **Stuck?** `@modules/00d-ml-ai-foundations/MODULE.md` + error paste.

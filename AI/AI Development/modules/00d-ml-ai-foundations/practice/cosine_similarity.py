@@ -14,7 +14,8 @@ def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
     Formula: dot(a, b) / (norm(a) * norm(b))
     """
     # TODO: implement using np.dot and np.linalg.norm
-    raise NotImplementedError
+    return np.dot(a,b)/(np.linalg.norm(a)*np.linalg.norm(b))
+    # raise NotImplementedError
 
 
 def _check():
@@ -27,6 +28,8 @@ def _check():
     print(f"A·A = 1: {sim_self:.4f}")
 
     # TODO: assert sim_self close to 1.0, sim_ortho close to 0.0
+    assert abs(sim_self-1.0)<1e-6
+    assert abs(sim_ortho-0.0)<1e-6
 
 
 if __name__ == "__main__":

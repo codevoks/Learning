@@ -4,13 +4,13 @@ from pydantic import BaseModel, Field
 
 # TODO A1: ChatMessage body — message: str, Field(min_length=1)
 
-
 class ChatMessage(BaseModel):
-    pass
+    message:str=Field(min_length=1)
 
 
 # TODO A1: ChatEcho response — reply: str, echoed: bool = True
 
 
 class ChatEcho(BaseModel):
-    pass
+    reply:str
+    echoed:bool=True

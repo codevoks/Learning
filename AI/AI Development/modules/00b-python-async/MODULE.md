@@ -6,12 +6,12 @@
 
 ## At a glance
 
-| | |
-|---|---|
-| Prerequisites | Module 00a |
-| Duration | ~3–4 sessions |
-| Project? | No |
-| Exit test | Async function + Pydantic model explain karo — Zod se compare |
+|               |                                                               |
+| ------------- | ------------------------------------------------------------- |
+| Prerequisites | Module 00a                                                    |
+| Duration      | ~3–4 sessions                                                 |
+| Project?      | No                                                            |
+| Exit test     | Async function + Pydantic model explain karo — Zod se compare |
 
 ## Visual map
 
@@ -57,13 +57,13 @@ Pydantic:  JSON dict → validate fields → Model instance (ya error)
 
 ## Learning hooks
 
-| Concept | Tera parallel |
-|---------|---------------|
-| Pydantic `BaseModel` | Zod schema + `.parse()` |
+| Concept                   | Tera parallel                              |
+| ------------------------- | ------------------------------------------ |
+| Pydantic `BaseModel`      | Zod schema + `.parse()`                    |
 | `async def` route handler | Non-blocking I/O — WebSocket/Redis workers |
-| `await httpx` | `fetch` without blocking thread |
-| `Optional`, `list[str]` | TypeScript generics |
-| Exception → HTTP 422 | Zod validation error → 400 |
+| `await httpx`             | `fetch` without blocking thread            |
+| `Optional`, `list[str]`   | TypeScript generics                        |
+| Exception → HTTP 422      | Zod validation error → 400                 |
 
 ---
 
@@ -74,11 +74,11 @@ Pydantic:  JSON dict → validate fields → Model instance (ya error)
 FastAPI + LLM gateway mein **zyada tar time I/O pe jaata hai** — DB query, Redis, OpenAI API call.  
 CPU calculate nahi kar raha; **wait** kar raha hai network/disk ka.
 
-| Sync | Async |
-|------|-------|
-| Ek request poori handle → phir next | I/O wait pe doosra task chalu |
-| `requests.get()` — thread block | `await httpx.get()` — thread free |
-| 3 API calls = 3× latency (serial) | 3 parallel ≈ slowest call |
+| Sync                                | Async                             |
+| ----------------------------------- | --------------------------------- |
+| Ek request poori handle → phir next | I/O wait pe doosra task chalu     |
+| `requests.get()` — thread block     | `await httpx.get()` — thread free |
+| 3 API calls = 3× latency (serial)   | 3 parallel ≈ slowest call         |
 
 **Tera hook**: Matching engine, gateway — agar har LLM call sync block kare, worker threads khatam; async se ek process mein hazaron concurrent connections possible (I/O bound pe).
 
@@ -111,8 +111,8 @@ async def main():
 asyncio.run(main())
 ```
 
-**`async def`** = coroutine function (callable abhi nahi chalti — schedule hoti hai)  
-**`await`** = "yahan ruko, loop doosra kaam kar sakta hai jab tak yeh complete na ho"
+`async def` = coroutine function (callable abhi nahi chalti — schedule hoti hai)  
+`await` = "yahan ruko, loop doosra kaam kar sakta hai jab tak yeh complete na ho"
 
 ```mermaid
 sequenceDiagram
@@ -167,13 +167,13 @@ async def good_handler():
         r = await client.get(url, timeout=10.0)  # ✅ non-blocking
 ```
 
-| Galat | Sahi |
-|-------|------|
-| `time.sleep` in async | `await asyncio.sleep` |
-| `requests` in async route | `httpx.AsyncClient` |
-| CPU-heavy loop in async | `run_in_executor` ya worker process |
+| Galat                     | Sahi                                |
+| ------------------------- | ----------------------------------- |
+| `time.sleep` in async     | `await asyncio.sleep`               |
+| `requests` in async route | `httpx.AsyncClient`                 |
+| CPU-heavy loop in async   | `run_in_executor` ya worker process |
 
-*(Active recall Q1: blocking sync call event loop ko freeze karta hai — sab concurrent requests wait.)*
+_(Active recall Q1: blocking sync call event loop ko freeze karta hai — sab concurrent requests wait.)_
 
 ---
 
@@ -201,13 +201,13 @@ req = ChatRequest.model_validate({"message": "hello"})
 ChatRequest.model_validate({"message": ""})  # min_length fail
 ```
 
-| Zod (TS) | Pydantic (Python) |
-|----------|-------------------|
-| `z.object({...})` | `class X(BaseModel)` |
-| `.parse(data)` | `.model_validate(data)` |
-| `.safeParse` | try/except `ValidationError` |
-| `.shape` | model fields + types |
-| `z.infer<typeof schema>` | class annotations |
+| Zod (TS)                 | Pydantic (Python)            |
+| ------------------------ | ---------------------------- |
+| `z.object({...})`        | `class X(BaseModel)`         |
+| `.parse(data)`           | `.model_validate(data)`      |
+| `.safeParse`             | try/except `ValidationError` |
+| `.shape`                 | model fields + types         |
+| `z.infer<typeof schema>` | class annotations            |
 
 **Serialize out** (API response):
 
@@ -225,13 +225,13 @@ async def chat(body: ChatRequest) -> ChatResponse:
     return ChatResponse(reply=f"Echo: {body.message}", tokens_used=5)
 ```
 
-*(Active recall Q2: dataclass sirf types hold karta hai; Pydantic runtime validation + coercion + JSON schema.)*
+_(Active recall Q2: dataclass sirf types hold karta hai; Pydantic runtime validation + coercion + JSON schema.)_
 
 ---
 
 ### 5. httpx async — external APIs
 
-LLM providers, embedding APIs — sab HTTP. **`httpx`** = modern `requests` + async support.
+LLM providers, embedding APIs — sab HTTP. `httpx` = modern `requests` + async support.
 
 ```python
 import httpx
@@ -264,7 +264,7 @@ await client.post(
 )
 ```
 
-*(Active recall Q3: LLM call async honi chahiye taaki wait ke dauran server doosre clients serve kar sake.)*
+_(Active recall Q3: LLM call async honi chahiye taaki wait ke dauran server doosre clients serve kar sake.)_
 
 ---
 
@@ -286,16 +286,16 @@ Yahi stack Module 00c aur Project 1 gateway mein repeat hoga.
 
 ## Practice
 
-> **Saare assignments ek jagah**: [`practice/README.md`](practice/README.md) — problem statements, instructions, pass criteria.  
+> **Saare assignments ek jagah**: `[practice/README.md](practice/README.md)` — problem statements, instructions, pass criteria.  
 > Code **tum** likhoge Cursor mein. Stubs `practice/` mein hain (`TODO` search).  
 > Stuck? Chat: `@modules/00b-python-async/MODULE.md` + error paste karo.
 
-| # | File | Kya karna hai | Pass when |
-|---|------|---------------|-----------|
-| A1 | `practice/chat_models.py` | `ChatRequest` + `ChatResponse` TODO complete | Invalid input → `ValidationError` |
-| A2 | `practice/parallel_fetch.py` | 3 URLs parallel `gather` | Total time ≈ slowest, not sum |
-| A3 | `practice/broken_async.py` | Sync blocking fix karo | Explain bug + fix in NOTES |
-| A4 | `NOTES.md` | Zod schema → Pydantic side-by-side | 1 schema, both versions |
+| #   | File                         | Kya karna hai                                | Pass when                         |
+| --- | ---------------------------- | -------------------------------------------- | --------------------------------- |
+| A1  | `practice/chat_models.py`    | `ChatRequest` + `ChatResponse` TODO complete | Invalid input → `ValidationError` |
+| A2  | `practice/parallel_fetch.py` | 3 URLs parallel `gather`                     | Total time ≈ slowest, not sum     |
+| A3  | `practice/broken_async.py`   | Sync blocking fix karo                       | Explain bug + fix in NOTES        |
+| A4  | `NOTES.md`                   | Zod schema → Pydantic side-by-side           | 1 schema, both versions           |
 
 ### A1 hints
 

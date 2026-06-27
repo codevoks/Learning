@@ -293,7 +293,7 @@ Tum **train** nahi kar rahe — **artifact download** karke `predict` / `encode`
 | A1 | `practice/cosine_similarity.py` | Cosine function TODO | Matches manual formula on test vectors |
 | A2 | Paper/Excalidraw | Training vs inference diagram | Self-check / coach |
 | A3 | `practice/tf_hello.py` | Tiny Keras model TODO | `predict()` on new input works |
-| A4 | `practice/embeddings_stub.py` | 3 sentences → find top pair | Similar pair ranks highest |
+| A4 | `practice/embeddings_local.py` or `embeddings_api.py` | 3 sentences → find top pair | Similar pair ranks highest |
 | A5 | `NOTES.md` | 200 words: TF kahan **nahi** chahiye? | Names Gateway, RAG, agents |
 
 ### Setup
@@ -303,7 +303,8 @@ cd modules/00d-ml-ai-foundations/practice
 python3 -m venv .venv && source .venv/bin/activate
 pip install numpy
 # A3: pip install tensorflow  (or tensorflow-macos on M1/M2)
-# A4: pip install openai python-dotenv  OR sentence-transformers
+# A4 Option A: pip install openai python-dotenv  → embeddings_api.py
+# A4 Option B: pip install sentence-transformers  → embeddings_local.py (recommended)
 ```
 
 ### A1 hints
@@ -318,8 +319,9 @@ pip install numpy
 
 ### A4 hints
 
-- Option A: OpenAI embeddings API + dot/cosine
-- Option B: `sentence-transformers` local — no API key
+- **Option A** (`embeddings_api.py`): OpenAI embeddings API + dot/cosine
+- **Option B** (`embeddings_local.py`): `sentence-transformers` local — no API key
+- **Shared** (`embeddings_common.py`): `best_pair()` — A1 cosine import
 - 3 sentences: 2 similar topic, 1 random
 
 ---

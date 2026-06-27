@@ -2,9 +2,10 @@
 
 import asyncio
 import time
+import httpx
 
 # BUG: sync libraries — replace with async-friendly versions
-import requests
+# import requests
 
 SLOW_URL = "https://httpbin.org/delay/1"
 
@@ -12,9 +13,10 @@ SLOW_URL = "https://httpbin.org/delay/1"
 async def fetch_slow() -> str:
     """Should not block the event loop."""
     # BUG: blocks entire loop
-    time.sleep(1)
+    await asyncio.sleep(1)
     # BUG: blocking HTTP
-    r = requests.get(SLOW_URL, timeout=10)
+    async with httpx.AsyncClient() as client:
+        r = await client.get(SLOW_URL, timeout=10)
     return r.text[:50]
 
 
@@ -22,7 +24,8 @@ async def run_two():
     """Both fetches should overlap (~1s total, not ~2s)."""
     start = time.perf_counter()
     # TODO: run two fetch_slow() concurrently (gather)
-    results = []  # replace after fix
+    # results = []  # replace after fix
+    results = await asyncio.gather(fetch_slow(),fetch_slow())
     elapsed = time.perf_counter() - start
     print(f"elapsed={elapsed:.2f}s, results={len(results)}")
     # Pass when elapsed < 1.5s and you documented fix in NOTES.md
