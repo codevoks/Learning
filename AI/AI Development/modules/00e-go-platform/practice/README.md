@@ -1,7 +1,6 @@
 # Practice — Module 00e Go Platform
 
-> **Pehle padho**: `../MODULE.md` **§0 se §5 tak order mein** — revision sheet nahi, textbook hai.  
-> Ek section → uska assignment → agla section.
+> **Pehle padho**: `../MODULE.md` **§0 (`:=`, err, pointers) se shuru** — atak raho toh wahi ruko, aage mat badho.
 
 ## Setup
 

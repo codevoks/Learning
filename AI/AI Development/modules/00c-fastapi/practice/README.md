@@ -1,9 +1,9 @@
 # Module 00c — Assignments (ek jagah)
 
-> **Theory**: `../MODULE.md` — **§0 se order mein padho**, har section ke baad assignment. Revision sheet nahi hai.  
+> **Theory**: `../MODULE.md` — **§0 Python syntax se shuru karo** (pehli baar Python/FastAPI). Ek section padho → assignment.  
 > **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`
 
-Order: Theory §1–§2 → A1 → §3 → A2 → … (MODULE.md Read order dekho)
+**Order:** §0–§2 padho → A1 start → §4 → A1 done → §5 → A2 → … (MODULE Read order table dekho)
 
 ---
 

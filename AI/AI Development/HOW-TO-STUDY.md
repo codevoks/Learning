@@ -3,6 +3,8 @@
 > **Sab kuch isi workspace mein.** Bahar links dhundhne ki zaroorat nahi.  
 > MODULE.md = **textbook (theory)** · `practice/` = **exercises** · Chat = **doubt + code check**
 
+> **MODULE quality rule:** [`MODULE-TEACHING-STANDARD.md`](MODULE-TEACHING-STANDARD.md) — syntax pehle, line-by-line, revision notes banned. Naye framework = §0 syntax from zero.
+
 ## 2 jagah + chat
 
 ```

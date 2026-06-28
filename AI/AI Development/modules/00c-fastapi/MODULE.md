@@ -4,157 +4,434 @@
 > **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
 > **Nav**: ← [Module 00b](../00b-python-async/MODULE.md) · Next → [Module 00d](../00d-ml-ai-foundations/MODULE.md)
 
-> **Format note**: Yeh revision sheet nahi hai. Har section **pehli baar seekhne** ke liye likha hai — syntax line-by-line, phir practice. Ek section padho → uska assignment karo → agla section.
+> **Kaun ke liye:** Pehli baar Python + FastAPI. **§0 syntax pehle** — high-level baad mein. Standard: `@MODULE-TEACHING-STANDARD.md`
 
 ## At a glance
 
 | | |
 |---|---|
-| Prerequisites | Module 00a, 00b (async + Pydantic) |
-| Duration | ~4–6 sessions |
-| Project? | No (but **Project A/B Python stack yahi hai**) |
-| Exit test | CRUD + middleware + Depends bina notes ke explain + curl se demo |
+| Prerequisites | 00a (venv/Docker). 00b recommended (async + Pydantic) — skip kiya toh §0–§1 yahan se cover ho jayega |
+| Duration | ~5–7 sessions (Python naya hai toh zyada time normal hai) |
+| Project? | No (Project A/B Python stack yahi hai) |
+| Exit test | Khud se `/health` + `/chat` route likho, curl se demo, middleware/Depends explain karo |
 
 ## Visual map
 
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant M as Middleware
-    participant R as Route handler
-    participant D as Depends()
-    participant DB as DB / service
-    C->>M: HTTP request
-    M->>R: pass through
-    R->>D: inject deps
-    D->>DB: session / auth check
-    DB-->>D: resource
-    D-->>R: typed deps
-    R-->>M: response model
-    M-->>C: JSON response
+```
+Browser / curl
+      │  HTTP (GET, POST, headers, JSON body)
+      ▼
+┌─────────────────────────────────────┐
+│  uvicorn  ← yeh process HTTP sunta hai
+│    └── FastAPI app  ← routes + validation
+│          ├── middleware  (har request)
+│          ├── Depends     (sirf kuch routes)
+│          └── handler     (tumhara code)
+└─────────────────────────────────────┘
+      │
+      ▼
+   JSON response
 ```
 
-**Mental model**: HTTP request pehle middleware se guzarti hai, phir route handler. FastAPI route ke andar **Pydantic** body validate karta hai aur **Depends()** extra cheezein inject karta hai (auth, DB) — Express + Zod jaisa feel, Python syntax mein.
-
-**Redraw challenge**: Client → Middleware → Route → Depends → Response sequence draw karo.
+**Redraw challenge**: Client → uvicorn → FastAPI → middleware → route → response draw karo.
 
 ---
 
-## Read order (strict)
+## Read order (strict — mat chhodna)
 
-1. Theory §0–§2 padho → **Practice A1** karo  
-2. Theory §3–§4 → **A2, A3**  
-3. Theory §5 → **A4**  
-4. Theory §6 → **A5**  
-5. Theory §7 → **A6** + active recall → NOTES
-
-**Unlocks**: Module 00d, 01 LLM APIs, Project A/B Python services
-
----
-
-## Learning hooks
-
-| Concept | Tera parallel |
-|---------|---------------|
-| `@app.post("/chat")` | Next.js Route Handler `export async function POST` |
-| `Depends(get_db)` | Prisma middleware / shared auth helper |
-| Pydantic body | Zod `.parse(req.body)` |
-| Middleware | `app.use()` Express chain |
-| `/docs` | Auto Swagger — Postman ki zarurat kam |
+| Session | Padho | Karo |
+|---------|-------|------|
+| 1 | §0 Python syntax | Terminal pe chhote snippets try karo |
+| 2 | §1 Setup + §2 Pehla server | **A1** start — `/health` chalao |
+| 3 | §3 Decorator + §4 POST/Pydantic | **A1** complete — `/chat` echo |
+| 4 | §5 Routers | **A2** |
+| 5 | §6 Errors + §7 Depends | **A4** |
+| 6 | §8 Middleware + §9 SSE | **A3, A5** |
+| 7 | §10 Wire-up + active recall | **A6** NOTES |
 
 ---
 
 ## Theory
 
-### §0. FastAPI kya hai — Express wala HTTP, Python mein
+### §0. Python pehli baar — FastAPI se pehle yeh (20 min)
 
-Tum pehle se **HTTP API** banate ho (Express / Next Route Handlers). FastAPI wahi kaam karta hai:
+Tum TypeScript jaante ho. Python **alag syntax**, same ideas. FastAPI padhne se pehle yeh 8 cheezein **samajh lo** — baad mein har line recognizable lagegi.
 
-```
-Client  --HTTP GET/POST-->  Server  --handler-->  JSON response
-```
+#### 0.1 Indentation = brackets
 
-**Farq kya hai?**
-
-| Express (JS) | FastAPI (Python) |
-|--------------|------------------|
-| `app.get("/health", handler)` | `@app.get("/health")` + function |
-| Manual body parse + Zod | Pydantic model = auto validate |
-| Swagger alag setup | `/docs` free |
-| `async (req,res)` optional | `async def` recommended (Module 00b) |
-
-FastAPI **Starlette** (ASGI web framework) + **Pydantic** (validation) pe built hai. Tum sirf routes + types likhte ho.
-
-**ASGI vs WSGI (ek line):**  
-- WSGI = purana sync Python (Flask)  
-- ASGI = async support — concurrent requests ke liye (uvicorn)
-
----
-
-### §1. Pehla server — har line samjho (→ Practice A1)
-
-**Step 1:** Folder banao `practice/app/` — Python **package** ke liye `app/` folder + andar files.
-
-**Step 2:** `main.py` — entry point:
+Python mein `{ }` nahi — **indentation (usually 4 spaces)** block batata hai:
 
 ```python
-from fastapi import FastAPI
+# ✅ Sahi
+def greet():
+    print("hello")      # andar wala block — indent zaroori
+    print("world")
 
-# FastAPI() = app instance. Express mein: const app = express()
-app = FastAPI(title="LLM Gateway", version="0.1.0")
+# ❌ Galat — IndentationError
+def greet():
+print("hello")
+```
 
-# Decorator = route register karta hai
-# @app.get("/health") matlab: GET /health pe yeh function chalega
-@app.get("/health")
-async def health():
-    # dict return karo → FastAPI automatically JSON banata hai
-    return {"status": "ok"}
+TS: `{` `}` ke andar code. Python: **tab/space se andar**.
+
+#### 0.2 Variables, strings, dict
+
+```python
+name = "Vansh"                    # str
+count = 42                        # int
+ok = True                         # bool — capital T
+
+# dict = JS object jaisa
+user = {"id": 1, "name": "Vansh"}
+print(user["name"])               # Vansh
+
+# f-string = template literal
+msg = f"Hello {name}, count={count}"
+```
+
+FastAPI response mein tum **dict return** karte ho → JSON ban jata hai:
+
+```python
+return {"status": "ok", "count": count}
+# ≈ res.json({ status: "ok", count })
+```
+
+#### 0.3 Function — `def` aur `async def`
+
+```python
+def add(a: int, b: int) -> int:
+    return a + b
+
+async def fetch_data():
+    # async = "baad mein wait kar sakta hoon, doosra kaam chalu rakho"
+    # Module 00b detail — abhi: route handlers mein async def use karo
+    return {"data": "ok"}
+```
+
+| | `def` | `async def` |
+|---|-------|-------------|
+| Matlab | Normal function | Coroutine — `await` use kar sakta hai |
+| FastAPI route | Chalega | **Recommended** (DB/API wait) |
+| TS parallel | sync function | `async function` |
+
+#### 0.4 Import — dusri file / library se code lao
+
+```python
+import json                          # poori library
+from fastapi import FastAPI          # sirf FastAPI class
+from app.models import ChatRequest   # apni file se
+```
+
+| Python | Node/TS |
+|--------|---------|
+| `import x` | `import x from 'x'` |
+| `from app.models import ChatRequest` | `import { ChatRequest } from './models'` |
+| `pip install fastapi` | `npm install fastapi` |
+
+#### 0.5 Class — Pydantic ke liye zaroori
+
+Pydantic models **class** hain:
+
+```python
+class ChatRequest:
+    message: str          # type hint — is field ka type
+
+# Pydantic wala (asli use):
+from pydantic import BaseModel
+
+class ChatRequest(BaseModel):
+    message: str
 ```
 
 **Line-by-line:**
 
 | Line | Matlab |
 |------|--------|
-| `from fastapi import FastAPI` | Library import — `npm install fastapi` jaisa |
-| `app = FastAPI(...)` | Ek app object — saari routes ispe register |
-| `@app.get("/health")` | **Decorator** — function ke upar route chipka deta hai |
-| `async def health()` | Async handler — I/O wait pe doosre requests serve ho sakte |
-| `return {"status": "ok"}` | Python dict → JSON `{"status":"ok"}` |
+| `class ChatRequest(BaseModel):` | `ChatRequest` naam ki class, `BaseModel` se extend — validation inherit |
+| `message: str` | Field — string honi chahiye |
+| Colon `:` ke baad indent | Class ke andar fields |
 
-**Step 3:** Server **run** karo — FastAPI khud HTTP nahi sunta, **uvicorn** sunta hai:
+TS parallel:
+
+```typescript
+// Zod
+const ChatRequest = z.object({ message: z.string() });
+
+// Python Pydantic
+class ChatRequest(BaseModel):
+    message: str
+```
+
+#### 0.6 `@decorator` — FastAPI ka core (pehle simple example)
+
+**Decorator** = function ke upar `@something` — us function ko **wrap/register** karta hai.
+
+Pehle **FastAPI ke bina** samjho:
+
+```python
+def loud(fn):
+    def wrapper():
+        print("BEFORE")
+        fn()
+        print("AFTER")
+    return wrapper
+
+@loud
+def hello():
+    print("hello")
+
+hello()
+# BEFORE
+# hello
+# AFTER
+```
+
+`@loud` ka matlab: `hello = loud(hello)` — automatically.
+
+**FastAPI mein:**
+
+```python
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+```
+
+Iska matlab: FastAPI ko register karo — **"jab GET /health aaye, `health` function chalao"**.
+
+Express mein alag likhte ho:
+
+```javascript
+app.get("/health", health);  // register alag line pe
+
+# Python mein decorator = register + function ek saath
+@app.get("/health")
+async def health(): ...
+```
+
+Yeh **`@`** dekh kar mat darro — bas "route register" samjho.
+
+#### 0.7 `None` aur optional
+
+```python
+q: str | None = None    # query optional — Python 3.10+
+# purana style: Optional[str] = None
+```
+
+FastAPI: default `None` = query param optional.
+
+#### 0.8 Abhi try karo (terminal)
+
+```bash
+python3
+>>> name = "test"
+>>> {"status": "ok", "name": name}
+{'status': 'ok', 'name': 'test'}
+>>> exit()
+```
+
+Python samajh aa gaya basics — ab FastAPI.
+
+---
+
+### §1. Project setup — folder, venv, install (→ A1 se pehle)
+
+#### 1.1 Folder structure — kya kahan hai
+
+```
+modules/00c-fastapi/practice/     ← yahan se commands chalenge
+├── .venv/                        ← virtual env (gitignore)
+└── app/                          ← Python PACKAGE (code yahan)
+    ├── __init__.py               ← khali file — "yeh folder package hai"
+    ├── main.py                   ← FastAPI app + uvicorn entry
+    ├── models.py                 ← Pydantic schemas
+    ├── deps.py                   ← auth helpers
+    ├── middleware.py
+    └── routes/
+        ├── __init__.py
+        ├── health.py
+        ├── chat.py
+        └── events.py
+```
+
+**`__init__.py` kyun?**  
+Python ko batata hai `app` ek **package** hai — `from app.models import X` kaam kare. Khali file OK.
+
+**Important:** Commands **`practice/`** folder se:
 
 ```bash
 cd modules/00c-fastapi/practice
-uvicorn app.main:app --reload --port 8000
-#              ↑      ↑
-#         module   FastAPI instance name (variable `app`)
 ```
 
-**Step 4:** Test karo:
+Warna `ModuleNotFoundError: No module named 'app'`.
+
+#### 1.2 Virtual environment — alag `node_modules` jaisa
+
+System Python ganda mat karo — har project apna venv:
+
+```bash
+python3 -m venv .venv          # ek baar
+source .venv/bin/activate      # har nayi terminal mein
+# prompt mein (.venv) dikhega
+```
+
+Deactivate: `deactivate`
+
+#### 1.3 Dependencies install
+
+```bash
+pip install fastapi uvicorn httpx pydantic
+```
+
+| Package | Kyun |
+|---------|------|
+| `fastapi` | Web framework |
+| `uvicorn` | **ASGI server** — HTTP actually sunta hai |
+| `httpx` | HTTP client (baad mein) |
+| `pydantic` | Validation (00b se aata hai) |
+
+**FastAPI ≠ server.** Tum likhte ho `app = FastAPI()`. Chalane ke liye **uvicorn** alag process:
+
+```bash
+uvicorn app.main:app --reload --port 8000
+```
+
+| Part | Matlab |
+|------|--------|
+| `app.main` | File `app/main.py` (folder `app`, file `main.py`) |
+| `:app` | Us file mein variable `app = FastAPI(...)` |
+| `--reload` | Code change → auto restart (dev only) |
+| `--port 8000` | `localhost:8000` |
+
+Node parallel: `node server.js` — yahan `uvicorn app.main:app`.
+
+---
+
+### §2. Pehla server — `GET /health` (→ A1 part 1)
+
+**File:** `app/main.py`
+
+Poora file — har line:
+
+```python
+from fastapi import FastAPI
+
+app = FastAPI(title="LLM Gateway", version="0.1.0")
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+```
+
+| Line | Kya hota hai |
+|------|--------------|
+| `from fastapi import FastAPI` | Library se `FastAPI` class import |
+| `app = FastAPI(...)` | App object banao — saari routes isi pe chipkenge |
+| `@app.get("/health")` | Decorator: GET request `/health` → neeche wala function |
+| `async def health():` | Handler function — naam kuch bhi (`health`, `health_check`) |
+| `return {"status": "ok"}` | Dict → FastAPI JSON response banata hai |
+
+**Chalao:**
+
+```bash
+cd modules/00c-fastapi/practice
+source .venv/bin/activate
+uvicorn app.main:app --reload --port 8000
+```
+
+**Test:**
 
 ```bash
 curl http://localhost:8000/health
 # {"status":"ok"}
-
-# Browser mein:
-# http://localhost:8000/docs  ← Swagger UI, yahan se POST try kar sakte ho
 ```
 
-**Common error:**
+Browser: http://localhost:8000/docs — **Swagger UI** — bina Postman test karo.
 
-| Error | Fix |
-|-------|-----|
-| `ModuleNotFoundError: app` | `practice/` folder se run karo, `app/` folder exist kare |
-| `Address already in use` | Port 8000 pe koi aur chal raha — kill karo ya `--port 8001` |
-| Handler sync `def` vs `async def` | Dono chalega; I/O heavy routes pe `async def` use karo |
+#### HTTP GET recap (30 sec)
+
+```
+GET /health HTTP/1.1
+Host: localhost:8000
+
+→ Server response:
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"status":"ok"}
+```
+
+Tumhara handler sirf body return karta hai — status 200 default.
+
+#### Common errors — padh ke fix karo
+
+| Error | Kyun | Fix |
+|-------|------|-----|
+| `ModuleNotFoundError: app` | Galat folder se run | `cd practice/` |
+| `No module named 'fastapi'` | venv activate nahi / install nahi | `source .venv/bin/activate` + `pip install fastapi uvicorn` |
+| `Address already in use` | Port 8000 busy | `--port 8001` ya purana process kill |
+| `404 Not Found` on `/health` | Route register nahi / typo URL | `@app.get("/health")` check karo |
+
+**A1 checkpoint 1:** `/health` curl se 200 + JSON.
 
 ---
 
-### §2. POST + Pydantic body — request validate karna (→ A1)
+### §3. Routes aur decorator — GET vs POST (→ A1 prep)
 
-Module 00b mein `ChatRequest` Pydantic model banaya. Ab use **route** mein wire karte hain.
+#### 3.1 Method + path
 
-**Pehle model** (`app/models.py`):
+```python
+@app.get("/items")       # GET  /items
+@app.post("/chat")       # POST /chat
+@app.delete("/items/5")  # DELETE /items/5
+```
+
+Express: `app.get`, `app.post` — same.
+
+#### 3.2 Path parameter
+
+URL mein variable:
+
+```python
+@app.get("/users/{user_id}")
+async def get_user(user_id: int):
+    return {"user_id": user_id}
+```
+
+`GET /users/42` → `user_id = 42` (FastAPI string se int convert karta hai).
+
+Galat type: `/users/abc` → **422** validation error.
+
+#### 3.3 Query parameter
+
+`?` ke baad:
+
+```python
+@app.get("/search")
+async def search(q: str, limit: int = 10):
+    return {"q": q, "limit": limit}
+```
+
+`GET /search?q=hello&limit=5` → `q="hello"`, `limit=5`  
+`GET /search?q=hello` → `limit=10` (default)
+
+**Rule:** Jo path `{braces}` mein nahi, simple type hai → **query param**.
+
+#### 3.4 Body — POST + JSON
+
+GET mein body nahi hoti usually. POST mein JSON body:
+
+```python
+# Body ke liye Pydantic class use karo (§4)
+@router.post("/chat")
+async def chat(body: ChatRequest):
+    ...
+```
+
+---
+
+### §4. Pydantic — POST body validate (→ A1 part 2)
+
+#### 4.1 Model file — `app/models.py`
 
 ```python
 from pydantic import BaseModel, Field
@@ -167,7 +444,14 @@ class ChatResponse(BaseModel):
     tokens_used: int
 ```
 
-**Phir route** (`app/routes/chat.py` ya `main.py` mein):
+| Syntax | Matlab |
+|--------|--------|
+| `BaseModel` | Pydantic base — auto validation |
+| `message: str` | Required string field |
+| `Field(min_length=1)` | Khali string reject — 422 |
+| `tokens_used: int` | Response mein integer required |
+
+#### 4.2 Route — `app/routes/chat.py`
 
 ```python
 from fastapi import APIRouter
@@ -177,21 +461,35 @@ router = APIRouter(tags=["chat"])
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(body: ChatRequest) -> ChatResponse:
-    # body already validated — galat JSON aaya toh FastAPI 422 dega, yahan tak nahi pahunchega
     return ChatResponse(
         reply=f"Echo: {body.message}",
         tokens_used=len(body.message),
     )
 ```
 
-**Magic kya hai?**
+**Request flow:**
 
-1. Client bhejta hai: `POST /chat` + `Content-Type: application/json` + body  
-2. FastAPI body ko `ChatRequest` mein convert karta hai  
-3. Fail → **422 Unprocessable Entity** (automatic)  
-4. Pass → `body.message` typed `str` hai  
+```
+1. Client: POST /chat  Content-Type: application/json  {"message":"hi"}
+2. FastAPI body parse → ChatRequest.model_validate(...)
+3. Fail (empty message) → 422, handler tak NAHI pahunchega
+4. Pass → chat() chalega, body.message typed str hai
+5. Return ChatResponse → JSON {"reply":"Echo: hi","tokens_used":2}
+```
 
-**curl test:**
+**`response_model=ChatResponse`:** Response bhi validate — extra fields kat jaate hain.
+
+#### 4.3 `main.py` mein router mount (abhi simple)
+
+```python
+from fastapi import FastAPI
+from app.routes.chat import router as chat_router
+
+app = FastAPI()
+app.include_router(chat_router)
+```
+
+#### 4.4 curl se test — haath se karo
 
 ```bash
 # ✅ Valid
@@ -199,56 +497,28 @@ curl -X POST http://localhost:8000/chat \
   -H "Content-Type: application/json" \
   -d '{"message":"hello"}'
 
-# ❌ Invalid — empty message
+# ❌ Invalid — empty message → 422
 curl -X POST http://localhost:8000/chat \
   -H "Content-Type: application/json" \
   -d '{"message":""}'
-# → 422 + error detail JSON
+
+# ❌ Invalid — missing field → 422
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{}'
 ```
 
-**Path vs Query vs Body — FastAPI ka rule:**
+422 response mein **detail** array hota hai — kaunsi field fail hui. `/docs` pe "Try it out" se bhi dekh sakte ho.
 
-```python
-@app.get("/items/{item_id}")                    # {item_id} = PATH param
-async def get_item(
-    item_id: int,                                # path se aaya
-    q: str | None = None,                        # query ?q=hello
-    skip: int = 0,                               # query ?skip=0 (default)
-):
-    return {"item_id": item_id, "q": q}
-
-# POST + Pydantic class = BODY (JSON)
-@router.post("/chat")
-async def chat(body: ChatRequest): ...
-```
-
-| Argument type | Source | Example URL |
-|---------------|--------|-------------|
-| Name in `{braces}` path mein | Path | `/items/42` |
-| `int`, `str` — path mein nahi | Query string | `/items/42?q=hi&skip=10` |
-| Pydantic `BaseModel` | JSON body | POST body |
-
-**`response_model=ChatResponse` kyun?**  
-Extra fields response se **kat** jaate hain — API contract enforce. Galat shape return kiya toh error pakad sakte ho dev mein.
+**A1 complete:** POST echo + 422 on bad input.
 
 ---
 
-### §3. APIRouter — files split karna (→ A2)
+### §5. APIRouter — files alag karo (→ A2)
 
-Chhota demo = sab `main.py` mein OK. Real gateway = **split routes**.
+Ek file mein sab OK for learning. Production / gateway = **split**.
 
-**Pattern:**
-
-```
-app/
-├── main.py          # app create, middleware, routers mount
-├── models.py        # Pydantic schemas
-├── routes/
-│   ├── health.py    # GET /health
-│   └── chat.py      # POST /chat
-```
-
-**`routes/health.py`:**
+**`app/routes/health.py`:**
 
 ```python
 from fastapi import APIRouter
@@ -260,37 +530,31 @@ async def health():
     return {"status": "ok"}
 ```
 
-**`main.py` — routers mount:**
+**`app/main.py`:**
 
 ```python
 from fastapi import FastAPI
 from app.routes.health import router as health_router
 from app.routes.chat import router as chat_router
 
-app = FastAPI()
-app.include_router(health_router)   # /health
-app.include_router(chat_router)     # /chat
-# Prefix chahiye toh: app.include_router(chat_router, prefix="/v1")
-```
-
-Express parallel:
-
-```javascript
-// Express
-const healthRouter = require('./routes/health');
-app.use(healthRouter);
-
-// FastAPI
+app = FastAPI(title="Practice Gateway")
 app.include_router(health_router)
+app.include_router(chat_router)
+# Version prefix: app.include_router(chat_router, prefix="/v1")
 ```
 
-`/docs` kholo — dono endpoints dikhne chahiye.
+| Express | FastAPI |
+|---------|---------|
+| `const r = Router(); app.use(r)` | `router = APIRouter(); app.include_router(router)` |
+| `routes/health.js` | `routes/health.py` |
+
+`/docs` pe **dono** endpoints dikhne chahiye.
 
 ---
 
-### §4. HTTPException — controlled errors
+### §6. HTTPException — tum khud error bhejo (→ A2 bonus)
 
-Validation automatic hai (422). **Business logic errors** khud throw karo:
+Pydantic auto 422 deta hai. **Business logic** errors tum throw karo:
 
 ```python
 from fastapi import HTTPException
@@ -304,55 +568,61 @@ async def get_user(user_id: int):
     return {"user_id": user_id}
 ```
 
-Express: `return res.status(404).json({ detail: "..." })`  
-FastAPI: `raise HTTPException(status_code=404, detail="...")`
+| Python | Express |
+|--------|---------|
+| `raise HTTPException(404, detail="...")` | `res.status(404).json({detail:"..."})` |
+
+Python mein **`raise`** = exception throw. FastAPI catch karke sahi HTTP response bana deta hai.
 
 | Code | Kab |
 |------|-----|
-| 400 | Tumne manually reject kiya |
-| 401 | Auth fail (A4) |
-| 404 | Resource nahi mila |
-| 422 | Pydantic auto — body galat |
-| 500 | Bug — handle karo prod mein |
+| 400 | Tumne reject kiya |
+| 401 | Auth fail |
+| 404 | Not found |
+| 422 | Pydantic — body galat |
+| 500 | Bug — prod mein log + generic message |
 
 ---
 
-### §5. Depends() — dependency injection step-by-step (→ A4)
+### §7. Depends() — auth ek jagah (→ A4)
 
-**Problem:** Har protected route pe API key check copy-paste:
+#### 7.1 Problem
 
-```python
-# ❌ Repeat hell
-@router.post("/chat")
-async def chat(body: ChatRequest, x_api_key: str = Header(...)):
-    if x_api_key != "dev-secret":
-        raise HTTPException(401, ...)
-    ...
+Har route pe API key check copy-paste — bura code.
 
-@router.post("/documents")
-async def docs(..., x_api_key: str = Header(...)):
-    if x_api_key != "dev-secret":  # same code again
-        ...
+#### 7.2 Header padhna
+
+HTTP headers client bhejta hai:
+
+```bash
+curl -H "X-API-Key: dev-secret" http://localhost:8000/chat
 ```
 
-**Solution:** Ek function banao — FastAPI **khud call** karega before handler.
+FastAPI mein:
 
-**`app/deps.py`:**
+```python
+from fastapi import Header
+
+async def read_key(x_api_key: str = Header(..., alias="X-API-Key")):
+    # Header(...) = required
+    # alias = actual header name (hyphen wala)
+    return x_api_key
+```
+
+#### 7.3 Dependency function — `app/deps.py`
 
 ```python
 from fastapi import Header, HTTPException
 
-DEV_SECRET = "dev-secret"  # practice only — prod mein os.getenv
+DEV_SECRET = "dev-secret"
 
 async def verify_api_key(x_api_key: str = Header(..., alias="X-API-Key")):
-    # Header(...) = required header
-    # alias="X-API-Key" = HTTP header name (Python variable alag ho sakta hai)
     if x_api_key != DEV_SECRET:
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
-    return x_api_key  # handler ko mil sakta hai agar chahiye
+    return x_api_key
 ```
 
-**Route mein use:**
+#### 7.4 Route mein inject
 
 ```python
 from fastapi import Depends
@@ -361,41 +631,28 @@ from app.deps import verify_api_key
 @router.post("/chat")
 async def chat(
     body: ChatRequest,
-    api_key: str = Depends(verify_api_key),  # pehle yeh chalega
+    api_key: str = Depends(verify_api_key),
 ):
     return ChatResponse(reply=body.message, tokens_used=1)
 ```
 
-**Flow:**
+**`Depends(verify_api_key)`** = "handler se pehle yeh function chalao".
 
 ```
-Request aayi
-  → FastAPI dekha Depends(verify_api_key)
-  → verify_api_key() chala
-  → 401 ya return value
-  → phir chat() chala
+Request → verify_api_key() → (401 ya ok) → chat()
 ```
 
-**Depends vs Middleware:**
+Express parallel: middleware sirf kuch routes pe — ya shared `requireAuth` function jo har handler call kare. FastAPI **`Depends`** = woh automatic.
 
-| | Middleware | Depends |
-|---|------------|---------|
-| Scope | **Har** request (jo routes use karein) | Sirf jis route pe lagaya |
-| Use | Request ID, CORS, logging | Auth, DB session, rate limit per route |
-| Order | `add_middleware` order matter | Per-route chain |
-
-Gateway mein: Request ID = **middleware** (sab routes). API key = **Depends** (sirf paid routes).
-
-**Test:**
+#### 7.5 Test
 
 ```bash
-# ❌ No key
+# ❌ 401
 curl -X POST http://localhost:8000/chat \
   -H "Content-Type: application/json" \
   -d '{"message":"hi"}'
-# 401
 
-# ✅ With key
+# ✅ 200
 curl -X POST http://localhost:8000/chat \
   -H "Content-Type: application/json" \
   -H "X-API-Key: dev-secret" \
@@ -404,9 +661,9 @@ curl -X POST http://localhost:8000/chat \
 
 ---
 
-### §6. Middleware — har response pe header (→ A3)
+### §8. Middleware — har response pe header (→ A3)
 
-Depends route-level hai. **Middleware** = onion — request andar, response bahar.
+**Depends** = specific routes. **Middleware** = **saari** requests jo app se guzrein.
 
 **`app/middleware.py`:**
 
@@ -416,65 +673,40 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
-        # request aayi — pehle yahan
         request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
-
-        # andar bhejo — routes + Depends chalenge
         response = await call_next(request)
-
-        # response wapas aayi — header lagao
         response.headers["X-Request-ID"] = request_id
         return response
 ```
 
-**`main.py` mein register:**
+| Line | Matlab |
+|------|--------|
+| `BaseHTTPMiddleware` | Starlette class — FastAPI isi pe built |
+| `dispatch(self, request, call_next)` | Har request yahan aati hai |
+| `await call_next(request)` | Andar bhejo — routes chalenge |
+| `response.headers[...] = ...` | Response modify |
+
+**Register — `main.py`:**
 
 ```python
 from app.middleware import RequestIDMiddleware
 
 app = FastAPI()
-app.add_middleware(RequestIDMiddleware)  # sabse pehle add = bahar wala layer
-```
-
-**Flow:**
-
-```
-Request → [RequestIDMiddleware in] → Route → [RequestIDMiddleware out] → Response
+app.add_middleware(RequestIDMiddleware)
 ```
 
 **Test:**
 
 ```bash
 curl -i http://localhost:8000/health
-# Response headers mein: X-Request-ID: <uuid>
+# Response headers: X-Request-ID: <uuid>
 ```
-
-**Lifespan (bonus — Redis connect once):**
-
-```python
-from contextlib import asynccontextmanager
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # startup
-    print("DB/Redis connect")
-    yield
-    # shutdown
-    print("cleanup")
-
-app = FastAPI(lifespan=lifespan)
-```
-
-Server start pe ek baar, shutdown pe ek baar — har request pe nahi.
 
 ---
 
-### §7. SSE streaming — LLM preview (→ A5)
+### §9. SSE streaming — LLM preview (→ A5)
 
-Normal response: poora body ek saath.  
-LLM: tokens **drip drip** aate hain — **Server-Sent Events (SSE)**.
-
-**Format rule:** Har chunk `data: ...\n\n` (do newline zaroori)
+Normal: poora JSON ek shot mein. LLM: tokens **stream**.
 
 ```python
 from fastapi.responses import StreamingResponse
@@ -487,24 +719,26 @@ async def tick_generator():
 
 @router.get("/events")
 async def events():
-    return StreamingResponse(
-        tick_generator(),
-        media_type="text/event-stream",
-    )
+    return StreamingResponse(tick_generator(), media_type="text/event-stream")
 ```
+
+| Keyword | Matlab |
+|---------|--------|
+| `yield` | Ek-ek piece bhejo — generator |
+| `data: ...\n\n` | SSE format — do newline zaroori |
+| `text/event-stream` | Content-Type |
 
 ```bash
 curl -N http://localhost:8000/events
-# har second ek line
 ```
 
-Module 01 mein yahi pattern OpenAI token stream pe lagega.
+Module 01: OpenAI tokens isi pattern se aayenge.
 
 ---
 
-### §8. Poora `main.py` wire — mental checklist
+### §10. Sab wire — final `main.py` checklist
 
-Jab A1–A5 complete karo, `main.py` roughly aisa dikhega:
+Jab A1–A5 done:
 
 ```python
 from fastapi import FastAPI
@@ -520,48 +754,50 @@ app.include_router(chat_router)
 app.include_router(events_router)
 ```
 
+**Order matter:** Middleware pehle register → phir routers.
+
 ---
 
 ## Practice
 
-> **Saare assignments**: [`practice/README.md`](practice/README.md)  
-> **Rule**: Theory section padho → uska assignment → agla section. Ek saath mat karo.
+> [`practice/README.md`](practice/README.md) — har assignment ke pass criteria.
 
 | # | Theory § | File | Pass when |
 |---|----------|------|-----------|
-| A1 | §1–§2 | `app/main.py`, `models.py`, `routes/chat.py` | POST echo + 422 on bad body |
-| A2 | §3 | `app/routes/` split | `/docs` pe health + chat |
-| A3 | §6 | `app/middleware.py` | `curl -i` → `X-Request-ID` |
-| A4 | §5 | `app/deps.py` | No key → 401 |
-| A5 | §7 | `app/routes/events.py` | `curl -N` streams |
-| A6 | §0 | `NOTES.md` | Express vs FastAPI table 5 rows |
+| A1 | §2–§4 | `main.py`, `models.py`, `routes/chat.py` | POST echo + 422 on bad body |
+| A2 | §5–§6 | `routes/` split | `/docs` pe health + chat |
+| A3 | §8 | `middleware.py` | `curl -i` → `X-Request-ID` |
+| A4 | §7 | `deps.py` | No key → 401 |
+| A5 | §9 | `routes/events.py` | `curl -N` streams |
+| A6 | §0–§1 | `NOTES.md` | Express vs FastAPI table 5 rows |
 
-### Run
+### Run (har session start)
 
 ```bash
 cd modules/00c-fastapi/practice
-python3 -m venv .venv && source .venv/bin/activate
-pip install fastapi uvicorn httpx
+source .venv/bin/activate
 uvicorn app.main:app --reload --port 8000
 ```
 
 ---
 
-## Active recall (NOTES mein likho)
+## Active recall (NOTES mein khud likho)
 
-1. FastAPI body validation automatic kaise hota hai — kaun validate karta hai?
-2. Middleware vs Depends — gateway mein dono ka ek example?
-3. `uvicorn app.main:app` — `app.main` aur doosra `:app` kya mean?
+1. `@app.get("/health")` — decorator actually kya karta hai?
+2. Path vs query vs body param — FastAPI kaise decide karta hai?
+3. 422 vs 401 — kaun automatic, kaun tum throw karte ho?
+4. `uvicorn app.main:app` — dono `app` alag kyun hain?
 
 ---
 
 ## Progress checklist
 
-- [ ] §0–§2 padha + A1 pass
-- [ ] §3–§4 + A2 pass
-- [ ] §5–§6 + A3, A4 pass
-- [ ] §7 + A5 pass
-- [ ] A6 + active recall NOTES mein
+- [ ] §0 Python snippets terminal pe try kiye
+- [ ] §1 setup + §2 `/health` chala
+- [ ] §4 POST `/chat` + 422 samjha
+- [ ] A1–A2 pass
+- [ ] A3–A5 pass
+- [ ] A6 + active recall NOTES
 - [ ] Redraw challenge
 
 ---

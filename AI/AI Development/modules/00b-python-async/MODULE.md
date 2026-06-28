@@ -49,7 +49,7 @@ Pydantic:  JSON dict → validate fields → Model instance (ya error)
 
 ## Read order
 
-1. Visual map → 2. **Theory** (neeche) → 3. **Practice** → 4. Chat agar doubt → 5. NOTES
+1. **§0 Python syntax** (terminal try) → 2. Theory §1–6 → 3. Practice → 4. NOTES
 
 **Unlocks**: Module 00c FastAPI
 
@@ -68,6 +68,129 @@ Pydantic:  JSON dict → validate fields → Model instance (ya error)
 ---
 
 ## Theory
+
+> **Pehle §0** — Python syntax (Node/TS se aaye ho toh bhi §0 mat skip karo jab tak atak na raho).  
+> Phir §1 async. High-level baad mein.
+
+### §0. Python syntax — pehli baar (30 min, terminal try karo)
+
+Tum JavaScript/TypeScript jaante ho. Python **alag grammar** hai. Is section ke baad har Python file readable lagegi.
+
+#### 0.1 Semicolon, braces, colon
+
+| JS/TS | Python |
+|-------|--------|
+| `{` `}` blocks | **Indentation** (4 spaces) |
+| `;` end of line | **Optional / usually nahi** |
+| `function foo() {` | `def foo():` — **`:` colon zaroori** |
+
+```python
+def greet():
+    print("hi")    # indent = block ke andar
+
+if True:
+    print("yes")   # if ke baad bhi colon
+```
+
+**Galati:** `def greet()` bina colon — **SyntaxError**.
+
+#### 0.2 `=` vs `==`
+
+```python
+name = "Vansh"      # assign — TS jaisa
+name == "Vansh"     # compare — True/False
+```
+
+Module mein jab `body: ChatRequest` dikhe — woh assignment nahi, **type annotation** hai (neeche).
+
+#### 0.3 Variables, types, f-strings
+
+```python
+count = 42
+price = 19.99
+ok = True           # capital T — True/False, not true/false
+nothing = None      # null jaisa
+
+msg = f"count={count}"   # template literal jaisa
+```
+
+#### 0.4 dict aur list
+
+```python
+user = {"id": 1, "name": "Vansh"}   # object jaisa
+user["name"]                         # access
+
+nums = [1, 2, 3]
+nums[0]
+```
+
+FastAPI: `return {"status": "ok"}` = dict → JSON.
+
+#### 0.5 Function — `def`
+
+```python
+def add(a: int, b: int) -> int:
+    return a + b
+```
+
+| Piece | Matlab |
+|-------|--------|
+| `def` | function start |
+| `a: int` | parameter + type hint (runtime force nahi, FastAPI/Pydantic use karte hain) |
+| `-> int` | return type hint |
+| `:` | function body shuru |
+| `return` | value wapas |
+
+#### 0.6 `async def` aur `await` (preview — §1 detail)
+
+```python
+async def fetch():
+    await asyncio.sleep(1)   # wait — loop free
+    return "done"
+```
+
+- `async def` = coroutine banata hai  
+- `await` = sirf `async def` ke andar  
+- `.py` file run: `asyncio.run(main())` — direct `await` top level pe nahi (Python 3.12+ except REPL)
+
+#### 0.7 Class — Pydantic se pehle
+
+```python
+class User:
+    name: str
+
+u = User()
+u.name = "Vansh"
+```
+
+Pydantic: `class ChatRequest(BaseModel):` — fields + validation (§4).
+
+#### 0.8 Import
+
+```python
+import asyncio
+from pydantic import BaseModel
+from app.models import ChatRequest   # apna package — 00c mein
+```
+
+#### 0.9 Terminal try (abhi karo)
+
+```bash
+python3
+>>> x = {"a": 1}
+>>> x["a"]
+1
+>>> def f(n: int) -> int:
+...     return n + 1
+...
+>>> f(5)
+6
+>>> exit()
+```
+
+**§0 done?** Ab §1 async — syntax atak rahi ho toh chat mein symbol paste karo, theory dubara nahi likhwani.
+
+---
 
 ### 1. Sync vs async — kyun matter karta hai?
 

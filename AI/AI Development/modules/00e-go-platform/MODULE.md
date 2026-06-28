@@ -4,7 +4,7 @@
 > **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
 > **Nav**: ← [00d ML Foundations](../00d-ml-ai-foundations/MODULE.md) · Next → [Module 01 LLM APIs](../01-llm-apis/MODULE.md)
 
-> **Format note**: Tum **Go pehli baar** likh rahe ho — yeh revision notes nahi. §0 se syntax seekho, phir HTTP, phir middleware, phir proxy. Har section ke baad practice assignment.
+> **Format note**: Textbook — **§0 syntax pehle** (`:=`, `err`, pointers). Architecture baad mein. Revision notes nahi. Standard: `@MODULE-TEACHING-STANDARD.md`
 
 > **Role**: **Go = platform** (auth, tenants, billing, public API). **Python = AI** (RAG, agents) — module 00c.
 
@@ -52,34 +52,131 @@ Client
 
 ## Theory
 
-### §0. Go pehli baar — TypeScript dev ke liye (15 min)
+### §0. Go syntax — pehli baar, har symbol (45 min + terminal try)
 
-Tum JS/TS jaante ho. Go alag syntax, same ideas.
+Tum TypeScript jaante ho. Go **nayi grammar** hai — `:` nahi, `{` hai, lekin **`:=`** aur **multiple return** naye hain.  
+**Is section ke bina** practice files padhoge toh har line pe atakoge. Ek ek karke karo.
 
-**File = package.** Har Go file shuru hoti hai:
-
-```go
-package main  // main = executable program (npm start jaisa entry)
-```
-
-**Import:**
+#### 0.1 File structure — har `.go` file
 
 ```go
-import (
-    "fmt"       // standard library — print
-    "net/http"  // HTTP server/client
-)
-// Single: import "fmt"
+package main   // line 1 — hamesha. main = runnable program
+
+import "fmt"   // imports
+
+func main() {  // entry point — C/JS main jaisa
+    fmt.Println("hello")
+}
 ```
 
-**Function:**
+| Line | Matlab |
+|------|--------|
+| `package main` | Is folder ka package naam. Executable ke liye `main` + `func main()` |
+| `import "fmt"` | Standard library — format/print |
+| `func main()` | Program yahan se start |
+
+**Run:**
+
+```bash
+cd modules/00e-go-platform/practice
+go run .
+```
+
+---
+
+#### 0.2 `:=` — short variable declaration (sabse common confusion)
+
+```go
+name := "gateway"    // DECLARE + assign, type auto = string
+port := 8080         // type auto = int
+```
+
+**`:=` matlab:** "naya variable banao aur value do" — type **right side se infer**.
+
+| Syntax | Kab use | Example |
+|--------|---------|---------|
+| `:=` | **Pehli baar** declare (function ke andar) | `x := 10` |
+| `=` | Pehle se declared — sirf value change | `x = 20` |
+| `var x int = 10` | Explicit type, function ke andar/bahar | `var port int = 8080` |
+| `const X = 10` | Change nahi hoga | `const DevSecret = "test"` |
+
+**TS parallel:**
+
+```typescript
+// TS
+let name = "gateway";  // ≈ name := "gateway"
+name = "other";        // ≈ name = "other" (no :=)
+```
+
+**Multiple assign (bahut common Go mein):**
+
+```go
+resp, err := client.Do(req)
+// resp = first return value
+// err = second return value (error)
+```
+
+**Rules — yaad rakho:**
+
+1. `:=` **sirf function ke andar** — package level pe `var` ya `const`
+2. Kam se kam **ek variable naya** hona chahiye left side pe  
+   `x, err := foo()` OK agar `err` naya hai; sirf `x = ...` agar dono pehle se hain
+3. **Declared but not used** = compile error — Go unused variables allow nahi karta
+
+**Common errors:**
+
+| Code | Error | Fix |
+|------|-------|-----|
+| `name = "x"` (pehle declare nahi) | undefined: name | `name := "x"` |
+| `name := "a"` dubara same block | no new variables | `name = "b"` |
+| `x := 1` package level | syntax error | `var x = 1` |
+
+**Try abhi** — `practice/` mein temp file ya REPL nahi Go mein — chhota `main.go` snippet:
+
+```go
+func main() {
+    a := 1
+    a = 2           // reassign OK
+    b, c := 3, 4    // multiple :=
+    _, err := divide(1, 0)  // _ = ignore value
+}
+```
+
+---
+
+#### 0.3 Types — int, string, bool, `[]byte`
+
+```go
+var s string = "hello"
+var n int = 42
+var ok bool = true
+
+bytes := []byte(`{"ok":true}`)  // byte slice — JSON body HTTP mein
+```
+
+| Go | TS | Kab dikhega |
+|----|-----|-------------|
+| `string` | `string` | headers, JSON text |
+| `int` | `number` | IDs, ports |
+| `bool` | `boolean` | flags |
+| `[]byte` | `Uint8Array` / Buffer | `w.Write([]byte(...))` |
+| `nil` | `null` | no error, empty pointer |
+
+**Backticks `` `...` ``** = raw string — escape nahi:
+
+```go
+`{"ok":true}`   // JSON literal easy
+```
+
+---
+
+#### 0.4 Functions — params, multiple return, `error`
 
 ```go
 func add(a int, b int) int {
     return a + b
 }
 
-// Multiple return — Go ka signature feature
 func divide(a, b float64) (float64, error) {
     if b == 0 {
         return 0, fmt.Errorf("divide by zero")
@@ -88,58 +185,122 @@ func divide(a, b float64) (float64, error) {
 }
 ```
 
-**Error handling — kabhi ignore mat karo:**
+**Multiple return** = Go signature feature. HTTP/DB calls almost always:
 
 ```go
-result, err := divide(10, 0)
+resp, err := http.Get(url)
 if err != nil {
-    // handle — log, return 500, etc.
+    // handle
     return
 }
-// result use karo
+// resp use karo
 ```
 
-TS mein `throw` common hai. Go mein **`error` return** — explicit.
+**TS:** usually `throw`. **Go:** `error` return — **explicit check** `if err != nil`.
 
-**Variables:**
+**`_` blank identifier** — value ignore:
 
 ```go
-name := "gateway"   // short declare + infer type
-var port int = 8080 // explicit type
-const DevSecret = "test"
+_, err := fmt.Println("x")  // Println returns (int, error) — count ignore
 ```
 
-**Struct = typed object:**
+---
+
+#### 0.5 `*` pointer — `*http.Request` kya hai?
+
+Practice mein dikhega:
+
+```go
+func handler(w http.ResponseWriter, r *http.Request) {
+```
+
+| Syntax | Matlab |
+|--------|--------|
+| `*http.Request` | Pointer to Request — original struct share, copy nahi |
+| `&x` | x ka address |
+| `nil` | koi object nahi |
+
+Abhi itna kaafi: **`*` = reference jaisa socho** — bada struct copy mat karo. Middleware `r *http.Request` modify kar sakta hai (headers, context).
+
+---
+
+#### 0.6 Struct — typed object
 
 ```go
 type Tenant struct {
-    ID   string
-    Name string
+    ID   string   // capital = exported (dusre packages use kar sakte)
+    name string   // lowercase = private is package ke andar
 }
 
-t := Tenant{ID: "t1", Name: "Acme"}
+t := Tenant{ID: "t1", name: "Acme"}
 fmt.Println(t.ID)
 ```
 
-**Pointer (abhi itna kaafi):**  
-`&x` = address of x. Functions ko mutate karwana ho toh pointer pass karte hain. Middleware mein zyada dikhega nahi — `context` use karenge.
+TS:
 
-**Run karo:**
-
-```bash
-go run .          # current folder ke saare .go files compile + run
-go mod tidy       # dependencies sync (npm install jaisa)
+```typescript
+type Tenant = { ID: string; name: string };
+const t: Tenant = { ID: "t1", name: "Acme" };
 ```
 
-**`go.mod`** = `package.json` — module name + dependencies:
+---
+
+#### 0.7 Anonymous function — `func(w, r) { ... }`
+
+```go
+r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte(`{"ok":true}`))
+})
+```
+
+Express: `(req, res) => { ... }` inline callback — same idea.
+
+---
+
+#### 0.8 Import block
+
+```go
+import (
+    "fmt"
+    "net/http"
+
+    "github.com/go-chi/chi/v5"   // third party
+)
+```
+
+Unused import = **compile error**. `go mod tidy` se sync.
+
+---
+
+#### 0.9 `go mod` — dependencies
+
+```bash
+go mod tidy      # npm install jaisa
+go get pkg@ver   # npm install pkg jaisa
+go run .         # compile + run all .go in package main
+go build -o api  # binary banao
+```
+
+**`go.mod`** example:
 
 ```go
 module github.com/you/platform
-
 go 1.22
-
 require github.com/go-chi/chi/v5 v5.0.12
 ```
+
+---
+
+#### 0.10 §0 checkpoint — khud likh paoge?
+
+Bina dekhe explain karo (NOTES mein):
+
+1. `:=` vs `=` vs `var`  
+2. `resp, err := ...` kyun do values  
+3. `if err != nil` kyun har jagah  
+4. `[]byte` HTTP body mein kyun  
+
+**Pass?** Ab §1 HTTP — warna §0 dubara + chat mein symbol pucho.
 
 ---
 

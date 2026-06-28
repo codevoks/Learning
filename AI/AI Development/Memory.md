@@ -30,7 +30,7 @@ MODULE.md (theory, Hinglish, diagrams)  →  practice/ (stubs, tum complete)
 
 ## Visual learning rules (coach + self-study)
 
-0. **Ek jagah**: Theory MODULE · Practice `practice/` · Chat = doubt only. `@HOW-TO-STUDY.md`
+0. **Ek jagah**: Theory MODULE · Practice `practice/` · Chat = doubt only. `@HOW-TO-STUDY.md` · **Textbook rule:** `@MODULE-TEACHING-STANDARD.md` (syntax §0 pehle, revision notes banned)
 1. **Har concept = diagram pehle** — mermaid/ASCII/architecture, phir explanation
 2. **Har MODULE.md** mein `## Visual map` section hai — **wahan se shuru karo**
 3. **Session end ritual**: diagram bina dekhe redraw karo (paper / Excalidraw / NOTES.md)
