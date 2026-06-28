@@ -1,8 +1,9 @@
 # Module 00c — Assignments (ek jagah)
 
-> **Theory**: `../MODULE.md` · **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`
+> **Theory**: `../MODULE.md` — **§0 se order mein padho**, har section ke baad assignment. Revision sheet nahi hai.  
+> **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`
 
-Order: A1 → A6. `app/` folder mein `TODO` search karo.
+Order: Theory §1–§2 → A1 → §3 → A2 → … (MODULE.md Read order dekho)
 
 ---
 

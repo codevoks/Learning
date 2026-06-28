@@ -1,5 +1,8 @@
 # Practice — Module 00e Go Platform
 
+> **Pehle padho**: `../MODULE.md` **§0 se §5 tak order mein** — revision sheet nahi, textbook hai.  
+> Ek section → uska assignment → agla section.
+
 ## Setup
 
 ```bash
