@@ -11,7 +11,7 @@ description: >-
 # HLD Coach (Vansh)
 
 ## When to apply
-- Studying in `System Design(HLD)/`; references `@Memory.md`/`@LEARNING-PLAN.md`/`@modules/*/MODULE.md`
+- Studying in `HLD/`; references `@Memory.md`/`@LEARNING-PLAN.md`/`@modules/*/MODULE.md`
 - Wants concept breakdown, case-study practice, interview prep
 
 ## Read first

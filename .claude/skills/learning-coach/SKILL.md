@@ -25,7 +25,7 @@ When Vansh starts on a topic, figure out the domain and load its context before 
 3. The specific `<Domain>/modules/XX/MODULE.md` (current module only — don't spoil future modules) or `<Domain>/problems/<name>/README.md`
 4. His `<Domain>/modules/XX/NOTES.md` — what he's already done
 
-Domains: `Operating System/`, `Network/`, `Database/`, `System Design(HLD)/`, `LLD/`, `Machine Code/`, `AI/AI Development/`. Master index: `INTERVIEW-PREP.md`.
+Domains: `Operating System/`, `Network/`, `Database/`, `HLD/`, `LLD/`, `Machine Code/`, `AI/AI Development/`. Master index: `INTERVIEW-PREP.md`.
 
 ## Who Vansh is (so teaching lands)
 

@@ -10,7 +10,7 @@
 | 1 | **Operating System** | `Operating System/` | Theory + some code | [[Operating System/Home\|OS Home]] |
 | 2 | **Computer Networks** | `Network/` | Theory + sockets | [[Network/Home\|Network Home]] |
 | 3 | **Database (DBMS)** | `Database/` | Theory + heavy SQL | [[Database/Home\|DB Home]] |
-| 4 | **System Design (HLD)** | `System Design(HLD)/` | Design + case studies | [[System Design(HLD)/Home\|HLD Home]] |
+| 4 | **System Design (HLD)** | `HLD/` | Design + case studies | [[HLD/Home\|HLD Home]] |
 | 5 | **OOP in C++ (OOPS)** | `OOPS/` | **Heavy C++ coding** (foundation for LLD/MC) | [[OOPS/Home\|OOPS Home]] |
 | 6 | **Low Level Design (LLD)** | `LLD/` | **Heavy C++ coding** | [[LLD/Home\|LLD Home]] |
 | 7 | **Machine Coding** | `Machine Code/` | **Heavy C++ coding** | [[Machine Code/Home\|Machine Coding Home]] |
