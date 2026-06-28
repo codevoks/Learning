@@ -1,8 +1,9 @@
 # Module 01 — Assignments (ek jagah)
 
+> **Pehle padho**: `../MODULE.md` **§0 Terms** (LLM, API, token, streaming) — architecture se pehle.  
 > **Theory**: `../MODULE.md` · **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`
 
-Order: A1 → A4. Har file mein `TODO` search karo.
+Order: §0 → session table follow → A1 → A4. Har file mein `TODO` search karo.
 
 ---
 

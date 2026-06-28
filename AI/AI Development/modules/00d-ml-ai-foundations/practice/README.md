@@ -1,8 +1,9 @@
 # Module 00d — Assignments (ek jagah)
 
-> **Theory**: `../MODULE.md` · **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`
+> **Theory**: `../MODULE.md` — **pehle §0** (token, embedding, training vs inference); diagram Session 2 ke baad.  
+> **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`
 
-Order: A1 → A5. Code files mein `TODO` search karo.
+Session table + Theory § column follow karo; order A1 → A5. Code files mein `TODO` search karo.
 
 ---
 

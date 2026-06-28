@@ -40,3 +40,5 @@ Har module = **ek naya Cursor agent**. Same coaching rules (`@Memory.md`), alag 
 | 11 | [11-project-agentic-workflow](./11-project-agentic-workflow/MODULE.md) | **Project B** ship |
 
 Full plan: `@LEARNING-PLAN.md` · Spec: `@Projects.md`
+
+> **Padhai quality:** Har MODULE = textbook (`@MODULE-TEACHING-STANDARD.md`). §0 pehle — syntax (Track 0) ya terms (Track 1). Cheat sheet style banned.

@@ -1,8 +1,12 @@
 # Module 04 — Assignments (ek jagah)
 
-> **Theory**: `../MODULE.md` · **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`
+> **Theory**: `../MODULE.md` (textbook — §0 terms pehle, session table follow karo)  
+> **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`  
+> **Standard**: `@MODULE-TEACHING-STANDARD.md` — cheat sheet nahi; har theory § ke baad yahan ka assignment
 
-Order: A1 → A3. `TODO` search in each file.
+**Read order:** MODULE.md session table ke hisaab se — Session 2 pe A1, Session 3 pe A2, Session 4 pe A3. Theory skip mat karo.
+
+Order: A1 → A3. Har file mein `TODO` search karo. Pehle MODULE.md § end-to-end walkthrough chalao, phir stubs complete karo.
 
 ---
 
@@ -31,6 +35,7 @@ cp .env.example .env   # API key
 
 | | |
 |---|---|
+| **Theory §** | §1, §2 |
 | **File** | `summarizer_prompt.py` |
 | **Kya** | Broken summarizer prompt fix |
 | **Pass** | Stable bullets 10/10 runs |
@@ -46,6 +51,7 @@ cp .env.example .env   # API key
 
 | | |
 |---|---|
+| **Theory §** | §3 |
 | **File** | `classifier_fewshot.py` |
 | **Kya** | Few-shot examples add karo |
 | **Pass** | Accuracy > baseline on 20 examples |
@@ -56,6 +62,7 @@ cp .env.example .env   # API key
 
 | | |
 |---|---|
+| **Theory §** | §5, §6 |
 | **File** | `injection_safe_bot.py` |
 | **Kya** | Prompt injection resistant support bot |
 | **Pass** | 5 attack strings fail safely |

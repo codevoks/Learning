@@ -1,11 +1,12 @@
 # Module 03 — Assignments (ek jagah)
 
+> **Pehle padho**: `../MODULE.md` **§0 Terms** (gateway, BFF, router, tenant, metering) — lifecycle se pehle.  
 > **Theory**: `../MODULE.md` · **Ship spec**: `../../Projects.md` Project C (Go)  
 > **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md @Projects.md`
 
 **Note:** Yeh learning sandbox hai — final ship Go mein Project C.
 
-Order: M1 → M7. `TODO` search in each file.
+Order: §0 → session table follow → M1 → M7. `TODO` search in each file.
 
 ---
 

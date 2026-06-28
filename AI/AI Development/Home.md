@@ -7,6 +7,7 @@
 | Doc | Kya hai |
 |-----|---------|
 | [[TOPIC-COVERAGE]] | **Prompt topics checklist** — kuch chhodna nahi |
+| [[MODULE-TEACHING-STANDARD]] | **Textbook rule** — §0 pehle, cheat sheet banned |
 | [[HOW-TO-STUDY]] | **Pehle yeh padho** — Topics vs study links vs coach |
 | [[Memory]] | Shared rules, CV hooks, coach format |
 | [[VISUAL-STUDY-GUIDE]] | **Visual learner master map** — poori journey diagrams |

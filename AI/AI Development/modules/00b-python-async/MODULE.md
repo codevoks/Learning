@@ -4,6 +4,8 @@
 > **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
 > **Nav**: ← [Module 00a](../00a-dev-environment/MODULE.md) · Next → [Module 00c](../00c-fastapi/MODULE.md)
 
+> **Format**: Textbook — **§0 Python syntax pehle**, phir async/Pydantic. Standard: `@MODULE-TEACHING-STANDARD.md`
+
 ## At a glance
 
 |               |                                                               |
@@ -47,9 +49,15 @@ Pydantic:  JSON dict → validate fields → Model instance (ya error)
 
 ---
 
-## Read order
+## Read order (strict)
 
-1. **§0 Python syntax** (terminal try) → 2. Theory §1–6 → 3. Practice → 4. NOTES
+| Session | Padho | Karo |
+|---------|-------|------|
+| 1 | §0 Python syntax — terminal try | `python3` snippets §0.9 |
+| 2 | §1 Sync vs async | Paper timeline draw |
+| 3 | §2 Event loop + `await` | **A2** prep — `asyncio.gather` samjho |
+| 4 | §3 Blocking mistakes + §4 Pydantic | **A1**, **A3** |
+| 5 | §5 httpx + §6 gateway model | **A2**, **A4** NOTES |
 
 **Unlocks**: Module 00c FastAPI
 
@@ -192,7 +200,7 @@ python3
 
 ---
 
-### 1. Sync vs async — kyun matter karta hai?
+### §1. Sync vs async — kyun matter karta hai?
 
 FastAPI + LLM gateway mein **zyada tar time I/O pe jaata hai** — DB query, Redis, OpenAI API call.  
 CPU calculate nahi kar raha; **wait** kar raha hai network/disk ka.
@@ -212,7 +220,7 @@ Event loop (async):     [R1==][R2==][R3==][R1==][R2==]...  ← switch on await
 
 ---
 
-### 2. Event loop — intuition (CS thesis nahi)
+### §2. Event loop — `async def`, `await`, `gather` (line-by-line)
 
 Python ka **asyncio** ek **event loop** chalata hai — single thread mein coroutines schedule karta hai.
 
@@ -234,8 +242,15 @@ async def main():
 asyncio.run(main())
 ```
 
-`async def` = coroutine function (callable abhi nahi chalti — schedule hoti hai)  
-`await` = "yahan ruko, loop doosra kaam kar sakta hai jab tak yeh complete na ho"
+| Line / symbol | Matlab |
+|---------------|--------|
+| `async def fetch_name()` | Coroutine function — call karte hi nahi chalti, schedule hoti hai |
+| `await asyncio.sleep(0.5)` | "Yahan wait karo" — **loop ko doosra task chalane do** (I/O wait simulate) |
+| `a = await fetch_name()` | Serial — pehla khatam, phir doosra (~1s total) |
+| `await asyncio.gather(...)` | **Parallel** — dono ek saath start (~0.5s total) |
+| `asyncio.run(main())` | Event loop start + `main()` chalao — script entry |
+
+**→ Practice A2** — 3 URLs parallel `gather`; time ≈ slowest URL.
 
 ```mermaid
 sequenceDiagram
@@ -265,7 +280,7 @@ Node parallel: `async function` + `await fetch()` — same brain, alag syntax.
 
 ---
 
-### 3. Common mistakes — sync blocking inside `async def`
+### §3. Common mistakes — sync blocking inside `async def`
 
 Yeh **production killer** hai:
 
@@ -300,7 +315,7 @@ _(Active recall Q1: blocking sync call event loop ko freeze karta hai — sab co
 
 ---
 
-### 4. Pydantic v2 — Zod Python mein
+### §4. Pydantic v2 — Zod Python mein
 
 API pe **raw dict** unsafe — wrong types, missing fields, extra junk.
 
@@ -352,7 +367,7 @@ _(Active recall Q2: dataclass sirf types hold karta hai; Pydantic runtime valida
 
 ---
 
-### 5. httpx async — external APIs
+### §5. httpx async — external APIs
 
 LLM providers, embedding APIs — sab HTTP. `httpx` = modern `requests` + async support.
 
@@ -391,7 +406,7 @@ _(Active recall Q3: LLM call async honi chahiye taaki wait ke dauran server doos
 
 ---
 
-### 6. Putting it together — gateway mental model
+### §6. Putting it together — gateway mental model
 
 ```
 Client POST /chat

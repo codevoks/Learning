@@ -1,8 +1,12 @@
 # Module 06 — Assignments (ek jagah)
 
-> **Theory**: `../MODULE.md` · **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`
+> **Theory**: `../MODULE.md` (textbook — §0 tools/function calling/JSON schema terms pehle)  
+> **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`  
+> **Standard**: `@MODULE-TEACHING-STANDARD.md` — line-by-line theory, phir yahan code
 
-Order: A1 → A3. `TODO` search in each file.
+**Read order:** Session 2–3 → A1 · Session 4 → A2 · Session 5 → A3. MODULE.md end-to-end walkthrough (`run_with_tools`) pehle copy-run karo, phir stubs.
+
+Order: A1 → A3. Har file mein `TODO` search karo.
 
 ---
 
@@ -31,6 +35,7 @@ cp .env.example .env 2>/dev/null || true
 
 | | |
 |---|---|
+| **Theory §** | §2, §3 |
 | **File** | `tool_schemas.py` |
 | **Kya** | 2 tools: `search_docs` + `get_weather` |
 | **Pass** | LLM picks correct tool 10/10 |
@@ -41,6 +46,7 @@ cp .env.example .env 2>/dev/null || true
 
 | | |
 |---|---|
+| **Theory §** | §5 |
 | **File** | `pydantic_tools.py` |
 | **Kya** | Pydantic-validated tool args |
 | **Pass** | Invalid args rejected pre-execute |
@@ -51,6 +57,7 @@ cp .env.example .env 2>/dev/null || true
 
 | | |
 |---|---|
+| **Theory §** | §3, §6 |
 | **File** | `multi_step_loop.py` |
 | **Kya** | 2-tool chain stub |
 | **Pass** | Query needing 2 tools completes |

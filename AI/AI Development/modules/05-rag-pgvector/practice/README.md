@@ -1,10 +1,14 @@
 # Module 05 — Assignments (ek jagah)
 
-> **Theory**: `../MODULE.md` · **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`
+> **Theory**: `../MODULE.md` (textbook — §0 RAG/chunking/embeddings/pgvector terms pehle)  
+> **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`  
+> **Standard**: `@MODULE-TEACHING-STANDARD.md` — har § ke baad mapped assignment neeche
 
-**Prereq:** 00a Postgres + `CREATE EXTENSION vector;`
+**Prereq:** Module 00a Postgres Docker + `CREATE EXTENSION vector;` (MODULE.md §0 try block). Module 04 prompts — RAG answer step mein kaam aayega.
 
-Order: A1 → A4. `TODO` search in code files.
+**Read order:** Session 2 → A1 · Session 3–4 → A2 · Session 5 → A3 · Session 6 → A4. Pehle MODULE.md end-to-end walkthrough (`sample_policy.txt`) khud chalao.
+
+Order: A1 → A4. Code files mein `TODO` search karo.
 
 ---
 
@@ -33,6 +37,7 @@ pip install openai python-dotenv psycopg2-binary numpy httpx fastapi uvicorn
 
 | | |
 |---|---|
+| **Theory §** | §3 |
 | **File** | `chunker.py` |
 | **Kya** | Document loader + chunker with overlap |
 | **Pass** | Chunks with overlap produced |
@@ -47,6 +52,7 @@ pip install openai python-dotenv psycopg2-binary numpy httpx fastapi uvicorn
 
 | | |
 |---|---|
+| **Theory §** | §4 |
 | **File** | `embed_store.py` |
 | **Kya** | Embed + pgvector store + similarity search |
 | **Pass** | Query returns relevant chunk |
@@ -61,6 +67,7 @@ pip install openai python-dotenv psycopg2-binary numpy httpx fastapi uvicorn
 
 | | |
 |---|---|
+| **Theory §** | §2, §6 |
 | **File** | `rag_endpoint.py` |
 | **Kya** | RAG answer stub |
 | **Pass** | Answer cites source chunk IDs |
@@ -71,6 +78,7 @@ pip install openai python-dotenv psycopg2-binary numpy httpx fastapi uvicorn
 
 | | |
 |---|---|
+| **Theory §** | §6 |
 | **File** | `FAILURE_CASES.md` |
 | **Kya** | 3 failure queries + fixes |
 | **Pass** | Coach / self review |

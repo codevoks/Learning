@@ -1,6 +1,14 @@
 # Module 10 — Assignments (ek jagah)
 
-> **Theory**: `../MODULE.md` · **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`
+> **Textbook**: `../MODULE.md` — §0 eval/LLMOps terms pehle. Golden recon CSV parallel socho.  
+> **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`  
+> **Standard**: `@MODULE-TEACHING-STANDARD.md`
+
+| Assignment | Theory § padhne ke baad |
+|------------|---------------------------|
+| A1 | §0–§2 — golden dataset (10 cases + trajectory fields) |
+| A2 | §2–§4 — trajectory scorer + report |
+| A3 | §5 — CI regression script (`exit 1` on drop) |
 
 Order: A1 → A3.
 

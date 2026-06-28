@@ -3,15 +3,21 @@
 > Har `MODULE.md` **textbook** hai, cheat sheet nahi.  
 > Audience: **pehli baar seekh raha hai** ya **dusre stack se migrate** (TS/Node → Python/Go).
 
-## Rule 1 — Syntax pehle, architecture baad mein
+## Rule 1 — §0 pehle (syntax OR terms)
 
-Har module jahan nayi language/framework ho, **§0 = language syntax from zero**:
+**Code modules (00a–00e):** §0 = language/tool syntax from zero (`:=`, `@`, docker commands).
 
-- Har naya operator/symbol (`:=`, `@`, `async`, `*`, `[]byte`) — table + example + common mistake
-- TS/JS parallel jahan helpful — par Python/Go assume mat karo
-- **Terminal try**: chhota snippet copy-paste karke chalao, phir aage badho
+**AI modules (01–11):** §0 = **terms from zero** — token, embedding, RAG, agent, MCP… har term define karo pehle analogy ke saath. Phir architecture.
 
-High-level diagrams **§0 ke baad** aate hain — pehle nahi.
+High-level diagrams **§0 ke baad** — pehle nahi.
+
+## Migration status
+
+| Module | Status |
+|--------|--------|
+| 00a–00e, 01–11 | ✅ textbook rewrite (§0 + session table + line tables) |
+
+Coach + agents: `@MODULE-TEMPLATE.md` follow karo.
 
 ## Rule 2 — Line-by-line, handwaving nahi
 
@@ -50,9 +56,6 @@ Module top pe session-by-session table — kya padhna, kya karna.
 - [ ] Prerequisites honest ("00b skip kiya toh §0 cover karo")
 - [ ] Active recall questions test understanding, not memory
 
-## Migration backlog
+## Migration status
 
-Track 0 modules: **00b, 00c, 00e** = syntax-first (in progress).  
-Track 1 (01–11): migrate jab user module start kare — same standard apply.
-
-Coach + agents: naya MODULE likhte waqt is file follow karo.
+All modules follow `@MODULE-TEACHING-STANDARD.md` + `@MODULE-TEMPLATE.md` — **textbook, not cheat sheet**. Track 0: syntax §0. Track 1: terms §0.

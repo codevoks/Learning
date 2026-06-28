@@ -1,11 +1,11 @@
 # Module 00a — Assignments (ek jagah)
 
-> **Theory**: `../MODULE.md`  
+> **Theory**: `../MODULE.md` — **pehle §0** (terminal / Docker / YAML symbols), phir session table follow karo.  
 > **Code**: isi folder mein  
 > **Apni learnings**: `../NOTES.md`  
 > **Doubt / review**: Cursor chat `@MODULE.md`
 
-Pehle theory padho, phir **order mein** A1 → A4 karo. Har assignment ke neeche **pass criteria** hai.
+Pehle **§0 + theory section** padho (MODULE mein Theory § column dekho), phir **order mein** A1 → A4 karo.
 
 ---
 

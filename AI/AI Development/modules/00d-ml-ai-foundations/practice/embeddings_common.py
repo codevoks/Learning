@@ -1,6 +1,7 @@
 """A4 shared — test sentences, pair scoring, runner."""
 
 from __future__ import annotations
+from cosine_similarity import cosine_similarity
 
 SENTENCES = [
     "How do I get a refund for my order?",
@@ -13,7 +14,18 @@ def best_pair(vectors: list[list[float]]) -> tuple[int, int, float]:
     """Return indices (i, j) i<j with highest cosine similarity and the score."""
     # TODO: import cosine_similarity from cosine_similarity OR inline numpy
     # TODO: compare all pairs, return best
-    raise NotImplementedError
+    best_score=-1e6
+    best_i:int
+    best_j:int
+    for i in range(len(vectors)):
+        for j in range(i+1,len(vectors)):
+            score=cosine_similarity(vectors[i],vectors[j])
+            if score>best_score:
+                best_score=score
+                best_i=i
+                best_j=j
+    return best_i, best_j, best_score
+    # raise NotImplementedError
 
 
 def run(embed_sentences):

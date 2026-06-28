@@ -1,8 +1,16 @@
 # Module 09 — Assignments (ek jagah)
 
-> **Theory**: `../MODULE.md` · **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`
+> **Textbook**: `../MODULE.md` — §0 multi-agent + HITL terms pehle. Zapier/outbox parallel socho.  
+> **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`  
+> **Standard**: `@MODULE-TEACHING-STANDARD.md`
 
-Order: A1 → A3. `TODO` search in each file.
+| Assignment | Theory § padhne ke baad |
+|------------|---------------------------|
+| A1 | §1–§3 — supervisor → specialist routing |
+| A2 | §4 — `interrupt_before`, approve/reject |
+| A3 | §5 — audit trail by `run_id` |
+
+Order: A1 → A3. Har file mein `TODO` search karo.
 
 ---
 

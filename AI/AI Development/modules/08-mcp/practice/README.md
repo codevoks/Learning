@@ -1,8 +1,16 @@
 # Module 08 — Assignments (ek jagah)
 
-> **Theory**: `../MODULE.md` · **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`
+> **Textbook**: `../MODULE.md` — §0 mein host/client/server terms pehle. Session table follow karo.  
+> **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`  
+> **Standard**: `@MODULE-TEACHING-STANDARD.md`
 
-Order: A1 → A3. `TODO` search in code files.
+| Assignment | Theory § padhne ke baad |
+|------------|---------------------------|
+| A1 | §0–§4 — MCP server, stdio transport, 2 tools |
+| A2 | §5 — LangGraph agent ↔ MCP wire |
+| A3 | §6 — threat model (written) |
+
+Order: A1 → A3. Code files mein `TODO` search karo.
 
 ---
 

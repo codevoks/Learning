@@ -1,11 +1,22 @@
 # Module 11 — Assignments (ek jagah)
 
-> **Theory**: `../MODULE.md` · **Ship spec**: `../../Projects.md` Project B  
-> **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md @Projects.md`
+> **Textbook**: `../MODULE.md` — §0 milestones M1–M7 map pehle. `@Projects.md` Project B ship spec. Session table strict follow.  
+> **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md @Projects.md`  
+> **Standard**: `@MODULE-TEACHING-STANDARD.md`
 
-**Note:** Learning sandbox — final ship main codebase mein Project B.
+**Sandbox vs ship:** Yahan practice — Phase 1 learn. Final product `services/agent/` + Go platform (Phase 2, Project A spine reuse).
 
-Order: M1 → M7. `TODO` search in each file.
+| Milestone | Theory § | Focus |
+|-----------|----------|-------|
+| M1 | §3 | NL → `WorkflowPlan` JSON |
+| M2 | §4 | Linear 3-step LangGraph |
+| M3 | §5 | MCP + local tools |
+| M4 | §6 | HITL destructive steps |
+| M5 | §7 | Outbox exactly-once |
+| M6 | §8 | Eval harness + Langfuse |
+| M7 | §9 | Refund demo E2E |
+
+Order: M1 → M7 (order mat todo). Har file mein `TODO` search karo.
 
 ---
 

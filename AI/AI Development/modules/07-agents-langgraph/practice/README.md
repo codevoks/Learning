@@ -1,8 +1,16 @@
 # Module 07 — Assignments (ek jagah)
 
-> **Theory**: `../MODULE.md` · **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`
+> **Textbook**: `../MODULE.md` — §0 terms pehle, phir section-by-section padho. Ek theory § khatam → uska assignment. Poora module ek din mat karo.  
+> **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`  
+> **Standard**: `@MODULE-TEACHING-STANDARD.md`
 
-Order: A1 → A3. `TODO` search in each file.
+| Assignment | Theory § padhne ke baad |
+|------------|---------------------------|
+| A1 | §0, §1, §2 — StateGraph, nodes, edges |
+| A2 | §3, §4 — ReAct loop + `max_iterations` guard |
+| A3 | §5 — checkpoints, `thread_id` resume |
+
+Order: A1 → A3. Har file mein `TODO` search karo.
 
 ---
 

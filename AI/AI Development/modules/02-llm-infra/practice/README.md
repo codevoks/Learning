@@ -1,10 +1,11 @@
 # Module 02 — Assignments (ek jagah)
 
+> **Pehle padho**: `../MODULE.md` **§0 Terms** (rate limit, cache, circuit breaker, fallback) — diagrams se pehle.  
 > **Theory**: `../MODULE.md` · **Learnings**: `../NOTES.md` · **Doubt**: `@MODULE.md`
 
 **Prereq:** Module 00a Redis running (`docker compose up -d` in `00a/practice`).
 
-Order: A1 → A4. `TODO` search in each file.
+Order: §0 → session table follow → A1 → A4. `TODO` search in each file.
 
 ---
 
