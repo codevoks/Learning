@@ -1,64 +1,41 @@
 # Module 00d — ML & AI Foundations (incl. TensorFlow intro)
 
-> **Padho**: Isi file mein **Theory** — bahar mat jao.  
-> **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
+> **Padho**: Isi file mein **Theory** — bahar mat jao.
+> **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`
 > **Nav**: ← [Module 00c](../00c-fastapi/MODULE.md) · Next → [Module 00e Go Platform](../00e-go-platform/MODULE.md)
 
-> **Format**: Textbook — §0 pehle (AI/ML terms from zero). `@MODULE-TEACHING-STANDARD.md`
+> **Format**: Textbook — §0 AI/ML terms zero se (prose). Voice: `@MODULE-TEACHING-STANDARD.md`
 
 ## At a glance
 
 | | |
 |---|---|
-| Prerequisites | Module 00b (Python basics). 00c helpful par required nahi |
+| Prerequisites | Module 00b (Python). 00c helpful, required nahi |
 | Duration | ~4–5 sessions (embedding + TF alag din) |
 | Project? | No |
-| Exit test | Training vs inference, embeddings, TF vs API-LLM path explain karo — apne words mein |
+| Exit test | Training vs inference, embeddings, aur "tum kya ship karoge" — apne shabdon mein |
 
-## Read order (strict — mat chhodna)
+## Yeh module kis baare mein hai
 
-| Session | Padho | Karo (Practice) |
-|---------|-------|-----------------|
-| 1 | **§0 Terms pehli baar** | Analogies NOTES mein likho |
-| 2 | Honest scope + **Visual map** | Redraw challenge start |
-| 3 | §1 AI/ML/DL/LLM hierarchy | — |
-| 4 | §2 Model, weights, training vs inference | **A2** diagram |
-| 5 | §3 NumPy tensors | — |
-| 6 | §4 Embeddings | — |
-| 7 | §5 Cosine similarity | **A1** |
-| 8 | §6 TensorFlow hello | **A3** |
-| 9 | §7 API path vs training + §8 HF hub | **A4**, **A5** |
+Module 01 se aage tum baar-baar yeh shabd sunoge — token, embedding, model, training, inference, vector. Agar yeh dhundhle rahe, to RAG aur agents mein har cheez magic lagegi. Yeh module un sab ko zero se concrete bana deta hai, taaki aage sab "samajh ke" ho, ratta nahi.
 
-**Pehle §0 terms, phir diagram.** Visual map Session 2 mein — token/embedding samjhe bina mat dekho.
+Ek baat pehle hi saaf kar deta hoon (yeh tumhara time bachayega): **tumhara 2026 job path mostly inference hai — banana-banwana nahi, banaye hue models ko use karna.** Isliye embeddings, vectors, cosine similarity, aur inference-vs-training ka farak gehraai mein seekho; CNN architecture design ya ML-research ki gehraai *abhi* zaroori nahi. TensorFlow yahan sirf isliye hai ki tum training code **padh** sako aur interview mein trade-off bol sako — har din TF nahi likhoge.
+
+---
+
+## Read order
+
+| Session | Padho | Karo |
+|---------|-------|------|
+| 1 | §0 Terms pehli baar | Analogies NOTES mein |
+| 2 | Visual map + scope | Redraw challenge start |
+| 3 | §1 AI/ML/DL/LLM + §2 training loop | **A2** diagram |
+| 4 | §3 NumPy tensors + §4 Embeddings | — |
+| 5 | §5 Cosine similarity | **A1** |
+| 6 | §6 TensorFlow hello | **A3** |
+| 7 | §7 API vs training + §8 HF hub | **A4**, **A5** |
 
 **Unlocks**: Module 01 (LLM APIs), Module 05 (RAG) — embeddings familiar honge.
-
----
-
-## Honest scope (important — Session 2)
-
-**Tera 2026 job path = LLM APIs + RAG + Agents**, mostly **inference**, not training models from scratch.
-
-| Seekho depth mein | Sirf awareness |
-|-------------------|----------------|
-| Embeddings, vectors, cosine similarity | Full CNN/RNN architecture design |
-| Inference vs training | Production TF Serving at scale |
-| NumPy intuition | Kaggle grandmaster skills |
-| TensorFlow **hello world** + read code | Become ML researcher |
-
-TensorFlow yahan **interview literacy + RAG foundation** ke liye hai — har din TF nahi likhoge, par code padh paoge aur trade-offs bol paoge.
-
----
-
-## Learning hooks (optional — tera parallel)
-
-| Concept | Tera parallel |
-|---------|---------------|
-| Embedding vector | Hash/fingerprint — similar input → close numeric signature |
-| Cosine similarity | Fuzzy match score — bank recon / dedup |
-| Inference latency | LLM API p99 — same "model run" brain |
-| Batch vs realtime | CSV chunked import vs single user query |
-| Pre-trained model | Vendor API — tum train nahi, **use** karte ho |
 
 ---
 
@@ -66,417 +43,200 @@ TensorFlow yahan **interview literacy + RAG foundation** ke liye hai — har din
 
 ### §0. AI/ML terms — pehli baar (45 min, diagram se pehle)
 
-Tum TS/Node background se aaye ho — **zero prior AI**. Is section ke baad Module 01–11 ki har line mein yeh words recognizable honge. **Architecture diagram §0 ke baad.**
+Tum zero AI background se aaye ho. In shabdon ko ek baar achhe se baith ke samajh lo — poora baaki course inhi par khada hai.
 
-#### 0.1 Token — LLM ki chhoti unit
+**Token.** Token text ka ek **chhota tukda** hai jise model padhता/likhता hai — poora word zaroori nahi, kabhi subword bhi (`ing` alag token ho sakta). Jaise WhatsApp message network packets mein todta hai, LLM text ko tokens mein todta hai — aur aksar billing bhi **per token** hoti hai. `"Return my money please"` model ke andar shायad `["Return", " my", " money", " please"]` — ~4 tokens. Tumhara daily contact ispे: API response mein `usage.prompt_tokens` batayega kitna input consume hua.
 
-**Token** = text ka **chhota piece** jise model padhta/likhta hai. Poora word nahi hota — subword bhi.
-
-| Example text | Rough tokens (idea) |
-|--------------|---------------------|
-| `"hello"` | ~1 token |
-| `"refund policy"` | ~2–3 tokens |
-| Long paragraph | hundreds |
-
-**Analogy (Hinglish):** WhatsApp message ko network **packets** mein todta hai — LLM text ko **tokens** mein todta hai. Billing bhi often **per token**.
-
-```python
-# Conceptual — actual count API se aata hai (Module 01)
-text = "Return my money please"
-# Model internally: ["Return", " my", " money", " please"]  ← ~4 tokens (approx)
-```
-
-| Symbol / term | Matlab |
-|---------------|--------|
-| Token | Model input/output ki atomic unit |
-| Tokenize | String → token ID list |
-| Token ID | Integer — vocabulary mein index |
-
-**Tera daily work:** API response mein `usage.prompt_tokens` — kitna input consume hua.
-
-#### 0.2 Embedding — text → numbers ki list
-
-**Embedding** = text ko **fixed-length vector** (floats ki list) mein map karna taaki **meaning** numeric ho.
+**Embedding.** Yeh sabse important concept hai is module ka. Embedding text ko **floats ki ek fixed-length list (vector)** mein badal deta hai, aise ki **meaning** numeric ban jaaye:
 
 ```
-"refund policy"  →  [0.02, -0.11, 0.88, ..., 0.05]   # e.g. 384 ya 1536 numbers
-"return money"   →  [0.01, -0.09, 0.85, ..., 0.04]   # similar meaning → similar numbers
-"banana bread"   →  [-0.4, 0.7, 0.1, ..., -0.2]      # alag topic → door numbers
+"refund policy"  →  [0.02, -0.11, 0.88, ...]   # e.g. 1536 numbers
+"return money"   →  [0.01, -0.09, 0.85, ...]   # similar meaning → similar numbers
+"banana bread"   →  [-0.4, 0.7, 0.1, ...]      # alag topic → door numbers
 ```
 
-**Analogy:** Har sentence ka **GPS coordinate** — similar sentences paas, alag door. Search "keyword match" nahi — **meaning match**.
+Soch aise: har sentence ka ek **GPS coordinate** mil gaya. Similar matlab waale sentences paas-paas, alag matlab waale door. Isi se "keyword match" ki jagah "**meaning match**" possible hota hai — `"refund"` search karo aur `"return money"` bhi mil jaaye. Yahi RAG ka dil hai (Module 05): docs ko embed karke DB mein rakho, user query ko embed karo, sabse paas waले vectors uthao, aur unka text LLM ko context do.
 
-| Term | Matlab |
-|------|--------|
-| Vector | Numbers ki ordered list — `[0.1, 0.2, ...]` |
-| Dimension | Vector ki length — 1536 = 1536 floats |
-| `embed()` / embeddings API | Function jo text le ke vector de |
+**Model aur weights.** Model ek **function** hai jiske andar **learned numbers (weights)** hain — input aata hai, layers se guzarta hai, output nikalता hai. Weights wo millions/billions floats hain jo training ne set kiye. Soch: model = compiled program, weights = wo internal state jo training se aaya. "Pre-trained" matlab koi pehle hi train kar chuka (GPT, BGE) — tum use download/use karte ho.
 
-**RAG preview (Module 05):** Docs embed karo → DB store → user query embed → **closest vectors** fetch → LLM ko context do.
-
-#### 0.3 Model aur weights
-
-**Model** = ek **function** jiske andar **learned numbers (weights)** hain. Input aata hai → layers → output.
+**Training vs inference — sabse zaroori farak.** Yeh ek line mein gaanth baandh lo: training mein weights **badalte** hain (model seekhता hai), inference mein weights **fixed** rehte hain (model sirf predict karta hai). Analogy bilkul exam jaisी — **training = exam ki taiyari** (notes padhke dimaag update), **inference = exam ka din** (dimaag fixed, sirf answer do).
 
 ```
-Input (tokens/embeddings) → [Layer 1 weights] → [Layer 2 weights] → Output (next token / class / vector)
+TRAINING:   data → model.fit() → weights change → save file   (offline, GPU, hours)
+INFERENCE:  input → model.predict()/API → output             (online, ms, weights untouched)
 ```
 
-| Term | Matlab |
-|------|--------|
-| Weights | Trainable parameters — millions/billions of floats |
-| Architecture | Layers ka design — kitne layers, kitna wide |
-| Pre-trained | Pehle se train ho chuka — GPT, BGE, etc. |
-| Checkpoint / `.h5` / `.safetensors` | Saved weights file |
+Tumhara kaam ~95% inference hai — OpenAI ko `chat.completions` call karna *inference* hai. Training sirf awareness ke liye.
 
-**Analogy:** Model = **compiled program**; weights = **internal state** jo training se set hui.
+**Loss.** Training ke dauran "model kitna galat hai" ka score — ek number jo training kam karne ki koshish karta hai (prediction vs sahi answer compare). Inference mein loss nahi hota, sirf output chahiye.
 
-#### 0.4 Training vs inference — sabse important split
+**Cosine similarity** (detail §5). Do embeddings kitne similar hain, yeh unke beech ke **angle** se naapते hain — `~1.0` matlab same direction (bahut similar meaning), `~0.0` matlab unrelated. RAG mein query vector ko har doc vector se cosine karke top-k uthate hain.
 
-| | **Training** | **Inference** |
-|---|--------------|---------------|
-| Matlab | Weights **seekhna / update** karna | Weights **fixed** — sirf predict |
-| Kab | Offline, rare (lab / fine-tune) | Har user request pe |
-| Compute | GPU, hours–days | ms–seconds |
-| Data | Large dataset (thousands+) | Single prompt / batch |
-| API | Nahi — tum run karte ho | OpenAI `chat.completions` = inference |
-| TF function | `model.fit()` | `model.predict()` |
+> **Ruko, socho:** "1536-dimensional embedding" ka matlab 1536 *words* hai? (Jawab: nahi — 1536 *numbers* (features). Ek vector ki length hai, words se koi seedha relation nahi.)
 
-**Analogy (Hinglish):**
-- **Training** = exam ki **preparation** — notes padhke brain update
-- **Inference** = **exam day** — brain fixed, sirf answer do
+#### §0 common galatfehmiyaan
 
-```
-TRAINING:   data → model.fit() → weights change → save file
-INFERENCE:  input → model.predict() / API call → output (weights touch nahi)
-```
-
-**Tera path:** 95% **inference** — API call, embeddings, RAG search. Training sirf awareness.
-
-#### 0.5 Loss — training mein error score
-
-**Loss** = model ne kitna **galat** predict kiya — number jo **kam** hona chahiye training ke dauran.
-
-```
-prediction = model(input)
-loss = compare(prediction, true_answer)   # e.g. cross-entropy
-# backprop → weights thoda adjust → loss kam
-```
-
-Inference mein loss **nahi** — sirf output chahiye.
-
-#### 0.6 Cosine similarity — preview (detail §5)
-
-Do embeddings **kitne similar** — angle se measure (direction matter, length kam):
-
-```
-cosine ≈ 1.0  → same direction (very similar meaning)
-cosine ≈ 0.0  → orthogonal (unrelated)
-```
-
-RAG: query vector vs sab doc vectors → **top-k highest cosine** → LLM context.
-
-#### 0.7 §0 term checklist
-
-| Term | Ek line mein |
-|------|--------------|
-| Token | Text ka piece — billing + model input |
-| Embedding | Text → float vector — meaning search |
-| Weights | Model ke andar learned numbers |
-| Training | Weights update — offline, heavy |
-| Inference | Fixed weights se output — daily API work |
-| Loss | Training error — minimize karte hain |
-| Vector dimension | Embedding list ki length — e.g. 1536 |
-
-#### §0 common errors (conceptual — galat soch)
-
-| Galat belief | Sach |
-|--------------|------|
+| Galat soch | Sach |
+|-----------|------|
 | "Har AI project mein training karni padti hai" | Mostly pre-trained + inference |
 | "Embedding = keyword search" | Semantic — synonyms paas aate hain |
-| "1536 = 1536 words" | 1536 **numbers** (features), words nahi |
+| "1536 = 1536 words" | 1536 numbers (features), words nahi |
 | "Token = character" | Subword — `ing` alag token ho sakta |
 
-#### §0 checkpoint (NOTES mein likho)
+#### §0 checkpoint (NOTES mein)
 
-1. Training aur inference — ek example each (API vs `fit`)?
-2. Embedding 1536-dim practically kya store karta hai?
-3. Token kyun matter karta hai cost mein?
-
-**§0 done?** Ab honest scope + visual map (Session 2).
+1. Training aur inference ka ek-ek example (API call vs `fit`)?
+2. 1536-dim embedding practically kya store karta hai?
+3. Token cost mein kyun matter karta hai?
 
 ---
 
-## Visual map (§0 ke baad — ab padho)
-
-```mermaid
-flowchart TB
-    subgraph train["Training (offline, heavy)"]
-        Data["Dataset"] --> Model["Train weights"]
-        Model --> Weights["Saved model"]
-    end
-    subgraph infer["Inference (online, fast)"]
-        Input["Text input"] --> Embed["Embedding model"]
-        Embed --> Vec["Vector in space"]
-        Vec --> Use["RAG / similarity / API"]
-    end
-    TF["TensorFlow path (optional)"] -.-> train
-    API["OpenAI / HF API path"] -.-> infer
-```
+## Visual map (§0 ke baad)
 
 ```
-TRAINING (awareness)              INFERENCE (daily job)
-────────────────────              ────────────────────
-labeled data → fit → save weights   text → embed → vector
-         ↑                                    ↓
-    TF / PyTorch optional              cosine search / RAG / chat API
-
-API-LLM path: prompt → provider → tokens out (no local training)
+TRAINING (awareness)              INFERENCE (tumhara daily job)
+────────────────────              ─────────────────────────────
+labeled data → fit → weights      text → embed → vector → cosine search / RAG / chat API
+        ↑                                  (no local training)
+   TF / PyTorch (optional)
 ```
 
-**Mental model**: Training weights **banata** hai; inference un weights (ya hosted API) se **output** deta hai — tumhara ship path zyada tar inference + embeddings.
+**Mental model**: Training weights **banata** hai; inference un weights (ya hosted API) se **output** deta hai. Tumhara ship-path zyadातar inference + embeddings hai.
 
-**Redraw challenge**: Training vs inference split, text→embedding→vector, TF optional vs API path — teen arrows ke saath paper pe draw karo.
+**Redraw challenge**: Training vs inference split + text→embedding→vector + API-path vs TF-path — bina dekhe banao.
 
 ---
 
 ### §1. AI vs ML vs DL vs LLM — umbrella se specific
 
-**Problem kya hai:** "AI" har jagah marketing word — interview aur docs mein precise terms chahiye.
-
-| Term | Matlab (Hinglish) |
-|------|-------------------|
-| **AI** | Machines jo "smart" tasks karein — **umbrella** |
-| **ML** | AI ka subset — data se **learn**, hardcoded `if/else` nahi |
-| **DL** | ML + **neural networks** (layers) — images, text, speech |
-| **LLM** | DL model trained on massive text — **next token** predict |
+"AI" ek marketing shabd ban gaya hai, par interview aur docs mein precise terms chahiye. Yeh ek nesting hai, har andar wali pichli ka subset hai: **AI** sabse bahari chhata hai (machines jo "smart" kaam karein). Uske andar **ML** — wo systems jo data se *seekhते* hain, hardcoded `if/else` nahi. Uske andar **DL** — ML par neural networks (layers) ke saath, jo images/text/speech sambhalta hai. Aur uske andar **LLM** — massive text pe trained DL model jo agla token predict karta hai (GPT, Claude, Llama).
 
 ```
 AI
- └── ML (learn from data)
-      └── DL (neural nets, many layers)
-           └── LLM (GPT, Claude, Llama — text in, text out)
+ └── ML (data se seekho)
+      └── DL (neural nets, kai layers)
+           └── LLM (GPT, Claude — text in, text out)
 ```
 
-| Level | Example product |
-|-------|-----------------|
-| AI | Self-driving (broad) |
-| ML | Spam filter learned from emails |
-| DL | Image recognition |
-| LLM | ChatGPT — tumhara daily tool |
-
-**Tera daily work**: LLM **API** + RAG + agents — **inference layer**, lab training nahi.
-
-> **→ Practice A5** (later): Gateway/RAG/agents mein TF kahan **nahi** chahiye — yahan se vocabulary aayegi.
+Example se: self-driving broadly AI hai, email spam filter ML, image recognition DL, aur ChatGPT LLM. Tumhara daily kaam sabse andar wale layer pe hai — LLM API + RAG + agents, yaani inference layer, lab training nahi.
 
 ---
 
 ### §2. Model, weights, training loop — intuition
 
-**Problem kya hai:** "Model train karo" sunke lagta hai magic — actually ek **repeat loop** hai jo weights adjust karta hai.
-
-**Model** = function with **learnable parameters (weights)**.
-
-**Training loop (numbered flow):**
+"Model train karo" sunke magic lagta hai, par actually yeh ek **repeat loop** hai jo weights ko thoda-thoda adjust karta hai jab tak galti kam na ho jaaye:
 
 ```
-1. Load batch of (input, correct_label) pairs
+1. (input, sahi_answer) ka ek batch lo
 2. Forward pass: prediction = model(input)
-3. Loss = error(prediction, correct_label)
-4. Backprop: loss se gradient — kaunse weights blame
-5. Optimizer: weights thoda update
-6. Repeat epoch until loss acceptable
-7. model.save() — artifact disk pe
+3. Loss = error(prediction, sahi_answer)
+4. Backprop: loss se pata karo kaunse weights "blame" hain
+5. Optimizer: un weights ko thoda update karo
+6. Repeat — jab tak loss acceptable
+7. model.save() — weights disk pe
 ```
 
-**Inference loop:**
+Inference loop chhota hai — sirf step 1–3 ka aadha: saved weights load karo (frozen), input do, forward pass se output lo. Step 4–5 (weights update) inference mein hote hi nahi. Isiliye training GPU-heavy hai (millions of updates) jabki ek inference sirf ek forward pass hai — aur API path mein wo bhi provider ke GPU pe hota hai, tumhare laptop pe nahi.
 
-```
-1. Load saved weights (weights frozen)
-2. input = user text / image
-3. output = model(input)   # forward only — no step 4–5
-4. Return prediction / embedding / tokens
-```
-
-| | Training | Inference |
-|---|----------|-----------|
-| Weights | Update hote hain | Frozen |
-| `model.fit()` | ✅ | ❌ |
-| `model.predict()` | ❌ (eval mode alag) | ✅ |
-| GPU | Often needed | Small model CPU ok; API = provider GPU |
-| Data size | Large dataset | 1 prompt |
-
-*(Active recall tie-in: training GPU-heavy kyunki millions of updates; inference ek forward pass — API pe provider handle karta hai.)*
-
-> **→ Practice A2** (pass): Training vs inference diagram paper/Excalidraw — §0 + is section se labels.
+> **→ Practice A2** (pass): Training vs inference diagram paper/Excalidraw pe — labels §0 + is section se.
 
 ---
 
-### §3. Tensor — multi-dim array (NumPy)
+### §3. Tensor — multi-dimensional array (NumPy)
 
-**Problem kya hai:** Embeddings aur weights **lists of numbers** hain — NumPy se manipulate karna seekho before TensorFlow.
+Embeddings aur weights dono **numbers ki lists** hain, isliye NumPy se inhe handle karna seekho — yeh TensorFlow se pehle ka foundation hai.
 
 ```python
 import numpy as np
 
-v = np.array([0.1, 0.5, -0.3])      # 1D — embedding jaisa
+v = np.array([0.1, 0.5, -0.3])      # 1D — embedding jaisा
 m = np.array([[1, 2], [3, 4]])      # 2D matrix
-v.shape   # (3,)
-m.shape   # (2, 2)
-
-np.dot(np.array([1, 2]), np.array([3, 4]))  # 1*3 + 2*4 = 11
+v.shape   # (3,)  → 3 elements
+np.dot(np.array([1, 2]), np.array([3, 4]))   # 1*3 + 2*4 = 11
 ```
 
-| Line / symbol | Matlab |
-|---------------|--------|
-| `import numpy as np` | NumPy convention |
-| `np.array([...])` | Python list → numeric array |
-| `.shape` | Dimensions tuple — `(3,)` = 3 elements |
-| `np.dot(a, b)` | Dot product — cosine §5 mein use |
-
-**Expected in REPL:**
-
-```python
->>> v = np.array([0.1, 0.5, -0.3])
->>> v.shape
-(3,)
->>> np.dot(np.array([1, 2]), np.array([3, 4]))
-11
-```
-
-**TensorFlow tensors** ≈ NumPy arrays + GPU placement + autograd (training ke liye gradients).
+`np.array(...)` Python list ko numeric array banata hai; `.shape` uske dimensions batata hai (`(3,)` matlab 3-length 1D); aur `np.dot(a, b)` dot product deta hai — yahi cosine similarity (§5) mein use hoga. TensorFlow ke "tensors" inhi NumPy arrays jaise hain, bas GPU placement aur autograd (training gradients) ke saath.
 
 #### §3 common errors
 
-| Error message | Kyun | Fix |
-|---------------|------|-----|
-| `ModuleNotFoundError: numpy` | Install nahi | `pip install numpy` in venv |
+| Error | Kyun | Fix |
+|-------|------|-----|
+| `ModuleNotFoundError: numpy` | Install nahi | `pip install numpy` (venv mein) |
 | `ValueError: shapes not aligned` | Dot product dimension mismatch | Vectors same length check |
-| `.shape` confusion | 1D vs 2D | Print `arr.shape` debug |
 
 ---
 
-### §4. Embeddings — text → vector (RAG foundation)
+### §4. Embeddings — text → vector (RAG ka foundation)
 
-**Problem kya hai:** Keyword search `"refund"` miss kare `"return money"`. **Semantic search** chahiye — meaning se match.
-
-Words/sentences → **dense vectors** — similar meaning → **close** in high-dimensional space.
+Keyword search `"refund"` ko `"return money"` nahi milegा — alag words hain. Iska ilaaj **semantic search** hai: text ko aise dense vectors mein badlo ki similar matlab waले vectors **paas** ho high-dimensional space mein.
 
 ```
-"refund policy"  → [0.02, -0.11, 0.88, ...]   # 1536 dims (OpenAI ada-002 example)
-"return money"   → [0.01, -0.09, 0.85, ...]   # high cosine vs above
-"banana bread"   → [-0.4, 0.7, 0.1, ...]      # low cosine vs refund pair
+"refund policy"  → [0.02, -0.11, 0.88, ...]   # 1536 dims
+"return money"   → [0.01, -0.09, 0.85, ...]   # upar wale se high cosine
+"banana bread"   → [-0.4, 0.7, 0.1, ...]      # refund pair se low cosine
 ```
 
-| Concept | Practical matlab |
-|---------|------------------|
-| 1536 dimensions | Vector = **1536 floats** — DB `vector` column (pgvector baad mein) |
-| Same dim required | Query aur docs same model — warna compare invalid |
-| Normalization | Often unit length — cosine stable |
+Do practical baatein yaad rakho. Ek, jo bhi dimension model deta hai (jaise 1536) wo tumhare DB ke `vector` column ki length ban jaata hai (pgvector, Module 05). Do — query aur docs ko **same embedding model** se banao, warna unke vectors compare karna invalid hai (alag GPS systems ko compare nahi kar sakte). Andar yeh hota hai: text → tokenize → neural net forward → ek single vector mein pool → DB mein store ya query se compare.
 
-**Embedding flow (numbered):**
+Use cases: semantic search, RAG retrieval, clustering, dedup, recommendations — sabki neev yahi "meaning ko vector banao" hai.
 
-```
-1. Raw text string
-2. Tokenize (internal to model)
-3. Neural net forward → hidden state
-4. Pool to single vector (e.g. 1536 floats)
-5. Store in DB / compare with query vector
-```
-
-```mermaid
-flowchart LR
-    T1["refund policy"] --> E1["embed()"]
-    T2["return money"] --> E2["embed()"]
-    E1 --> V1["vec A"]
-    E2 --> V2["vec B"]
-    V1 --> Sim["cosine sim ≈ 0.9"]
-    V2 --> Sim
-```
-
-**Use cases:** semantic search, RAG retrieval, clustering, dedup, recommendations.
-
-*(Active recall Q1: 1536 = embedding size; fixed-length fingerprint for compare/search.)*
-
-> **→ Practice A4** (prep): 3 sentences embed karke similar pair dhundho — §5 cosine ke baad full pass.
+> **→ Practice A4** (prep): 3 sentences embed karke similar pair dhoondho — §5 cosine ke baad full pass.
 
 ---
 
-### §5. Cosine similarity vs Euclidean
+### §5. Cosine similarity
 
-**Problem kya hai:** Do vectors "kitne similar" — distance measure chahiye. Text embeddings pe **cosine** standard.
+Do vectors "kitne similar" hain — iska standard measure text embeddings ke liye **cosine** hai, jo vectors ke beech ka **angle** dekhta hai (direction matter karti hai, length nahi):
 
-**Cosine** = angle between vectors (direction matter, magnitude kam):
+```
+cosine(A, B) = (A · B) / (||A|| × ||B||)
+```
 
-\[
-\text{cosine}(A, B) = \frac{A \cdot B}{\|A\| \|B\|}
-\]
-
-Range: **-1 to 1** (normalized vectors pe often 0–1 for similar docs).
+Range -1 se 1 (similar docs pe aksar 0–1). Code:
 
 ```python
 import numpy as np
 
 def cosine_sim(a: np.ndarray, b: np.ndarray) -> float:
-    a_norm = a / np.linalg.norm(a)
+    a_norm = a / np.linalg.norm(a)   # unit vector — sirf direction
     b_norm = b / np.linalg.norm(b)
     return float(np.dot(a_norm, b_norm))
 
-a = np.array([1.0, 0.0])
-b = np.array([0.9, 0.1])
-cosine_sim(a, b)  # ~0.99 — similar direction
+cosine_sim(np.array([1.0, 0.0]), np.array([0.9, 0.1]))   # ~0.99 (almost same direction)
 ```
 
-| Line / symbol | Matlab |
-|---------------|--------|
-| `np.linalg.norm(a)` | Vector length (magnitude) |
-| `a / norm` | Unit vector — direction preserve |
-| `np.dot(a_norm, b_norm)` | Cosine when both normalized |
-| `~0.99` | Almost same direction |
+Idea seedha hai: pehle dono vectors ko unit-length banao (`/ norm`) taaki sirf direction bache, phir dot product le lo — yahi cosine hai. (Euclidean distance physical coordinates ke liye theek hai, par high-dim text embeddings ke liye cosine standard hai.)
 
-| Metric | Kab use |
-|--------|---------|
-| Cosine | Text embeddings, high-dim |
-| Euclidean | Physical coords, low-dim distance |
-
-**RAG retrieval flow:**
+RAG retrieval poora flow:
 
 ```
 1. query_vec = embed(user_question)
-2. For each doc_vec in database: score = cosine(query_vec, doc_vec)
-3. Sort scores descending → top-k docs
-4. Concatenate doc text → LLM prompt context
+2. har doc_vec ke liye: score = cosine(query_vec, doc_vec)
+3. scores ko descending sort → top-k docs
+4. un docs ka text → LLM prompt ka context
 ```
 
-**Run A1 stub (after implement):**
-
-```bash
-cd modules/00d-ml-ai-foundations/practice
-python cosine_similarity.py
-# Expected: tests pass — identical → 1.0, orthogonal → ~0.0
-```
+> **Ruko, socho:** Agar tum cosine nikalne se pehle vectors ko normalize karna bhool jao, to result 1 se zyada aa sakta hai — galat. Kyun? (Jawab: bina normalize ke tum `A·B` to le rahe ho par `||A||×||B||` se divide nahi — to wo cosine nahi, raw dot product hai, jiska magnitude bound nahi.)
 
 #### §5 common errors
 
-| Error message / bug | Kyun | Fix |
-|---------------------|------|-----|
-| `ZeroDivisionError` | Zero vector | Check embedding non-empty |
-| Similarity > 1 | Norm skip kiya | Normalize pehle |
-| Wrong pair wins A4 | Model not loaded / random vecs | Same embed model for all 3 sentences |
+| Bug | Kyun | Fix |
+|-----|------|-----|
+| `ZeroDivisionError` | Zero vector | Embedding non-empty check |
+| Similarity > 1 | Normalize skip kiya | Pehle normalize karo |
+| Wrong pair wins (A4) | Alag embed models | Teeno sentences same model se |
 
-> **→ Practice A1** (pass): `cosine_similarity.py` — manual formula match; identical → 1.0.
+> **→ Practice A1** (pass): `cosine_similarity.py` — identical → 1.0, orthogonal → ~0.0.
 
 ---
 
-### §6. TensorFlow/Keras — minimal hello (training path awareness)
+### §6. TensorFlow/Keras — minimal hello (training ki awareness)
 
-**Problem kya hai:** Interview / docs mein `model.fit`, `Dense`, `Sequential` dikhe — ek baar haath se chalao taaki **training code padh sako**, daily use nahi.
+Interview ya docs mein `model.fit`, `Dense`, `Sequential` dikhega — ek baar haath se chala lo taaki training code **padh sako**. Yeh daily kaam nahi, sirf literacy. Ek toy AND-gate model:
 
 ```python
-import numpy as np
-import tensorflow as tf
+import numpy as np, tensorflow as tf
 
-# Toy: AND gate — 2 inputs → 1 output
 X = np.array([[0,0],[0,1],[1,0],[1,1]], dtype=float)
 y = np.array([[0],[0],[0],[1]], dtype=float)
 
@@ -484,139 +244,67 @@ model = tf.keras.Sequential([
     tf.keras.layers.Dense(4, activation="relu", input_shape=(2,)),
     tf.keras.layers.Dense(1, activation="sigmoid"),
 ])
-
 model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
-model.fit(X, y, epochs=50, verbose=0)   # TRAINING — weights update
-
-pred = model.predict([[1, 1]], verbose=0)   # INFERENCE → ~[[1.0]]
+model.fit(X, y, epochs=50, verbose=0)        # TRAINING — weights update hote hain
+pred = model.predict([[1, 1]], verbose=0)    # INFERENCE — sirf forward → ~[[1.0]]
 ```
 
-| Line / symbol | Matlab |
-|---------------|--------|
-| `Sequential([...])` | Layers stack — bottom to top |
-| `Dense(4, activation="relu")` | Fully connected, 4 neurons, ReLU |
-| `input_shape=(2,)` | 2 features per sample |
-| `sigmoid` | Output 0–1 — binary classification |
-| `model.compile(...)` | Optimizer + loss define — training setup |
-| `model.fit(X, y, epochs=50)` | **Training** — 50 passes over data |
-| `model.predict([[1,1]])` | **Inference** — forward only |
-
-| API | Phase |
-|-----|-------|
-| `model.fit()` | Training |
-| `model.predict()` | Inference |
-| `model.save()` | Artifact export |
-
-**Expected after `python tf_hello.py` (A3):**
-
-```
-# Loss decreases over epochs (verbose=1)
-# predict [[1,1]] → ~1.0 (AND true)
-```
-
-**Apple Silicon:** `pip install tensorflow-macos` + `tensorflow-metal` — ya Google Colab.
+Yahan `Sequential([...])` layers ka stack hai; `Dense(4, ...)` ek fully-connected layer hai 4 neurons ke saath; `compile(...)` optimizer aur loss set karke training ka setup karta hai. Ab gaur karo wahi training-vs-inference farak code mein dikh raha hai: `model.fit()` **training** hai (weights badle), `model.predict()` **inference** (sirf forward pass). Yahi do lines is poore module ka saar hain. (Apple Silicon pe `tensorflow-macos` + `tensorflow-metal`, ya Google Colab use karo.)
 
 #### §6 common errors
 
-| Error message | Kyun | Fix |
-|---------------|------|-----|
-| `No module named 'tensorflow'` | Not installed | `pip install tensorflow` / macos variant |
-| Loss not decreasing | LR / architecture / data | Toy AND should work — check X,y shapes |
-| `input_shape` warning | Keras 3 style | Still runs — follow stub |
+| Error | Kyun | Fix |
+|-------|------|-----|
+| `No module named 'tensorflow'` | Install nahi | `pip install tensorflow` / macos variant |
+| Loss not decreasing | Shapes/LR | Toy AND chalna chahiye — `X,y` shapes check |
 
-> **→ Practice A3** (pass): Tiny Keras model — `predict()` new input pe kaam kare.
+> **→ Practice A3** (pass): Tiny Keras model — `predict()` naye input pe kaam kare.
 
 ---
 
 ### §7. API path vs training path — tum kya ship karoge
 
-**Problem kya hai:** "Model banayein?" — team ko clear answer: **default API + embeddings**, training exception.
+Team poochhegi "model banayein kya?" — aur tumhara default jawab clear hona chahiye: **API + embeddings; training exception hai.** Do raste hain:
 
-```mermaid
-flowchart TB
-    subgraph api_path["API path (tera default)"]
-        P["Prompt / text"] --> API["OpenAI / Anthropic API"]
-        API --> T["Tokens / embeddings"]
-    end
-    subgraph train_path["Training path (awareness)"]
-        D["Dataset"] --> TF["TF / PyTorch train"]
-        TF --> W["Weights file"]
-        W --> S["Self-host inference"]
-    end
-```
+- **API path (tumhara default):** prompt/text → OpenAI/Anthropic API → tokens/embeddings. Best quality, zero ML-ops, par cost + vendor dependency.
+- **Training path (awareness):** dataset → TF/PyTorch train → weights file → khud host karke inference. Control deta hai par data + GPU + skill maangता hai.
 
-| Approach | Pros | Cons |
-|----------|------|------|
-| **GPT-4 API** | Best quality, zero ML ops | Cost, latency, vendor |
-| **Embeddings API** | Easy RAG | Per-token cost |
-| **Local sentence-transformers** | Free inference, privacy | Ops, GPU for scale |
-| **Fine-tune / train TF** | Custom domain | Data, GPU, skill |
+Practically tumhare projects mein: LLM Gateway, RAG app, aur agents — teeno mein TF training **nahi** chahiye (sab API/embeddings se chalте hain). Custom vision model jaisा kuch ho to *shayad* fine-tune — par wo early career mein rare hai. Bottom line: jaldi ship karna hai to API path; bade scale pe control chahiye to training, par wo bada upfront investment hai.
 
-| Project | TF training? | Inference how |
-|---------|--------------|---------------|
-| LLM Gateway | ❌ | FastAPI + httpx → OpenAI |
-| RAG app | ❌ | Embeddings API or local encode |
-| Agents | ❌ | LLM API + tools |
-| Custom vision 2050 | Maybe | Fine-tune — rare early career |
-
-*(Active recall Q3: API = fast ship, no weight ops; TF train = control at scale but heavy upfront.)*
-
-> **→ Practice A4** (pass): 3 sentences → top similar pair.  
+> **→ Practice A4** (pass): 3 sentences → top similar pair.
 > **→ Practice A5** (pass): ~200 words NOTES — TF kahan **nahi** chahiye; Gateway, RAG, agents name karo.
 
 ---
 
-### §8. Hugging Face hub — browse, don't boil ocean
+### §8. Hugging Face hub — model card padhna
 
-**Problem kya hai:** "Kaunsa model?" — HF pe **cards** padhna = interview + local embed choose karna.
+"Kaunsa model use karun?" — iska jawab Hugging Face pe **model cards** padhke milta hai. Models hub pe publish hote hain apni size, license, aur task ke saath. Embedding ke liye `bge-small` ya `all-MiniLM-L6-v2` jaise search karoge. Card mein chaar cheezein dekho: **task** (`sentence-similarity` chahiye, `text-generation` nahi), **dimensions** (DB schema se match kare), **license** (commercial use OK?), aur **size** (laptop pe chalega?).
 
-Models **hub** pe published — size, license, task (embeddings, chat, etc.).
-
-```
-huggingface.co → search "bge-small" / "all-MiniLM-L6-v2"
-```
-
-| Card field | Kyun dekho |
-|------------|------------|
-| Task | `sentence-similarity` vs `text-generation` |
-| Dimensions | Must match your DB schema |
-| License | Commercial ok? |
-| Size | Laptop pe chalega? |
-
-**Flow — local embed (A4 Option B):**
+Local embedding banane ka flow:
 
 ```
 1. pip install sentence-transformers
 2. model = SentenceTransformer('all-MiniLM-L6-v2')
 3. vectors = model.encode(["sentence1", "sentence2", ...])
-4. cosine_sim from A1 → best_pair()
+4. A1 ka cosine_sim → best_pair()
 ```
 
-Tum **train nahi** — **artifact download** + `encode` = same brain as OpenAI embeddings API, local version.
-
-#### §8 common errors
-
-| Error message | Kyun | Fix |
-|---------------|------|-----|
-| Model download slow | First run pulls GB | Wait; cache `~/.cache/huggingface` |
-| CUDA errors local | GPU driver | CPU mode ok for MiniLM |
-| API 401 A4 Option A | Missing `OPENAI_API_KEY` | `.env` from Module 00a pattern |
+Yahan bhi tum **train nahi** kar rahe — bas ek pre-trained artifact download karke `encode` kar rahe ho. Yeh OpenAI embeddings API jaisा hi kaam hai, bas local. Pehli baar model download GB mein ho sakta hai (`~/.cache/huggingface` mein cache hota hai).
 
 ---
 
 ## Practice
 
-> **Saare assignments ek jagah**: [`practice/README.md`](practice/README.md) — problem statements, instructions, pass criteria.  
-> Code **tum** likhoge Cursor mein. Stubs `practice/` mein hain (`TODO` search).  
-> Stuck? Chat: `@modules/00d-ml-ai-foundations/MODULE.md` + error paste karo.
+> **Saare assignments**: [`practice/README.md`](practice/README.md). Code **tum** likhoge.
+> Stuck? `@modules/00d-ml-ai-foundations/MODULE.md` + error paste.
 
-| # | Theory § | File | Kya karna hai | Pass when |
-|---|----------|------|---------------|-----------|
-| A1 | §5 | `practice/cosine_similarity.py` | Cosine function TODO | Manual formula match; identical → 1.0; orthogonal → ~0.0 |
-| A2 | §0, §2 | Paper / Excalidraw | Training vs inference diagram | Self-check / coach — labels from §0 |
-| A3 | §6 | `practice/tf_hello.py` | Tiny Keras model TODO | `predict()` on new input works |
-| A4 | §4, §5, §8 | `embeddings_local.py` or `embeddings_api.py` + `embeddings_common.py` | 3 sentences → find top pair | Similar pair ranks highest |
-| A5 | §1, §7 | `NOTES.md` | ~200 words: TF kahan **nahi** chahiye? | Names Gateway, RAG, agents |
+| # | Theory § | File | Pass when |
+|---|----------|------|-----------|
+| A1 | §5 | `cosine_similarity.py` | identical → 1.0; orthogonal → ~0.0 |
+| A2 | §0, §2 | Paper / Excalidraw | Training vs inference diagram, labelled |
+| A3 | §6 | `tf_hello.py` | `predict()` naye input pe kaam kare |
+| A4 | §4,§5,§8 | `embeddings_local.py` / `_api.py` + `_common.py` | Similar pair sabse upar rank kare |
+| A5 | §1, §7 | `NOTES.md` | ~200 words: TF kahan nahi chahiye |
 
 ### Setup
 
@@ -624,48 +312,35 @@ Tum **train nahi** — **artifact download** + `encode` = same brain as OpenAI e
 cd modules/00d-ml-ai-foundations/practice
 python3 -m venv .venv && source .venv/bin/activate
 pip install numpy
-# A3: pip install tensorflow  (or tensorflow-macos on M1/M2)
-# A4 Option A: pip install openai python-dotenv  → embeddings_api.py
-# A4 Option B: pip install sentence-transformers  → embeddings_local.py (recommended)
+# A3: pip install tensorflow (ya tensorflow-macos)
+# A4 Option A: pip install openai python-dotenv
+# A4 Option B: pip install sentence-transformers (recommended, no API key)
 ```
 
-### A1 hints
-
-- `np.linalg.norm` for magnitude
-- Test: identical vectors → 1.0; orthogonal → 0.0
-
-### A3 hints
-
-- XOR ya simple 2-input AND enough
-- `epochs=50`, `verbose=1` se loss dekho
-
-### A4 hints
-
-- **Option A** (`embeddings_api.py`): OpenAI embeddings API + cosine
-- **Option B** (`embeddings_local.py`): `sentence-transformers` local — no API key
-- **Shared** (`embeddings_common.py`): `best_pair()` — A1 cosine import
-- 3 sentences: 2 similar topic, 1 random
+### Hints
+- A1: `np.linalg.norm` for magnitude; identical → 1.0, orthogonal → 0.0.
+- A4: Option A = OpenAI embeddings API; Option B = local `sentence-transformers`; `best_pair()` A1 cosine import kare. 3 sentences: 2 similar, 1 random.
 
 ---
 
 ## Active recall (khud jawab likho NOTES mein)
 
-1. Embedding dimension 1536 ka matlab kya hai practically?
-2. Training GPU kyun chahiye, inference kab CPU ok?
-3. TensorFlow vs calling GPT-4 API — trade-off 3 bullets?
+1. Embedding dimension 1536 ka practical matlab kya hai?
+2. Training GPU kyun chahiye, inference kab CPU pe theek hai?
+3. TensorFlow train karna vs GPT-4 API call — trade-off 3 bullets mein?
 
-**Chat drill** (optional): "Module 00d recall — 3 questions test karo"
+**Chat drill** (optional): "Module 00d recall — 3 questions mujhse poochh."
 
 ---
 
 ## Progress checklist
 
 - [ ] §0 terms + checkpoint NOTES mein
-- [ ] Honest scope samjha
-- [ ] Visual map redraw challenge kiya
-- [ ] Theory §1–§8 padh liya (session table follow)
+- [ ] Scope samjha
+- [ ] Visual map redraw challenge
+- [ ] Theory §1–§8 padha
 - [ ] Practice A1–A5 pass
-- [ ] Active recall NOTES mein likha
+- [ ] Active recall NOTES mein
 - [ ] NOTES session log updated
 
 ---
@@ -675,4 +350,4 @@ pip install numpy
 - [NumPy Quickstart](https://numpy.org/doc/stable/user/quickstart.html)
 - [OpenAI — Embeddings guide](https://platform.openai.com/docs/guides/embeddings)
 - [TensorFlow — Quickstart for beginners](https://www.tensorflow.org/tutorials/quickstart/beginner)
-- [3Blue1Brown — Neural Networks Ch.1](https://www.youtube.com/watch?v=aircAruvnKk) (visual optional)
+- [3Blue1Brown — Neural Networks Ch.1](https://www.youtube.com/watch?v=aircAruvnKk)

@@ -1,12 +1,12 @@
 # Module 00e — Go Platform Backend
 
-> **Padho**: Isi file mein **Theory** — bahar mat jao.  
-> **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
+> **Padho**: Isi file mein **Theory** — bahar mat jao.
+> **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`
 > **Nav**: ← [00d ML Foundations](../00d-ml-ai-foundations/MODULE.md) · Next → [Module 01 LLM APIs](../01-llm-apis/MODULE.md)
 
-> **Format note**: Textbook — **§0 syntax pehle** (`:=`, `err`, pointers). Architecture baad mein. Revision notes nahi. Standard: `@MODULE-TEACHING-STANDARD.md`
+> **Format**: Textbook — §0 Go syntax pehle (`:=`, `err`, pointers), prose mein. Voice: `@MODULE-TEACHING-STANDARD.md`
 
-> **Role**: **Go = platform** (auth, tenants, billing, public API). **Python = AI** (RAG, agents) — module 00c.
+> **Role**: **Go = platform** (auth, tenants, billing, public API). **Python = AI** (RAG, agents, module 00c).
 
 ## At a glance
 
@@ -14,39 +14,31 @@
 |---|---|
 | Prerequisites | 00a (Docker), 00c (HTTP API mental model) |
 | Duration | ~4–6 sessions |
-| Project? | No (enables Projects phase 2 + Project C) |
-| Exit test | Go syntax explain + middleware + proxy curl se demo |
+| Project? | No (par Projects phase 2 + Project C enable karta hai) |
+| Exit test | Go syntax samjhao + middleware + proxy curl se demo |
 
-## Visual map
+## Yeh module kis baare mein hai
+
+Tumhare portfolio mein do tarah ka backend hoga. **Python** AI ka kaam karega (RAG, agents) — wo tumne 00c mein dekha. **Go** "platform" layer hoga — wo public-facing API jo auth, tenants, billing, aur rate-limiting sambhalta hai, aur phir andar Python service ko call karta hai. Yeh module Go ka wo zaroori hissa sikhata hai.
+
+Mental model bank jaisा socho: **Go = bank ki branch** (customer-facing, ID check karta hai), **Python = back-office specialist** (asli AI kaam, customer se directly nahi milta). Customer Python ko kabhi directly nahi pahunchta — hamesha Go ke through.
 
 ```
-Client
-   │
-   ▼
-┌──────────────────────────────┐
-│  GO PLATFORM (:8080)         │  ← tum yahan likhoge
-│  auth │ tenant │ proxy       │
-└──────────────┬───────────────┘
-               │  internal HTTP only
-               ▼
-┌──────────────────────────────┐
-│  PYTHON AI (:8001)           │  ← 00c FastAPI
-│  RAG / agents                │
-└──────────────────────────────┘
+Client → GO PLATFORM (:8080)  auth│tenant│proxy  → (internal HTTP) → PYTHON AI (:8001)  RAG/agents
 ```
 
-**Mental model**: Go = bank branch (customer face). Python = back-office specialist. Customer Python ko directly nahi milta.
+Go ki grammar TS se alag hai — `:=`, multiple return values, aur explicit error checks naye honge. §0 mein har symbol zero se dunga; uske bina practice files padhoge to har line pe atकोge.
 
 ---
 
 ## Read order (strict)
 
-1. §0 Go syntax → **A1** start  
-2. §1–§2 HTTP + Chi → **A1** complete  
-3. §3 Middleware → **A2**  
-4. §4 Context → **A2** complete  
-5. §5 HTTP client proxy → **A3**  
-6. §6–§7 architecture story → **A4** NOTES
+1. §0 Go syntax → **A1** start
+2. §1–§2 HTTP + Chi → **A1** complete
+3. §3 Middleware → **A2**
+4. §4 Context → **A2** complete
+5. §5 HTTP client proxy → **A3**
+6. §6–§8 architecture story → **A4** NOTES
 
 ---
 
@@ -54,465 +46,179 @@ Client
 
 ### §0. Go syntax — pehli baar, har symbol (45 min + terminal try)
 
-Tum TypeScript jaante ho. Go **nayi grammar** hai — `:` nahi, `{` hai, lekin **`:=`** aur **multiple return** naye hain.  
-**Is section ke bina** practice files padhoge toh har line pe atakoge. Ek ek karke karo.
+Tum TypeScript jaante ho. Go bhi curly-brace language hai, par kuch cheezein nayi hain. Ek-ek karke karo, jaldbaazi mat.
 
-#### 0.1 File structure — har `.go` file
+**File ka shape.** Har `.go` file ek `package` se shuru hoti hai; chal-ne wale program ke liye `package main` + `func main()`:
 
 ```go
-package main   // line 1 — hamesha. main = runnable program
+package main
+import "fmt"
 
-import "fmt"   // imports
-
-func main() {  // entry point — C/JS main jaisa
+func main() {
     fmt.Println("hello")
 }
 ```
 
-| Line | Matlab |
-|------|--------|
-| `package main` | Is folder ka package naam. Executable ke liye `main` + `func main()` |
-| `import "fmt"` | Standard library — format/print |
-| `func main()` | Program yahan se start |
+Run: `cd practice && go run .`
 
-**Run:**
-
-```bash
-cd modules/00e-go-platform/practice
-go run .
-```
-
----
-
-#### 0.2 `:=` — short variable declaration (sabse common confusion)
+**`:=` — sabse common confusion.** Yeh "naya variable banao aur value do" hai, jisme type right side se infer hota hai. `name := "gateway"` ek string banata hai, `port := 8080` ek int. Pehle se bane variable ko sirf badalna ho to `=` (bina colon). Teen rules gaanth lo: (1) `:=` sirf function ke andar chalta hai, package level pe `var`/`const`; (2) left side pe kam se kam ek variable naya hona chahiye; (3) **declared-but-unused = compile error** — Go bekaar variable allow nahi karta (yeh shuru mein chidhaata hai par baad mein accha lagta hai).
 
 ```go
-name := "gateway"    // DECLARE + assign, type auto = string
-port := 8080         // type auto = int
+name := "gateway"   // TS ka let name = "gateway"
+name = "other"      // reassign — naya nahi, isliye = (no colon)
 ```
 
-**`:=` matlab:** "naya variable banao aur value do" — type **right side se infer**.
-
-| Syntax | Kab use | Example |
-|--------|---------|---------|
-| `:=` | **Pehli baar** declare (function ke andar) | `x := 10` |
-| `=` | Pehle se declared — sirf value change | `x = 20` |
-| `var x int = 10` | Explicit type, function ke andar/bahar | `var port int = 8080` |
-| `const X = 10` | Change nahi hoga | `const DevSecret = "test"` |
-
-**TS parallel:**
-
-```typescript
-// TS
-let name = "gateway";  // ≈ name := "gateway"
-name = "other";        // ≈ name = "other" (no :=)
-```
-
-**Multiple assign (bahut common Go mein):**
+**Multiple return — Go ki signature feature.** Yeh tum har jagah dekhoge. HTTP/DB calls do values lautate hain: actual result aur ek `error`:
 
 ```go
 resp, err := client.Do(req)
-// resp = first return value
-// err = second return value (error)
-```
-
-**Rules — yaad rakho:**
-
-1. `:=` **sirf function ke andar** — package level pe `var` ya `const`
-2. Kam se kam **ek variable naya** hona chahiye left side pe  
-   `x, err := foo()` OK agar `err` naya hai; sirf `x = ...` agar dono pehle se hain
-3. **Declared but not used** = compile error — Go unused variables allow nahi karta
-
-**Common errors:**
-
-| Code | Error | Fix |
-|------|-------|-----|
-| `name = "x"` (pehle declare nahi) | undefined: name | `name := "x"` |
-| `name := "a"` dubara same block | no new variables | `name = "b"` |
-| `x := 1` package level | syntax error | `var x = 1` |
-
-**Try abhi** — `practice/` mein temp file ya REPL nahi Go mein — chhota `main.go` snippet:
-
-```go
-func main() {
-    a := 1
-    a = 2           // reassign OK
-    b, c := 3, 4    // multiple :=
-    _, err := divide(1, 0)  // _ = ignore value
-}
-```
-
----
-
-#### 0.3 Types — int, string, bool, `[]byte`
-
-```go
-var s string = "hello"
-var n int = 42
-var ok bool = true
-
-bytes := []byte(`{"ok":true}`)  // byte slice — JSON body HTTP mein
-```
-
-| Go | TS | Kab dikhega |
-|----|-----|-------------|
-| `string` | `string` | headers, JSON text |
-| `int` | `number` | IDs, ports |
-| `bool` | `boolean` | flags |
-| `[]byte` | `Uint8Array` / Buffer | `w.Write([]byte(...))` |
-| `nil` | `null` | no error, empty pointer |
-
-**Backticks `` `...` ``** = raw string — escape nahi:
-
-```go
-`{"ok":true}`   // JSON literal easy
-```
-
----
-
-#### 0.4 Functions — params, multiple return, `error`
-
-```go
-func add(a int, b int) int {
-    return a + b
-}
-
-func divide(a, b float64) (float64, error) {
-    if b == 0 {
-        return 0, fmt.Errorf("divide by zero")
-    }
-    return a / b, nil
-}
-```
-
-**Multiple return** = Go signature feature. HTTP/DB calls almost always:
-
-```go
-resp, err := http.Get(url)
 if err != nil {
-    // handle
-    return
+    return   // handle karo
 }
 // resp use karo
 ```
 
-**TS:** usually `throw`. **Go:** `error` return — **explicit check** `if err != nil`.
+Yahi Go ka error-handling tareeka hai — TS ki tarah `throw`/`try-catch` nahi, balki **explicit `if err != nil` check** har risky call ke baad. Pehle yeh verbose lagega, par yeh tumhe har failure ke baare mein *sochne* pe majboor karta hai — production code mein yeh achhi baat hai. Value ignore karni ho to `_` (blank identifier): `_, err := foo()`.
 
-**`_` blank identifier** — value ignore:
+**Types jo dikhenge.** `string`, `int`, `bool` to clear hain. Naya hai `[]byte` (byte slice) — HTTP bodies bytes mein likhi jaati hain, isliye `w.Write([]byte(...))` dikhega. Aur `nil` Go ka `null` hai (no error, empty pointer). Backtick `` `{"ok":true}` `` raw string hai — escape nahi karni padti, JSON literals ke liye perfect.
 
-```go
-_, err := fmt.Println("x")  // Println returns (int, error) — count ignore
-```
+**Pointer `*` — abhi bas itna.** Practice mein `func handler(w http.ResponseWriter, r *http.Request)` dikhega. `*http.Request` ka matlab "Request struct ka pointer (reference)" — bada struct copy karne ke bajaye share karte hain. Abhi `*` ko "reference jaisा" socho; itna kaafi hai ki middleware request ko modify kar sake (headers, context).
 
----
-
-#### 0.5 `*` pointer — `*http.Request` kya hai?
-
-Practice mein dikhega:
-
-```go
-func handler(w http.ResponseWriter, r *http.Request) {
-```
-
-| Syntax | Matlab |
-|--------|--------|
-| `*http.Request` | Pointer to Request — original struct share, copy nahi |
-| `&x` | x ka address |
-| `nil` | koi object nahi |
-
-Abhi itna kaafi: **`*` = reference jaisa socho** — bada struct copy mat karo. Middleware `r *http.Request` modify kar sakta hai (headers, context).
-
----
-
-#### 0.6 Struct — typed object
+**Struct — typed object.** TS ke type/object jaisa, ek dhyaan dene layak twist ke saath: field ka naam **capital se shuru** ho to wo exported hai (dusre packages use kar sakte), lowercase ho to package-private:
 
 ```go
 type Tenant struct {
-    ID   string   // capital = exported (dusre packages use kar sakte)
-    name string   // lowercase = private is package ke andar
+    ID   string   // capital = exported
+    name string   // lowercase = private
 }
-
 t := Tenant{ID: "t1", name: "Acme"}
-fmt.Println(t.ID)
 ```
 
-TS:
+**Baaki chhoti cheezein.** Anonymous function `func(w, r) { ... }` Express ke `(req, res) => {}` jaisा inline callback hai. Imports ek block mein, aur unused import bhi compile error (`go mod tidy` se sync). Dependencies ke liye: `go mod tidy` ≈ `npm install`, `go get pkg@ver` ≈ `npm install pkg`, `go run .` compile + run, `go build -o api` binary.
 
-```typescript
-type Tenant = { ID: string; name: string };
-const t: Tenant = { ID: "t1", name: "Acme" };
-```
+> **Ruko, socho:** Go mein agar tumne `name := "a"` likha aur niche `name` ko kabhi use nahi kiya, to kya hoga? (Jawab: compile error — "declared but not used". Go forces tumhe ya use karo ya hatao.)
+
+#### §0 checkpoint (NOTES mein, bina dekhe)
+
+1. `:=` vs `=` vs `var` ka farak?
+2. `resp, err := ...` do values kyun?
+3. `if err != nil` har jagah kyun?
+4. `[]byte` HTTP body mein kyun?
+
+**Pass?** Ab §1. Atke to chat mein symbol paste karo, theory dubara mat likhwao.
 
 ---
 
-#### 0.7 Anonymous function — `func(w, r) { ... }`
+### §1. HTTP server Go mein — `net/http`
 
-```go
-r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte(`{"ok":true}`))
-})
-```
-
-Express: `(req, res) => { ... }` inline callback — same idea.
-
----
-
-#### 0.8 Import block
-
-```go
-import (
-    "fmt"
-    "net/http"
-
-    "github.com/go-chi/chi/v5"   // third party
-)
-```
-
-Unused import = **compile error**. `go mod tidy` se sync.
-
----
-
-#### 0.9 `go mod` — dependencies
-
-```bash
-go mod tidy      # npm install jaisa
-go get pkg@ver   # npm install pkg jaisa
-go run .         # compile + run all .go in package main
-go build -o api  # binary banao
-```
-
-**`go.mod`** example:
-
-```go
-module github.com/you/platform
-go 1.22
-require github.com/go-chi/chi/v5 v5.0.12
-```
-
----
-
-#### 0.10 §0 checkpoint — khud likh paoge?
-
-Bina dekhe explain karo (NOTES mein):
-
-1. `:=` vs `=` vs `var`  
-2. `resp, err := ...` kyun do values  
-3. `if err != nil` kyun har jagah  
-4. `[]byte` HTTP body mein kyun  
-
-**Pass?** Ab §1 HTTP — warna §0 dubara + chat mein symbol pucho.
-
----
-
-### §1. HTTP server Go mein — `net/http` (→ A1)
-
-Express mein: `app.get("/health", handler)`.  
-Go stdlib mein: **`http.HandlerFunc`** — function jo request accept karta hai.
-
-**Handler signature (yaad rakho):**
+Express mein `app.get("/health", handler)`. Go stdlib mein handler ek function hota hai jiska signature fixed hai — `w` se response likho, `r` se request padho:
 
 ```go
 func handler(w http.ResponseWriter, r *http.Request) {
-    // w = response likho (headers + body)
-    // r = request padho (method, URL, headers, body)
+    // w = response (headers + body) likho
+    // r = request (method, URL, headers, body) padho
 }
 ```
 
-**Minimal server — har line:**
+Minimal server:
 
 ```go
 package main
-
-import (
-    "log"
-    "net/http"
-)
+import ("log"; "net/http")
 
 func main() {
-    // Route register: pattern + handler function
     http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Content-Type", "application/json")
-        w.WriteHeader(http.StatusOK)  // 200 — default bhi 200 hai
-        w.Write([]byte(`{"ok":true}`))
+        w.WriteHeader(http.StatusOK)        // 200
+        w.Write([]byte(`{"ok":true}`))      // body — bytes, string nahi
     })
-
     log.Println("listening :8080")
-    log.Fatal(http.ListenAndServe(":8080", nil))
-    // nil = default mux (router). Production mein chi use karenge.
+    log.Fatal(http.ListenAndServe(":8080", nil))   // nil = default router
 }
 ```
 
-| Line | Matlab |
-|------|--------|
-| `http.HandleFunc("/health", fn)` | GET/POST sab methods — method check khud karo |
-| `w.Header().Set(...)` | Response header |
-| `w.WriteHeader(200)` | Status code |
-| `w.Write([]byte(...))` | Response body — bytes chahiye, string nahi |
-| `ListenAndServe(":8080", nil)` | Port 8080 pe suno — block karta hai |
-
-**Test:**
-
-```bash
-curl http://localhost:8080/health
-```
-
-**Method check (sirf GET allow):**
-
-```go
-if r.Method != http.MethodGet {
-    http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-    return
-}
-```
+Do baatein jo Express se alag hain. Ek, response body **bytes** mein likhni padti hai (`[]byte(...)`), seedha string nahi. Do, `http.HandleFunc` saare HTTP methods pe match karta hai — agar sirf GET chahiye to khud check karo: `if r.Method != http.MethodGet { http.Error(w, "...", http.StatusMethodNotAllowed); return }`. (Yeh manual kaam §2 mein chi router solve kar dega.)
 
 ---
 
-### §2. Chi router — clean routes (→ A1)
+### §2. Chi router — clean routes
 
-Stdlib `HandleFunc` chhota demo ke liye OK. **chi** = Express jaisa router — methods, groups, middleware.
-
-**Install** (already in `go.mod`):
-
-```bash
-go get github.com/go-chi/chi/v5
-```
-
-**`main.go` pattern:**
+Stdlib `HandleFunc` chhote demo ke liye theek hai par method-matching khud karni padti hai. **chi** ek Express-jaisा router hai — per-method routes, groups, middleware sab deta hai:
 
 ```go
-package main
-
-import (
-    "log"
-    "net/http"
-
-    "github.com/go-chi/chi/v5"
-)
+import ("log"; "net/http"; "github.com/go-chi/chi/v5")
 
 func main() {
     r := chi.NewRouter()
-
     r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Content-Type", "application/json")
         w.Write([]byte(`{"ok":true}`))
     })
-
     r.Post("/v1/query", func(w http.ResponseWriter, r *http.Request) {
-        // A3 mein proxyToRAG yahan lagega
-        http.Error(w, "not implemented", http.StatusNotImplemented)
+        http.Error(w, "not implemented", http.StatusNotImplemented)   // A3 mein bharega
     })
-
-    log.Println("listening :8080")
-    log.Fatal(http.ListenAndServe(":8080", r))
-    //                                      ↑ router pass karo — nil nahi
+    log.Fatal(http.ListenAndServe(":8080", r))   // nil ki jagah router pass karo
 }
 ```
 
-| Chi | Express |
-|-----|---------|
-| `r.Get("/health", fn)` | `app.get("/health", fn)` |
-| `r.Post("/v1/query", fn)` | `app.post("/v1/query", fn)` |
-| `r.Route("/v1", func(r chi.Router) { ... })` | `router = express.Router(); app.use('/v1', router)` |
-| `r.Use(middleware)` | `app.use(middleware)` |
-
-**Route groups — auth sirf `/v1` pe:**
+Mapping seedha hai: `r.Get(...)` ≈ `app.get(...)`, `r.Use(mw)` ≈ `app.use(mw)`, aur `r.Route("/v1", ...)` ≈ Express ka nested router. Yeh `Route` grouping ek important kaam karta hai — auth sirf `/v1/*` pe lagana:
 
 ```go
 r.Route("/v1", func(r chi.Router) {
-    r.Use(tenantAuthMiddleware)  // sab /v1/* pe lagega
+    r.Use(tenantAuthMiddleware)   // sirf /v1/* pe
     r.Post("/query", proxyToRAG)
 })
 ```
 
-**Practice A1 pass:** `curl localhost:8080/health` → `{"ok":true}`
+**A1 pass:** `curl localhost:8080/health` → `{"ok":true}`.
 
 ---
 
-### §3. Middleware — `http.Handler` chain (→ A2)
+### §3. Middleware — `http.Handler` chain
 
-**Idea:** Middleware = function jo **next handler** ko wrap kare.
-
-Go type:
-
-```go
-type Handler interface {
-    ServeHTTP(w http.ResponseWriter, r *http.Request)
-}
-```
-
-Middleware signature:
+Go mein middleware ek function hai jo **agle handler ko wrap** karta hai. Signature pehli baar ajeeb lagta hai par pattern yaad ho jaaye to clear hai: ek `http.Handler` lo (`next`), aur ek naya handler return karo jo `next` ko beech mein call kare:
 
 ```go
 func myMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        // BEFORE request hits route
-        next.ServeHTTP(w, r)  // andar bhejo
-        // AFTER response (agar wrap kiya)
+        // BEFORE — request route tak pahunchne se pehle
+        next.ServeHTTP(w, r)   // andar bhejo
+        // AFTER — response wapas aane ke baad
     })
 }
 ```
 
-**Request ID middleware — line by line** (`middleware.go`):
+`next.ServeHTTP(w, r)` hi wo line hai jo request ko chain mein aage bhejti hai — agar tum ise call na karo, request wahin ruk jaayegi (jaise auth fail pe). Ek request-ID middleware:
 
 ```go
-import (
-    "context"
-    "net/http"
-    "github.com/google/uuid"  // ya fmt.Sprintf + random — practice mein uuid package optional
-)
-
 func requestIDMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         requestID := r.Header.Get("X-Request-ID")
         if requestID == "" {
             requestID = uuid.New().String()
         }
-        // response header set karo BEFORE next — ya after, dono OK
         w.Header().Set("X-Request-ID", requestID)
         next.ServeHTTP(w, r)
     })
 }
 ```
 
-**Register in main:**
-
-```go
-r := chi.NewRouter()
-r.Use(requestIDMiddleware)
-r.Use(tenantAuthMiddleware)  // order: upar wala pehle chalega (outer)
-```
-
-**Flow:**
-
-```
-Request
-  → requestIDMiddleware (outer)
-    → tenantAuthMiddleware
-      → route handler
-    ← back
-  ← back
-Response
-```
-
-Express: same onion model as `app.use()`.
+Register `r.Use(requestIDMiddleware)` se. Order matter karta hai — jo `Use` pehle, wo "outer" (pehle chalता hai). Yeh Express ka same onion model hai: outer middleware → inner middleware → route → wapas inner → wapas outer.
 
 ---
 
-### §4. Context — request ke saath tenant carry karna (→ A2)
+### §4. Context — request ke saath tenant carry karna
 
-**Problem:** Middleware ne API key se tenant nikala — route handler ko kaise do?
+Yahan ek asli problem hai: auth middleware ne API key se tenant nikal liya — ab wo tenant route handler tak kaise pahunche? Go ka jawab `context.Context` hai, jo request ke saath values attach karta hai.
 
-**Answer:** Go ka `context.Context` — request ke saath values attach.
-
-**Step 1 — custom key type** (collision avoid):
+Pehle ek custom key type banao (string keys collision kar sakti hain, isliye apna type):
 
 ```go
 type contextKey string
-
 const tenantIDKey contextKey = "tenant_id"
 ```
 
-**Step 2 — auth middleware:**
+Auth middleware mein API key check karke tenant ko context mein daalo:
 
 ```go
 func tenantAuthMiddleware(next http.Handler) http.Handler {
@@ -520,221 +226,113 @@ func tenantAuthMiddleware(next http.Handler) http.Handler {
         apiKey := r.Header.Get("X-API-Key")
         if apiKey == "" {
             http.Error(w, `{"error":"missing api key"}`, http.StatusUnauthorized)
-            return
+            return   // next call NAHI — request yahin ruk gayi
         }
-        // practice: fake mapping — prod mein DB lookup
-        tenantID := "tenant-" + apiKey
-
-        // context mein store — NEW request with updated context
+        tenantID := "tenant-" + apiKey   // practice: fake; prod mein DB lookup
         ctx := context.WithValue(r.Context(), tenantIDKey, tenantID)
-        r = r.WithContext(ctx)
-
-        next.ServeHTTP(w, r)
+        next.ServeHTTP(w, r.WithContext(ctx))   // naya request, updated context
     })
 }
 ```
 
-**Step 3 — handler mein read:**
+Handler mein wapas padhna (`v, ok := ...(string)` Go ka type-assertion idiom hai — `ok` batata hai value mili ya nahi):
 
 ```go
 func tenantFromContext(ctx context.Context) string {
     v, ok := ctx.Value(tenantIDKey).(string)
-    if !ok {
-        return ""
-    }
+    if !ok { return "" }
     return v
 }
-
-// proxy ya handler mein:
-tenantID := tenantFromContext(r.Context())
 ```
 
-**Test A2:**
+Gaur karo jab API key missing thi, hum ne `http.Error(...)` ke baad `return` kiya aur `next.ServeHTTP` call **nahi** kiya — yahi request ko 401 pe rok deta hai.
 
-```bash
-# ❌
-curl -i http://localhost:8080/v1/query
-# 401
-
-# ✅
-curl -i -X POST http://localhost:8080/v1/query \
-  -H "X-API-Key: test" \
-  -H "Content-Type: application/json" \
-  -d '{}'
-```
+> **Ruko, socho:** Agar auth middleware mein `http.Error(...)` ke baad `return` likhna bhool jao, to kya hoga? (Jawab: request fail hone ke *baad bhi* `next.ServeHTTP` chal jaayega — handler bina valid tenant ke chalega, security hole. `return` zaroori hai.)
 
 ---
 
-### §5. HTTP client — Go se Python call (→ A3)
+### §5. HTTP client — Go se Python call (proxy)
 
-Platform ka kaam: client ka request lo → Python AI service ko forward karo → response wapas do.
-
-**`proxy_rag.go` — step by step:**
+Platform ka asli kaam: client ka request lo → Python AI service ko forward karo → response wapas do. Yeh poora proxy handler:
 
 ```go
-import (
-    "io"
-    "net/http"
-    "os"
-)
-
-func ragBaseURL() string {
-    if u := os.Getenv("RAG_SERVICE_URL"); u != "" {
-        return u
-    }
-    return "http://localhost:8001"
-}
-
 func proxyToRAG(w http.ResponseWriter, r *http.Request) {
     tenantID := tenantFromContext(r.Context())
     if tenantID == "" {
-        http.Error(w, "no tenant", http.StatusUnauthorized)
-        return
+        http.Error(w, "no tenant", http.StatusUnauthorized); return
     }
-
-    // 1. Upstream request banao
-    upstreamURL := ragBaseURL() + "/internal/query"
-    req, err := http.NewRequestWithContext(
-        r.Context(),
-        http.MethodPost,
-        upstreamURL,
-        r.Body,  // client body forward — same JSON
-    )
+    // 1. Upstream request banao — client ka body aage forward
+    req, err := http.NewRequestWithContext(r.Context(), http.MethodPost,
+        ragBaseURL()+"/internal/query", r.Body)
     if err != nil {
-        http.Error(w, "bad request", http.StatusInternalServerError)
-        return
+        http.Error(w, "bad request", http.StatusInternalServerError); return
     }
-
-    // 2. Headers copy + tenant inject
+    // 2. Headers + tenant inject
     req.Header.Set("Content-Type", "application/json")
     req.Header.Set("X-Tenant-ID", tenantID)
-
-    // 3. Call Python service
+    // 3. Python service ko call (timeout ke saath)
     client := &http.Client{Timeout: 30 * time.Second}
     resp, err := client.Do(req)
     if err != nil {
-        http.Error(w, "upstream failed", http.StatusBadGateway)
-        return
+        http.Error(w, "upstream failed", http.StatusBadGateway); return
     }
     defer resp.Body.Close()
-
-    // 4. Response client ko wapas
+    // 4. Response client ko stream karo
     w.WriteHeader(resp.StatusCode)
     io.Copy(w, resp.Body)
 }
 ```
 
-**Har step kyun:**
+Har step ka kyun samajhna zaroori hai. **`NewRequestWithContext`** client ke context ko upstream se jodता hai — client disconnect kare to upstream call bhi cancel ho jaaye (waste na ho). **`r.Body` forward** karte hain taaki client ne jo JSON bheja wahi Python ko jaaye. **`X-Tenant-ID`** se Python ko pata chalta hai request kis tenant ki hai (multi-tenancy) — Python is header pe bharosa karta hai kyunki wo internal network pe hai. **`Timeout: 30s`** critical hai — bina iske agar Python hang ho jaaye to Go ka worker hamesha ke liye atak jaayega. Aur **`io.Copy`** response ko stream karta hai bina poori cheez memory mein load kiye (bade responses ke liye zaroori). `defer resp.Body.Close()` ka `defer` matlab "yeh function khatam hone pe chalao" — resource leak rokта hai.
 
-| Step | Kyun |
-|------|------|
-| `NewRequestWithContext` | Client disconnect → upstream cancel (timeout) |
-| `r.Body` forward | Client ne jo JSON bheja wahi RAG ko |
-| `X-Tenant-ID` | Python ko pata tenant kaun — multi-tenancy |
-| `http.Client{Timeout: ...}` | Python hang → Go worker stuck forever na ho |
-| `io.Copy(w, resp.Body)` | Stream large response without loading all in memory |
-
-**Python stub (doosri terminal):**
+Test ke liye doosri terminal mein ek chhota Python stub chalao (practice README mein hai), phir:
 
 ```bash
-python3 -c "
-from http.server import BaseHTTPRequestHandler, HTTPServer
-class H(BaseHTTPRequestHandler):
-    def do_POST(self):
-        print('Tenant:', self.headers.get('X-Tenant-ID'))
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b'{\"ok\":true}')
-HTTPServer(('',8001), H).serve_forever()
-"
+curl -X POST http://localhost:8080/v1/query -H "X-API-Key: test" \
+  -H "Content-Type: application/json" -d '{"message":"hello"}'
+# Python terminal pe: Tenant: tenant-test
 ```
 
-**Integration test:**
-
-```bash
-curl -X POST http://localhost:8080/v1/query \
-  -H "X-API-Key: test" \
-  -H "Content-Type: application/json" \
-  -d '{"message":"hello"}'
-# Python terminal: Tenant: tenant-test
-```
-
-**Wire in `main.go` (recommended pattern):**
-
-```go
-r.Use(requestIDMiddleware)
-
-r.Route("/v1", func(r chi.Router) {
-    r.Use(tenantAuthMiddleware)   // sirf /v1/* pe auth
-    r.Post("/query", proxyToRAG)  // full path: POST /v1/query
-})
-```
-
-Chi mein middleware + route alag files mein rakhna cleaner — practice stubs already split hain.
+`main.go` mein wire karo: `requestIDMiddleware` global, aur `tenantAuthMiddleware` + `proxyToRAG` `/v1` group ke andar.
 
 ---
 
 ### §6. Goroutines — parallel calls (awareness)
 
-Jab ek request pe **do Python calls** parallel chahiye (RAG + embed):
+Kabhi ek request pe do Python calls parallel chahiye (RAG + embed). Go isके liye **goroutines** deta hai — `go func() { ... }` ek lightweight thread shuru karta hai (Kafka consumer jaisा), aur results **channels** se wapas aate hain:
 
 ```go
-type result struct {
-    data string
-    err  error
-}
-
-ch1 := make(chan result, 1)
+ch := make(chan result, 1)
 go func() {
     data, err := callRAG(ctx, q)
-    ch1 <- result{data, err}
+    ch <- result{data, err}
 }()
-
-r1 := <-ch1  // wait
+r1 := <-ch   // wait for result
 ```
 
-`go func()` = lightweight thread — Kafka consumer jaisa.  
-**Rule:** shared maps without lock mat likho — channels ya mutex.
-
-Abhi practice mein zarurat nahi — Project C gateway mein aayega.
+Ek rule abhi yaad rakho: shared maps ko bina lock ke alag goroutines se mat likho — channels ya mutex use karo, warna race condition. Practice mein abhi zarurat nahi; Project C gateway mein aayega.
 
 ---
 
-### §7. Kyun Go platform, Python AI? (architecture)
+### §7. Kyun Go platform aur Python AI?
 
-| Layer | Language | Kyun |
-|-------|----------|------|
-| Platform | Go | Fast HTTP, low memory, simple deploy, billing/metering |
-| AI | Python | LangGraph, ragas, OpenAI SDK |
-| Frontend | Next.js | Tum jaante ho |
+Yeh split jaanboojh ke hai. **Go** platform ke liye perfect hai — fast HTTP, kam memory, simple single-binary deploy, aur billing/metering jaisा precise kaam. **Python** AI ke liye — LangGraph, ragas, OpenAI SDK sab Python mein hain. **Next.js** frontend (tum jaante ho).
 
-**Python public expose mat karo** — sirf Docker internal network. Go API key check karta hai; Python trust karta hai `X-Tenant-ID` (internal network pe).
-
-**Metering (future — tumhara moat):**
-
-```
-Request done → usage event {tenant_id, units, idempotency_key}
-           → outbox INSERT
-           → worker → Stripe
-```
-
-Billing galat = company dead. Rootstock + Zapier clone story.
-
-**Go mein mat likho:** LangGraph, RAG chunking, ragas — Python mein depth lo.
+Ek security rule: **Python ko kabhi public expose mat karo** — wo sirf Docker internal network pe rehta hai. Go API key check karta hai (zero-trust, customer-facing); Python `X-Tenant-ID` pe bharosa karta hai kyunki usе sirf Go (internal network se) hi call kar sakta hai. Aur metering tumhara real moat hai — har request ke baad ek usage event banाo (outbox pattern se Stripe tak). Galat billing = company dead; yeh tumhari Rootstock/Zapier-clone waali muscle hai.
 
 ---
 
-### §8. Repo layout (jab portfolio banoge)
+### §8. Repo layout (portfolio ke liye)
 
 ```
 portfolio/
-├── platform/          # GO — cmd/api, internal/auth, metering, proxy
-├── services/rag/      # PYTHON — Project A
-├── services/agent/    # PYTHON — Project B
+├── platform/        # GO — cmd/api, internal/auth, metering, proxy
+├── services/rag/    # PYTHON — Project A
+├── services/agent/  # PYTHON — Project B
 └── docker-compose.yml
 ```
 
-Abhi sirf `modules/00e-go-platform/practice/` — same patterns, chhota scale.
+Abhi sirf `modules/00e-go-platform/practice/` — wahi patterns, chhota scale.
 
 ---
 
@@ -743,7 +341,7 @@ Abhi sirf `modules/00e-go-platform/practice/` — same patterns, chhota scale.
 | # | Theory § | File | Pass when |
 |---|----------|------|-----------|
 | A1 | §1–§2 | `main.go` | `curl /health` → 200 + JSON |
-| A2 | §3–§4 | `middleware.go` + wire in main | No key → 401; `X-Request-ID` header |
+| A2 | §3–§4 | `middleware.go` + wire | No key → 401; `X-Request-ID` header |
 | A3 | §5 | `proxy_rag.go` | Python stub prints `X-Tenant-ID` |
 | A4 | §7 | `NOTES.md` | FastAPI vs Chi table 5 rows + polyglot diagram |
 
@@ -753,15 +351,15 @@ go mod tidy
 go run .
 ```
 
-> Stubs mein `TODO` search karo — Theory padh ke khud complete karo. Poora solution MODULE mein copy mat karo practice se pehle; stuck pe ek hint pucho chat mein.
+> Stubs mein `TODO` search karo — theory padhke khud bharo. Solution copy mat karo; stuck pe ek hint chat mein maango.
 
 ---
 
 ## Active recall (NOTES)
 
-1. Go mein error handle kaise karte ho — `try/catch` nahi, kya karte ho?
-2. Middleware mein `next.ServeHTTP(w, r)` kyun call karte ho?
-3. Python service internal kyun rakhte ho — 2 reasons?
+1. Go mein error handle kaise — `try/catch` nahi to kya?
+2. Middleware mein `next.ServeHTTP(w, r)` kyun call karte ho, aur na karein to?
+3. Python service ko internal kyun rakhte ho — 2 reasons?
 
 ---
 
@@ -770,7 +368,7 @@ go run .
 - [ ] §0 syntax — chhota program `go run` se chala
 - [ ] §1–§2 + A1 pass
 - [ ] §3–§4 + A2 pass
-- [ ] §5 + A3 pass (Python stub ke saath)
+- [ ] §5 + A3 pass
 - [ ] A4 NOTES
 - [ ] Redraw challenge
 
@@ -778,4 +376,4 @@ go run .
 
 ## Optional appendix
 
-- [Go tour](https://go.dev/tour/) — extra exercises, MODULE primary hai
+- [Go tour](https://go.dev/tour/) — MODULE primary hai
