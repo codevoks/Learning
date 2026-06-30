@@ -1,61 +1,43 @@
 # Module 06 — Tools & Function Calling
 
-> **Padho**: Isi file mein **Theory** — bahar mat jao.  
-> **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
+> **Padho**: Isi file mein **Theory** — bahar mat jao.
+> **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`
 > **Nav**: ← [Module 05](../05-rag-pgvector/MODULE.md) · Next → [Module 07](../07-agents-langgraph/MODULE.md)
 
-> **Kaun ke liye:** Pehli baar tools / function calling seekh rahe ho. **§0 terms pehle**. Standard: `@MODULE-TEACHING-STANDARD.md`
+> **Format**: Textbook — §0 terms pehle (tool, function calling, JSON schema), prose mein. Voice: `@MODULE-TEACHING-STANDARD.md`
 
 ## At a glance
 
 | | |
 |---|---|
-| Prerequisites | Module 05 (RAG optional). Module 00c (Pydantic). Module 01 (messages API) |
+| Prerequisites | Module 05 (optional). 00c (Pydantic). 01 (messages API) |
 | Duration | ~4–6 sessions |
 | Project? | No |
 | Exit test | Tool schema design + tool loop flow bina notes ke whiteboard karo |
 
-## Visual map
+## Yeh module kis baare mein hai
+
+Ab tak LLM sirf *baat* kar sakta tha — text in, text out. Par asli products ko **action** chahiye: DB mein search karo, weather laao, email bhejo. Tools (function calling) wahi pul hai. Aur yahan ek bahut important — aur security-critical — baat samajhni hai: **model tool khud nahi chalata.** Model sirf *plan* karta hai ("mujhe `get_weather` chahiye `city=Berlin` ke saath"), aur **tumhara code** us request ko validate karke actually run karta hai.
+
+Manager-worker socho: LLM manager hai jo memo likhta hai "warehouse se item #42 lao"; tumhara code worker hai jo actually warehouse jaata hai. Manager ke paas warehouse ki chaabi nahi hoti. Yeh separation hi tumhe safe rakhta hai — model galat ya malicious instruction de bhi de, action sirf tumhare validated code ke through hoti hai.
 
 ```
-User query
-    ↓
-LLM + tool definitions (JSON schema)
-    ↓
-tool_call { name, arguments }  ←── Pydantic validates args
-    ↓
-execute tool → result
-    ↓
-LLM synthesizes final response
+User query → LLM + tool definitions → tool_call {name, args} → [validate] → execute → result → LLM final answer
 ```
 
-**Mental model:** LLM **plan** karta hai (kaunsa tool, kya args) — tumhara code **validate + execute** karta hai. Model khud safely HTTP/DB call nahi karta.
-
-**Redraw challenge:** User → LLM → tool_call → executor → result → final answer sequence bina dekhe draw karo.
+**Redraw challenge:** User → LLM → tool_call → executor → result → final answer bina dekhe banao.
 
 ---
 
-## Read order (strict — session table)
+## Read order (strict)
 
-| Session | Padho | Karo (Practice) |
-|---------|-------|-----------------|
-| 1 | §0 Terms + §1 Tools concept | JSON schema ek haath se likho |
-| 2 | §2 Tool schemas | **A1** start — `tool_schemas.py` |
+| Session | Padho | Karo |
+|---------|-------|------|
+| 1 | §0 Terms + §1 Tools concept | Ek JSON schema haath se likho |
+| 2 | §2 Tool schemas | **A1** — `tool_schemas.py` |
 | 3 | §3 Tool call loop | **A1** complete — 10/10 tool pick |
 | 4 | §4 Structured vs tools + §5 Pydantic | **A2** — `pydantic_tools.py` |
 | 5 | §6 Idempotency + end-to-end | **A3** — `multi_step_loop.py` |
-
----
-
-## Learning hooks (optional)
-
-| Concept | Parallel |
-|---------|----------|
-| Tool JSON schema | OpenAPI request body |
-| Tool call loop | Kafka consume → process → publish |
-| Pydantic validation | Zod `.parse()` on API input |
-| Structured output | Fixed response contract |
-| Parallel tool calls | Batch order submission |
 
 ---
 
@@ -63,559 +45,239 @@ LLM synthesizes final response
 
 ### §0. Terms pehli baar — tools, function calling, JSON schema (20 min)
 
-#### 0.1 Tool (function) kya hai?
+**Tool (function).** LLM ke liye ek **named capability** jo tum define karte ho — jaise `get_weather(city)` ya `search_docs(query)`. Phir se: model tool **nahi chalata**, sirf maangता hai; tumhara Python run karta hai.
 
-**Tool** = LLM ke liye ek **named capability** jo tum define karte ho — jaise `get_weather(city)` ya `search_docs(query)`.
-
-Model tool **nahi chalata**. Model kehta hai: *"Mujhe `get_weather` chahiye `city=Berlin` ke saath"* — tumhara Python usko run karta hai.
-
-**Analogy:** Manager (LLM) memo likhta hai "warehouse se item #42 lao". Worker (tumhara code) actually warehouse jata hai.
-
-#### 0.2 Function calling kya hai?
-
-**Function calling** = provider ka feature jahan model response mein **structured tool request** de sakta hai — plain text ke bajay.
+**Function calling.** Provider ka wo feature jisse model plain text ke bajaye ek **structured tool request** de sakta hai:
 
 ```json
-{
-  "tool_calls": [{
-    "id": "call_abc",
-    "type": "function",
-    "function": {
-      "name": "get_weather",
-      "arguments": "{\"city\": \"Berlin\"}"
-    }
-  }]
-}
+{ "tool_calls": [{ "id": "call_abc", "type": "function",
+    "function": { "name": "get_weather", "arguments": "{\"city\": \"Berlin\"}" } }] }
 ```
 
-| Field | Matlab |
-|-------|--------|
-| `tool_calls` | Zero ya zyada tools ek turn mein |
-| `name` | Kaunsa tool |
-| `arguments` | JSON **string** — parse karke validate karo |
+Ek baat jo bug deti hai naye logon ko — `arguments` ek JSON **string** hai (object nahi), to use `json.loads` se parse karke phir validate karna padta hai. (OpenAI ise `tool_calls` kehta hai, Anthropic `tool_use` blocks — loop same hai, §3.)
 
-OpenAI: `tool_calls` array. Anthropic: `tool_use` blocks. Loop same — §3.
-
-#### 0.3 JSON Schema kya hai?
-
-**JSON Schema** = parameters ka **shape** — types, required fields, descriptions.
+**JSON Schema.** Tool ke parameters ka **shape** — types, required fields, descriptions:
 
 ```json
-{
-  "type": "object",
-  "properties": {
-    "city": { "type": "string", "description": "City name in English" }
-  },
-  "required": ["city"]
-}
+{ "type": "object",
+  "properties": { "city": { "type": "string", "description": "City name in English" } },
+  "required": ["city"] }
 ```
 
-LLM is schema ko padh ke decide karta hai **kab** tool call karna hai aur **kya** args bhejne hain.
+HTML form socho — `city` required text field, `limit` optional number. LLM is schema ko padhkar decide karta hai **kab** tool call karna hai aur **kya** args bhejne hain — isliye `description` likhna optional nahi, wahi model ka guide hai.
 
-**Analogy:** HTML form — `city` text field required, `limit` number optional.
-
-#### 0.4 Tool result message
-
-Tool chalne ke baad tum LLM ko **result** wapas bhejte ho — naya message:
+**Tool result message.** Tool chalने ke baad tum result ko ek naye message ke roop mein wapas LLM ko bhejte ho:
 
 ```python
 {"role": "tool", "tool_call_id": "call_abc", "content": '{"temp_c": 18, "condition": "cloudy"}'}
 ```
 
-Phir LLM final natural language jawab banata hai.
+Phir LLM us result se final natural-language jawab banata hai.
 
-#### 0.5 Terms quick reference
+> **Ruko, socho:** Jab model `tool_calls` return karta hai, kya wo database already query kar chuka hai? (Jawab: nahi — usne sirf *request* di hai. Koi side-effect nahi hua jab tak tumhara code execute na kare. Yahi reason hai ki control tumhare paas rehta hai.)
 
-| Term | Ek line |
-|------|---------|
-| Tool definition | name + description + parameters schema |
-| Executor | Tumhara code jo tool run karta hai |
-| Tool loop | Call LLM → tool? → run → LLM again — jab tak done |
-| Parallel tool calls | Ek turn mein multiple tools |
-| Structured output | Final answer fixed JSON — action nahi (§4) |
-
-**§0 checkpoint:**
-1. Model khud database query karta hai ya request return karta hai?
-2. `arguments` string hai ya object? (API response mein)
-3. JSON Schema mein `description` kyun likhte hain?
+**§0 checkpoint:** (1) Model khud DB query karta hai ya request return karta hai? (2) `arguments` string hai ya object? (3) Schema mein `description` kyun?
 
 ---
 
-### §1. Tools = LLM ko APIs dena, execution tumhara (→ A1 concept)
+### §1. Tools = LLM ko APIs dena, execution tumhara
 
-#### Problem kya hai?
+User poochhta hai "Berlin ka weather kaisa hai aur docs mein refund policy dhoondo." Model ke paas na live weather hai na tumhare docs — par agar tum tools de do, model *plan* karega kaunsa tool pehle, kaunsa baad. Division of labour saaf hai: **LLM (probabilistic) decide karta hai** kaunsa tool aur kya arguments; **tum (deterministic) validate, auth, rate-limit, aur actual I/O** karte ho.
 
-User: "Berlin ka weather kaisa hai aur docs mein refund policy dhoondo."
-
-Model ke paas live data nahi. Tum tools doge — model plan karega kaunsa pehle.
-
-```mermaid
-flowchart LR
-    LLM["LLM decides"] --> Plan["tool_call JSON"]
-    Plan --> Code["Your executor"]
-    Code --> Side["DB / API / file"]
-    Side --> Result["tool result message"]
-    Result --> LLM2["LLM final answer"]
-```
-
-| Kaun decide | Kya |
-|-------------|-----|
-| LLM (probabilistic) | Kaunsa tool, kya arguments |
-| Tum (deterministic) | Validate, auth, rate limit, actual IO |
-
-**Security rule:** Kabhi bhi model ke bole bina write action mat chalao. Allowlist = sirf registered tools.
+Isse ek security rule nikalta hai jo har agentic system ka core hai: **model ke bole bina koi write-action mat chalao, aur sirf registered (allowlisted) tools hi available rakho.** Model jo bhi suggest kare, wo tabhi hoga jab tumhara code use validate karke explicitly execute kare.
 
 ---
 
-### §2. Tool schemas — JSON Schema shape (→ A1)
+### §2. Tool schemas — JSON Schema shape
 
-#### Problem kya hai?
-
-Galat schema → model galat tool pick kare ya args todo.
-
-#### Poora tool definition — line by line
+Galat schema ka seedha natija — model galat tool pick karega ya args todega. Ek poora tool definition:
 
 ```python
-TOOLS = [
-    {
-        "type": "function",
-        "function": {
-            "name": "search_docs",
-            "description": (
-                "Search internal company documentation by keyword. "
-                "Use when the user asks about policies, refunds, or product docs."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "string",
-                        "description": "Search terms, e.g. 'refund policy'",
-                    },
-                    "limit": {
-                        "type": "integer",
-                        "description": "Max results, default 5",
-                    },
-                },
-                "required": ["query"],
+TOOLS = [{
+    "type": "function",
+    "function": {
+        "name": "search_docs",
+        "description": "Search internal company documentation by keyword. Use when the user asks about policies, refunds, or product docs.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Search terms, e.g. 'refund policy'"},
+                "limit": {"type": "integer", "description": "Max results, default 5"},
             },
+            "required": ["query"],
         },
     },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_weather",
-            "description": (
-                "Get current weather for a city. "
-                "Use when the user asks about temperature, rain, or forecast."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "city": {
-                        "type": "string",
-                        "description": "City name, e.g. Berlin",
-                    },
-                },
-                "required": ["city"],
-            },
-        },
-    },
-]
+}]
 ```
 
-| Field | Kyun matter |
-|-------|-------------|
-| `name` | Short, unique — routing key |
-| `description` | **Kab** use kare — quality critical (model mostly isse decide karta hai) |
-| `parameters` | JSON Schema — types + required |
-| `required` | Missing arg → validation fail before execute |
+Is poore definition mein sabse important field `description` hai — naye log isे bhar dete hain bina soche, par **model mostly isi se decide karta hai kaunsा tool kab use karna hai.** "Searches docs" bekaar hai; "Use when the user asks about policies, refunds, or product docs" achha hai kyunki yeh weather tool se clearly distinguish karta hai. `required` array bhi critical — usse missing arg execute se *pehle* fail ho jaata hai.
 
-#### Stub implementations
+Practice mein stubs use karo (fake data, par shape real rakho):
 
 ```python
 def search_docs(query: str, limit: int = 5) -> dict:
-    # Production: real DB / RAG
-    fake_db = [
-        {"id": "doc1", "title": "Refund Policy", "snippet": "30 day returns..."},
-    ]
-    hits = [d for d in fake_db if query.lower() in d["title"].lower()]
-    return {"results": hits[:limit]}
-
-def get_weather(city: str) -> dict:
-    # Production: real weather API
-    return {"city": city, "temp_c": 18, "condition": "partly cloudy"}
+    fake_db = [{"id": "doc1", "title": "Refund Policy", "snippet": "30 day returns..."}]
+    return {"results": [d for d in fake_db if query.lower() in d["title"].lower()][:limit]}
 ```
 
-| Line | Matlab |
-|------|--------|
-| Stub | Learning ke liye fake data — shape real rakho |
-| `return dict` | JSON-serializable — tool result string banega |
-
-**Description quality test:**
-
-```
-Bad:  "search_docs" / "Searches docs"
-Good: "Use when user asks about policies..." — disambiguates from weather
-```
-
-**Common errors (§2):**
+#### §2 common errors
 
 | Symptom | Kyun | Fix |
 |---------|------|-----|
-| Wrong tool 10% time | Descriptions overlap | Narrow "Use when..." per tool |
-| Invalid JSON args | Schema vague | `required`, types explicit |
-| Model never calls tool | Description too strict | Examples in description |
+| 10% baar galat tool | Descriptions overlap karti hain | Har tool ka "Use when..." narrow karo |
+| Invalid JSON args | Schema vague | `required` + types explicit |
+| Model kabhi tool call nahi karta | Description bahut strict | Description mein examples |
 
 > **→ Practice A1** (`tool_schemas.py`) — 2 tools, 10 prompts, correct tool 10/10.
 
 ---
 
-### §3. Tool call loop (→ A1, A3)
+### §3. Tool call loop
 
-#### Problem kya hai?
-
-Ek API call enough nahi — model pehle tool maangega, result dekh ke final jawab banayega.
-
-#### Loop — line by line
+Ek single API call kaafi nahi hai — model pehle tool maangega, tum result do, phir wo final jawab banayega. Kabhi-kabhi yeh kai baar repeat hota hai (multi-step), isliye yeh ek **loop** hai:
 
 ```python
-from openai import OpenAI
-import json
-
-client = OpenAI()
-
-TOOL_IMPL = {
-    "search_docs": search_docs,
-    "get_weather": get_weather,
-}
+TOOL_IMPL = {"search_docs": search_docs, "get_weather": get_weather}
 
 def run_with_tools(user_message: str) -> str:
     messages = [{"role": "user", "content": user_message}]
-
     while True:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=messages,
-            tools=TOOLS,
-            tool_choice="auto",
-        )
+            model="gpt-4o-mini", messages=messages, tools=TOOLS, tool_choice="auto")
         msg = response.choices[0].message
         messages.append(msg)
-
         if not msg.tool_calls:
-            return msg.content or ""
-
+            return msg.content or ""          # koi tool nahi maanga → done
         for tc in msg.tool_calls:
-            name = tc.function.name
-            args = json.loads(tc.function.arguments)
-            fn = TOOL_IMPL[name]
-            result = fn(**args)
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tc.id,
-                "content": json.dumps(result),
-            })
+            args = json.loads(tc.function.arguments)   # string → dict
+            result = TOOL_IMPL[tc.function.name](**args)
+            messages.append({"role": "tool", "tool_call_id": tc.id, "content": json.dumps(result)})
 ```
 
-| Line | Matlab |
-|------|--------|
-| `while True` | Tab tak loop jab tak model tools maangta hai |
-| `tools=TOOLS` | Available capabilities pass |
-| `tool_choice="auto"` | Model decide — force specific tool bhi kar sakte ho |
-| `messages.append(msg)` | Assistant message with tool_calls history mein |
-| `if not msg.tool_calls` | Done — final text return |
-| `json.loads(tc.function.arguments)` | String → dict |
-| `fn(**args)` | Python unpack — `search_docs(query="x")` |
-| `role: tool` | Result wapas model ko |
+Loop ki dhuri yeh hai: har iteration mein model ko messages + tools bhejo. Agar wo `tool_calls` deta hai, to har tool chalao aur uska result `role: tool` message mein wapas append karo, phir loop dobara. Jab model bina tool maange text deta hai, wahi final jawab hai aur loop khatam. `fn(**args)` Python unpacking hai — `{"query": "x"}` ko `search_docs(query="x")` bana deta hai. (Model ek hi turn mein do tools bhi maang sakta hai — "parallel tool calls" — to bas dono chalao, dono results append karo.)
 
-```mermaid
-sequenceDiagram
-    loop until no tool_calls
-        Client->>LLM: messages + tools
-        LLM-->>Client: assistant + tool_calls?
-        alt has tool_calls
-            Client->>Executor: run each tool
-            Executor-->>Client: tool results
-            Client->>LLM: append tool messages
-        end
-    end
-    LLM-->>Client: final text
-```
-
-#### Parallel tool calls
-
-Model ek turn mein `search_docs` + `get_weather` dono maang sakta hai — **dono execute** karo, dono results append:
-
-```python
-for tc in msg.tool_calls:
-    # ... run each — order usually doesn't matter for read-only
-```
-
-#### Error handling — tool fail pe kya bhejo
+Production mein tool fail ho sakta hai, to crash karne ke bajaye structured error wapas bhejo — model use padhkar user se clarify kar sakta hai:
 
 ```python
 try:
     result = fn(**args)
 except Exception as e:
     result = {"error": str(e), "retry_hint": "Check city spelling"}
-messages.append({
-    "role": "tool",
-    "tool_call_id": tc.id,
-    "content": json.dumps(result),
-})
 ```
 
-LLM user se clarify kar sakta hai — structured error better than crash.
+> **Ruko, socho:** Agar model ne ek turn mein 2 tools maange aur tum sirf pehle ka result append karke turant LLM ko dobara call kar do, to kya hoga? (Jawab: API error ya confusion — har `tool_call` ka ek matching `tool` result hona chahiye agli LLM call se pehle. Saare tools chalao, sab results append karo, *phir* model ko wapas bulao.)
 
-**Test:**
-
-```python
-print(run_with_tools("What's the weather in Tokyo?"))
-# Expected: mentions temp/condition from stub
-
-print(run_with_tools("Find our refund policy in docs"))
-# Expected: search_docs used, policy mentioned
-```
-
-**Common errors (§3):**
+#### §3 common errors
 
 | Error | Kyun | Fix |
 |-------|------|-----|
-| Infinite loop | Tool result format wrong | Valid JSON string in `content` |
-| `KeyError` on tool name | Typo in TOOL_IMPL | Names match schema exactly |
-| Empty final answer | `msg.content` None while tool_calls | Normal — next iteration |
+| Infinite loop | Tool result format galat | `content` mein valid JSON string |
+| `KeyError` tool name pe | `TOOL_IMPL` mein typo | Names schema se exact match |
+| Khaali final answer | `msg.content` None jab tool_calls hai | Normal — agla iteration |
 
-> **→ Practice A3** (`multi_step_loop.py`) — query needing 2 tools in sequence.
+> **→ Practice A3** (`multi_step_loop.py`) — query jisme 2 tools sequence mein chahiye.
 
 ---
 
 ### §4. Structured outputs vs tool calling
 
-#### Problem kya hai?
+Dono JSON dete hain, isliye log confuse ho jaate hain — par maqsad alag hai. **Structured output** (Module 04 ka `response_format`) tab hai jab tumhe final answer ek fixed shape mein chahiye, bina kisi side-effect ke — jaise `{"bullets": [...]}` report. **Tool calling** tab hai jab external actions ya multi-step kaam ho — DB search, email bhejो.
 
-Dono JSON dete hain — confuse mat ho kab kaunsa.
-
-| Use | Kab | Example |
-|-----|-----|---------|
-| **Structured output** | Final answer fixed schema | `{"bullets": [...]}` report |
-| **Tool calling** | External actions, multi-step | DB search, send email |
-
-Same user query — intent se decide:
-
-```
-"Return sales summary as JSON"     → structured output (no side effect)
-"Look up sales in DB then email"   → tools (DB + email)
-```
-
-Structured output = **ek** LLM call, shape enforced.  
-Tools = **loop**, side effects, fresh data.
-
-*(Active recall: Module 04 `response_format` = structured output side)*
+Same query ko intent se decide karo: "Return sales summary as JSON" → structured output (koi action nahi). "Look up sales in DB then email" → tools (DB + email, side-effects). Yaad rakho: structured output **ek** LLM call hai shape-enforced; tools ek **loop** hai side-effects aur fresh data ke saath.
 
 ---
 
-### §5. Pydantic validation — args execute se pehle (→ A2)
+### §5. Pydantic validation — args ko execute se pehle check karo
 
-#### Problem kya hai?
-
-Model ne `limit: "five"` bhej diya — bina validation ke DB crash.
+Model ek probabilistic system hai — wo `limit: "five"` (string) ya `limit: 999` bhej sakta hai. Agar tum yeh seedhe DB ko de doge, crash ya abuse. Isliye **execute se pehle** Pydantic se validate karo (00c se familiar):
 
 ```python
-from pydantic import BaseModel, Field
-
 class SearchDocsArgs(BaseModel):
     query: str = Field(description="Search terms")
     limit: int = Field(default=5, ge=1, le=20)
 
-class GetWeatherArgs(BaseModel):
-    city: str = Field(min_length=1)
+SCHEMA_MAP = {"search_docs": SearchDocsArgs, "get_weather": GetWeatherArgs}
 
-SCHEMA_MAP = {
-    "search_docs": SearchDocsArgs,
-    "get_weather": GetWeatherArgs,
-}
-
-def validate_tool_call(name: str, arguments_json: str) -> BaseModel:
-    model_cls = SCHEMA_MAP[name]
-    return model_cls.model_validate_json(arguments_json)
-```
-
-| Line | Matlab |
-|------|--------|
-| `BaseModel` | Pydantic — auto validation |
-| `ge=1, le=20` | limit bounds — bad values reject |
-| `model_validate_json` | JSON string → typed object |
-| `Field(description=...)` | Extra hint — schema mein bhi OK |
-
-#### Safe execute wrapper
-
-```python
 def safe_execute(name: str, arguments_json: str) -> dict:
     try:
-        args = validate_tool_call(name, arguments_json)
+        args = SCHEMA_MAP[name].model_validate_json(arguments_json)
     except ValidationError as e:
-        return {"error": "invalid_args", "details": e.errors()}
-    fn = TOOL_IMPL[name]
-    return fn(**args.model_dump())
+        return {"error": "invalid_args", "details": e.errors()}   # DB ko chhua bhi nahi
+    return TOOL_IMPL[name](**args.model_dump())
 ```
 
-| Line | Matlab |
-|------|--------|
-| `ValidationError` | Args galat — execute **se pehle** catch |
-| `model_dump()` | Pydantic → plain dict for `**kwargs` |
-| Never call DB on invalid | Security + stability |
+`ge=1, le=20` limit ko bound karta hai (999 reject), aur `model_validate_json` JSON string ko typed object banata hai. Asli point yeh hai — galat args pe hum `ValidationError` catch karke ek error wapas dete hain, **DB ko call hi nahi karte**. Yeh security aur stability dono ke liye zaroori hai. Loop mein raw `fn(**args)` ki jagah `safe_execute` use karo.
 
-**Test invalid args:**
-
-```python
-safe_execute("search_docs", '{"query": "x", "limit": 999}')
-# error — limit > 20
-
-safe_execute("get_weather", '{"city": ""}')
-# error — min_length
-```
-
-**Common errors (§5):**
-
-| Symptom | Kyun | Fix |
-|---------|------|-----|
-| Validation pass, logic fail | Business rules not in Pydantic | Custom validators |
-| Double schema | OpenAI schema + Pydantic drift | Pydantic se schema generate (advanced) |
-
-> **→ Practice A2** (`pydantic_tools.py`) — invalid args rejected pre-execute.
+> **→ Practice A2** (`pydantic_tools.py`) — invalid args execute se pehle reject hon.
 
 ---
 
-### §6. Idempotent tools — retries safe banao
+### §6. Idempotent tools — retries ko safe banao
 
-#### Problem kya hai?
+Yahan ek khatarnak scenario hai. Network retry hota hai, ya model galti se do baar `send_refund` maang leta hai — aur tumne customer ko **do baar refund** kar diya. Read-only tools (jaise `search_docs`) ke liye yeh problem nahi (do baar search = same result). Par **write** tools (charge, refund, email) ke liye yeh disaster hai.
 
-Network retry → same tool do baar → **double refund**.
-
-```
-send_refund(order_id, amount)  ← DANGEROUS if called twice
-```
-
-**Fix pattern:**
+Fix **idempotency key** hai — ek unique key jise tum DB ke UNIQUE constraint se baandhte ho, taaki dusri baar wahi call same result laaye, double-charge nahi:
 
 ```python
 class RefundArgs(BaseModel):
     order_id: str
     amount: float
-    idempotency_key: str  # client-generated UUID
-
-def send_refund(order_id: str, amount: float, idempotency_key: str) -> dict:
-    # DB: UNIQUE(idempotency_key) — second call returns same result, no double charge
-    ...
+    idempotency_key: str   # client-generated UUID; DB pe UNIQUE(idempotency_key)
 ```
 
-| Tool type | Idempotency |
-|-----------|-------------|
-| Read-only (`search_docs`) | Easy — same result |
-| Write (`charge_card`) | **Must** idempotency key + DB constraint |
-
-Tera hook: outbox + exactly-once (Module 11) — same mental model.
+Yeh tumhara outbox/exactly-once (Module 11) waala same dimaag hai. Rule: read-only tools easy hain; write tools ko **must** idempotency key + DB constraint chahiye.
 
 ---
 
-### End-to-end walkthrough — weather + docs, start se finish
+### End-to-end (yahi A1+A3 hai)
 
-**Goal:** User message → correct tool(s) → validated args → stub result → natural answer.
+Sab jodke: `TOOLS` define karo (§2), `run_with_tools` loop banao (§3), loop mein `safe_execute` use karo (§5), phir ek multi-step query chalao jaise "What's the weather in Berlin and search docs for refund policy?" — model dono tools maangega (parallel ya sequence), dono results append honge, aur final answer weather + policy dono combine karega. Quality check ke liye 10 prompts ka regression test banao jo verify kare har prompt sahi tool pe route hua (A1 ka 10/10).
 
-**Step 1 — Setup**
-
-```bash
-cd modules/06-tools-function-calling/practice
-python3 -m venv .venv && source .venv/bin/activate
-pip install openai pydantic python-dotenv
-cp .env.example .env 2>/dev/null || true
-```
-
-**Step 2 — Define TOOLS** (§2 code) + stubs
-
-**Step 3 — Loop** (§3 `run_with_tools`)
-
-**Step 4 — Add Pydantic** (§5 `safe_execute` in loop instead of raw `fn(**args)`)
-
-**Step 5 — Multi-step query**
-
-```python
-q = "What's the weather in Berlin and search docs for refund policy?"
-print(run_with_tools(q))
-```
-
-Expected flow:
-1. Model may call `get_weather` and `search_docs` (parallel or sequential)
-2. Tool results append
-3. Final answer combines weather + policy snippet
-
-**Step 6 — Regression 10 prompts (A1 pass)**
-
-```python
-TESTS = [
-    ("Weather in Paris?", "get_weather"),
-    ("Search docs for shipping", "search_docs"),
-    # ... 8 more
-]
-for prompt, expected_tool in TESTS:
-    # log which tool called — assert expected_tool
-```
-
-| Step | Verify |
-|------|--------|
-| 1 | API key works |
-| 2 | Schema descriptions distinct |
-| 3 | Loop terminates |
-| 4 | Bad args never hit stub |
-| 5 | Multi-tool answer coherent |
-| 6 | 10/10 routing |
-
-**Common errors (end-to-end):**
+#### end-to-end common errors
 
 | Symptom | Kyun | Fix |
 |---------|------|-----|
-| Only first tool runs | Loop breaks early | Append all tool results before next LLM call |
-| JSON in final answer | Model confused | Clear tool descriptions |
-| Wrong city in weather | Args not validated | Pydantic + confirm in tests |
+| Sirf pehla tool chala | Loop jaldi break ho gaya | Agle LLM call se pehle saare results append |
+| Final answer mein JSON | Model confused | Tool descriptions clear karo |
+| Weather mein galat city | Args validate nahi hue | Pydantic + tests |
 
 ---
 
 ## Practice
 
-> **Saare assignments ek jagah**: [`practice/README.md`](practice/README.md)
+> **Saare assignments**: [`practice/README.md`](practice/README.md). Code **tum** likhoge.
 
-| # | Theory § | File | Kya karna hai | Pass when |
-|---|----------|------|---------------|-----------|
-| A1 | §2, §3 | `practice/tool_schemas.py` | 2 tools: search_docs + get_weather | LLM picks correct tool 10/10 |
-| A2 | §5 | `practice/pydantic_tools.py` | Pydantic-validated args | Invalid args rejected pre-execute |
-| A3 | §3, §6 | `practice/multi_step_loop.py` | 2-tool chain stub | Query needing 2 tools completes |
+| # | Theory § | File | Pass when |
+|---|----------|------|-----------|
+| A1 | §2, §3 | `tool_schemas.py` | LLM correct tool pick 10/10 |
+| A2 | §5 | `pydantic_tools.py` | Invalid args execute se pehle reject |
+| A3 | §3, §6 | `multi_step_loop.py` | 2-tool chain wali query complete ho |
 
 ---
 
 ## Active recall (khud jawab likho NOTES mein)
 
-1. Tool description quality output pe kyun matter karti hai?
-2. Tool call fail ho — LLM ko kya message bhejoge?
+1. Tool description ki quality output pe kyun matter karti hai?
+2. Tool fail ho — LLM ko kya bhejoge, aur kyun structured error?
 3. Structured output vs tool calling — same query pe kab alag choose?
 4. Idempotency write tools pe kyun zaroori?
 
-**Chat drill** (optional): "Module 06 — tool loop whiteboard karo"
+**Chat drill** (optional): "Module 06 — tool loop whiteboard karo."
 
 ---
 
 ## Progress checklist
 
-- [ ] §0 terms clear (tool, function calling, JSON schema)
-- [ ] Theory §1–§6 padh liya
-- [ ] End-to-end walkthrough chalaya
-- [ ] Redraw challenge kiya
+- [ ] §0 terms (tool, function calling, JSON schema)
+- [ ] Theory §1–§6 padha
+- [ ] End-to-end chalaya
+- [ ] Redraw challenge
 - [ ] Practice A1–A3 pass
-- [ ] Active recall NOTES mein likha
+- [ ] Active recall NOTES mein
 
 ---
 
 ## Optional appendix
 
-- [OpenAI Function calling](https://platform.openai.com/docs/guides/function-calling) — message shapes
-- [Anthropic Tool use](https://docs.anthropic.com/en/docs/build-with-claude/tool-use) — tool_result format
+- [OpenAI Function calling](https://platform.openai.com/docs/guides/function-calling)
+- [Anthropic Tool use](https://docs.anthropic.com/en/docs/build-with-claude/tool-use)
