@@ -1,62 +1,47 @@
 # Module 09 — Multi-Agent & Human-in-the-Loop
 
-> **Padho**: Isi file mein **Theory** — bahar mat jao.  
-> **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
+> **Padho**: Isi file mein **Theory** — bahar mat jao.
+> **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`
 > **Nav**: ← [Module 08](../08-mcp/MODULE.md) · Next → [Module 10](../10-evals-llmops/MODULE.md)
 
-> **Format**: Textbook — §0 pehle (terms from zero). `@MODULE-TEACHING-STANDARD.md`
+> **Format**: Textbook — §0 terms zero se, prose mein. Voice: `@MODULE-TEACHING-STANDARD.md`
 
 ## At a glance
 
 | | |
 |---|---|
-| Prerequisites | Module 07 (LangGraph) + Module 08 (MCP tools). Module 06 structured outputs |
+| Prerequisites | Module 07 (LangGraph) + 08 (MCP tools). 06 structured outputs |
 | Duration | ~4–6 sessions |
 | Project? | No (Project B HITL gates — Module 11 M4) |
 | Exit test | Supervisor routing + HITL interrupt flow bina notes ke whiteboard karo |
 
-## Visual map
+## Yeh module kis baare mein hai
 
-**Mental model (§0 ke baad):**
+Do ideas yahan judti hain. Ek — **multi-agent**: ek hi mega-agent ko 20 tools dene ke bajaye, kaam ko alag-alag *roles* mein baant do (supervisor, researcher, executor), har ek ke paas limited tools aur focused prompt. Do — **Human-in-the-Loop (HITL)**: koi irreversible ya high-risk action ($50,000 refund, data delete) se pehle **human ki approval** mandatory banao. Yeh dono production-grade agentic systems ki neev hain, aur tumhare payment-system background se seedhe baith jaate hain.
 
 ```
-User task
-    ↓
-Supervisor (routes)
-    ├── Researcher (read-only tools)
-    └── Executor (write tools)
-              ↓
-        [HITL GATE] ──approve──► execute irreversible action
-              │
-           reject → rollback → supervisor replan
+User task → Supervisor (routes)
+              ├── Researcher (read-only tools)
+              └── Executor (write tools)
+                        ↓
+                  [HITL GATE] ──approve──► execute irreversible action
+                        └── reject → rollback → supervisor replan
 ```
 
-**Redraw challenge**: Planner → 2 workers → HITL gate → execute. Reject arrow wapas planner pe. Audit log kahan likho mark karo.
+**Redraw challenge**: Planner → 2 workers → HITL gate → execute; reject arrow wapas planner; audit log kahan likhte ho mark karo.
 
 ---
 
-## Read order (strict — mat chhodna)
+## Read order (strict)
 
-| Session | Padho | Karo (Practice) |
-|---------|-------|-----------------|
+| Session | Padho | Karo |
+|---------|-------|------|
 | 1 | §0 Terms + §1 Problem | Socho: kaunse actions bina human ke nahi chalne chahiye |
-| 2 | §2 Supervisor pattern | **A1** start — `supervisor_router.py` |
+| 2 | §2 Supervisor pattern | **A1** — `supervisor_router.py` |
 | 3 | §3 Specialist agents | **A1** complete — 8/10 routing |
 | 4 | §4 HITL gates | **A2** — `hitl_gate.py` |
 | 5 | §5 Audit + rollback | **A3** — `audit_log.py` |
-| 6 | Active recall + redraw | Checklist |
-
----
-
-## Learning hooks (tera parallel — optional)
-
-| Concept | Tum already jaante ho |
-|---------|----------------------|
-| Supervisor | Kafka orchestrator — message type → right consumer |
-| Specialist worker | Domain microservice — billing service vs notify service |
-| HITL approval | Manager sign-off on large refund — savepoint se pehle |
-| Rollback on reject | TX rollback — proposed action execute nahi hua |
-| Audit log | Payment audit trail — har state transition logged |
+| 6 | §6 Production patterns | Recall + redraw |
 
 ---
 
@@ -64,95 +49,33 @@ Supervisor (routes)
 
 ### §0. Terms pehli baar — multi-agent, HITL
 
-#### 0.1 Multi-agent — ek LLM sab kyun nahi
+**Multi-agent — ek LLM sab kyun nahi.** Ek single mega-agent ke teen problems hain: prompt mein 20 tools daloge to LLM confuse ho ke galat tool pick karega; ek hi (mehenga) model har kaam karega (Opus se "hello" route karna paisa jalana hai); aur blame mushkil — kaunse step ne galat refund kiya, pata nahi. Iska ilaaj kaam ko roles mein baantna hai. Typical team: **Supervisor** (route + synthesize, usually no writes), **Researcher** (facts gather, read-only tools), **Executor** (side-effects, write tools), aur optional **Critic** (output review, koi external IO nahi). Yeh bilkul tumhare Kafka orchestrator + domain microservices jaisा hai.
 
-**Multi-agent** = ek task ke liye **alag roles** wale agents — har ek limited tools + focused prompt.
+**HITL — Human-in-the-Loop.** Irreversible ya high-risk action se pehle human approval mandatory. Bina HITL: agent → `send_refund($50,000)` → done (disaster). HITL ke saath: agent → refund **propose** kare → **PAUSE** → human OK → tab execute. Tumhare payment system mein bada refund manager-approval queue mein jaata tha aur sign-off ke baad hi settle hota — yahi cheez. LangGraph mein `interrupt_before` graph ko pause karta hai, state save karta hai, aur UI se approve/reject karke resume.
 
-```
-Single mega-agent problems:
-  - Prompt mein 20 tools → LLM confuse ("galat tool pick")
-  - Ek model har kaam — mehnga (Opus se "hello" route)
-  - Blame mushkil — kaunse step ne galat refund kiya?
-```
+Kuch aur shabd: **handoff** (ek agent ka output doosre ka input), **interrupt** (LangGraph API jo run pause karke checkpoint persist kare), **resume** (approve/reject ke baad graph aage), aur **audit trail** (har step ka JSON log — interview defence aur "yeh refund kyun hua" ka jawab).
 
-**Split:**
-| Agent | Role | Tools |
-|-------|------|-------|
-| Supervisor | Route + synthesize | Usually no writes |
-| Researcher | Gather facts | Read-only: search, get_order |
-| Executor | Side effects | Write: refund, webhook |
-| Critic (optional) | Review before ship | Read output, no external IO |
+> **Ruko, socho:** HITL sirf "slow/careful" workflows ke liye hai, ya safety ke liye bhi? (Jawab: dono — par primary safety hai. Iska maqsad sirf user ko intimate karna nahi, balki ek irreversible action ko ek human checkpoint ke peeche rokna hai. Refund execute hone se *pehle* ruकna hi poora point hai.)
 
-#### 0.2 HITL — Human-in-the-Loop
-
-**HITL** = irreversible ya high-risk action se pehle **human approve** mandatory.
-
-```
-❌ Bina HITL: Agent → send_refund($50,000) → done
-✅ HITL ke saath: Agent → PROPOSE refund → PAUSE → human OK → execute
-```
-
-**Tera payment parallel:** Large refund → manager approval queue — execute tab jab sign-off. LangGraph mein `interrupt_before` = graph pause, state save, UI se approve/reject.
-
-#### 0.3 Terms table
-
-| Term | Matlab |
-|------|--------|
-| **Handoff** | Ek agent output doosre agent input ban jata hai |
-| **Supervisor** | Central router — kaunsa worker next |
-| **HITL gate** | Node jahan graph rukta hai human ke liye |
-| **Interrupt** | LangGraph API — run pause, checkpoint persist |
-| **Resume** | `approve` ya `reject` ke baad graph aage |
-| **Audit trail** | Har step JSON log — interview defence |
-
-**§0 checkpoint:**
-1. Multi-agent kab zaroori — 2 reasons?
-2. HITL sirf "slow" workflows ke liye hai ya safety ke liye bhi?
-3. Handoff example — researcher se executor ko kya milta hai?
+**§0 checkpoint:** (1) Multi-agent kab zaroori — 2 reasons? (2) HITL safety ya speed? (3) Handoff example — researcher se executor ko kya milta hai?
 
 ---
 
 ### §1. Problem pehle — ek agent + 15 tools production mein
 
-**Problem:** Project B user bolega: "Overdue invoice pe email bhejo aur Slack task banao aur agar amount > 10k ho toh refund initiate karo."
+Project B mein user kahega: "Overdue invoice pe email bhejo, Slack task banao, aur agar amount > 10k ho to refund initiate karo." Ek single agent ke saath teen khतре: refund tool galti se email step pe chal jaaye; $10k refund bina kisi approval ke ho jaaye; aur debugging me 40 tool calls ek thread mein ulajh jaayein.
 
-Ek agent ke saath:
-- Refund tool galti se email step pe call ho sakta hai
-- $10k refund bina approval
-- Debugging: 40 tool calls ek thread mein
+Solution ek payment-system jaisा architecture hai: **supervisor** task todta/route karta hai → **researcher** sirf data laata hai → **executor** write *propose* karta hai → **HITL** destructive propose pe pause → **audit** har transition log. Yeh "orchestrator → validation worker → approval gate → posting worker" ka hi roop hai.
 
-**Solution architecture:**
-1. **Supervisor** task todta hai / worker choose karta hai
-2. **Researcher** sirf data laata hai
-3. **Executor** write propose karta hai
-4. **HITL** destructive propose pe pause
-5. **Audit** har transition log
-
-```
-Payment system jaisa:
-  Orchestrator → Validation worker → Approval gate → Posting worker
-```
-
-> **→ Practice A1** (pass: supervisor 2 specialists ko 8/10 sahi route)
+> **→ Practice A1** (pass: supervisor 2 specialists ko 8/10 sahi route kare).
 
 ---
 
 ### §2. Supervisor pattern — routing graph
 
-```mermaid
-flowchart TB
-    Sup["Supervisor node"] --> R{"task type?"}
-    R -->|lookup| Res["Researcher"]
-    R -->|action| Ex["Executor"]
-    Res --> Sup
-    Ex --> Sup
-    Sup --> Done["END — final answer"]
-```
+Supervisor ek central router node hai jo decide karta hai agla worker kaun, aur workers kaam karke **wapas supervisor ko report** karte hain (loop), jab tak supervisor `finish` na bole:
 
 ```python
-from typing import Literal
-from langgraph.graph import StateGraph, START, END
-
 class TeamState(TypedDict):
     messages: list
     next_worker: str
@@ -160,266 +83,140 @@ class TeamState(TypedDict):
     step_log: list
 
 def supervisor_node(state: TeamState) -> dict:
-  # LLM ya rules: "research" | "execute" | "finish"
-    decision = route_task(state["task"], state["messages"])
-    return {"next_worker": decision, "step_log": state["step_log"] + [{"agent": "supervisor", "decision": decision}]}
+    decision = route_task(state["task"], state["messages"])   # "research" | "execute" | "finish"
+    return {"next_worker": decision,
+            "step_log": state["step_log"] + [{"agent": "supervisor", "decision": decision}]}
 
 def route_supervisor(state: TeamState) -> Literal["researcher", "executor", "finish"]:
-    w = state["next_worker"]
-    if w == "finish":
-        return "finish"
-    return w  # "researcher" or "executor"
+    return state["next_worker"]
 
-graph.add_node("supervisor", supervisor_node)
-graph.add_node("researcher", researcher_node)
-graph.add_node("executor", executor_node)
 graph.add_conditional_edges("supervisor", route_supervisor)
-graph.add_edge("researcher", "supervisor")
+graph.add_edge("researcher", "supervisor")   # worker → wapas boss
 graph.add_edge("executor", "supervisor")
 ```
 
-**Line-by-line:**
+Pattern dekho: supervisor ka decision `next_worker` mein jaata hai, conditional edge use padhkar route karti hai, aur har worker khatam hoke wapas supervisor pe aata hai (yeh loop multi-step delegation deta hai). `step_log` har decision record karta hai (audit). Production cost-control zaroori hai: chhota model supervisor pe (Haiku route kare, Sonnet sirf hard execute), max-delegation depth (10 loops ke baad stop), aur researcher cache (same `order_id` dobara query mat karo).
 
-| Line | Matlab |
-|------|--------|
-| `next_worker` | Supervisor ka decision state mein |
-| `route_supervisor` | Conditional edge — agla node naam |
-| `researcher → supervisor` | Worker khatam → wapas boss ko report |
-| `step_log` | Audit ke liye — har supervisor decision |
+> **Ruko, socho:** Supervisor kabhi `finish` nahi bol raha aur graph loop kar raha hai. Kis cheez ki kami hai? (Jawab: ek `max_delegations` guard — N supervisor loops ke baad forced END. Module 07 ka loop-guard yahan bhi lagta hai, warna infinite delegation + bill explode.)
 
-**Cost control (production):**
+#### §2 common errors
 
-| Strategy | Kaise |
-|----------|-------|
-| Small model supervisor | Haiku route, Sonnet sirf hard execute |
-| Max delegation depth | 10 supervisor loops ke baad stop |
-| Cache researcher | Same `order_id` query dubara mat karo |
-
-| Error message | Kyun | Fix |
-|---------------|------|-----|
+| Error | Kyun | Fix |
+|-------|------|-----|
 | Infinite supervisor loop | Kabhi `finish` nahi | `max_delegations` + forced END |
-| Wrong worker | Vague task | Supervisor prompt mein examples |
+| Wrong worker | Task vague | Supervisor prompt mein examples |
 
 ---
 
 ### §3. Specialist agents — least privilege tools
 
-```python
-RESEARCHER_TOOLS = ["search_orders", "get_invoice"]  # read-only
-EXECUTOR_TOOLS = ["send_email", "propose_refund"]     # writes — HITL ke pehle
+Asli security yahan hai: **har agent ko sirf wahi tools do jo uske role ke liye chahiye.** Researcher ko sirf read-only tools (`search_orders`, `get_invoice`), executor ko write tools (`send_email`, `propose_refund`). Yeh "least privilege" hai — agar researcher ka prompt inject bhi ho jaaye, uske paas koi destructive tool hai hi nahi.
 
-def researcher_node(state: TeamState) -> dict:
-    # Sirf RESEARCHER_TOOLS LLM ko dikhao
-    ...
-    return {"messages": updated, "step_log": ...}
+```python
+RESEARCHER_TOOLS = ["search_orders", "get_invoice"]   # read-only, low risk
+EXECUTOR_TOOLS   = ["send_email", "propose_refund"]   # writes — HITL ke pehle
 ```
 
-| Agent | Model size | Tools | Risk |
-|-------|------------|-------|------|
-| Researcher | Small OK | Read | Low |
-| Executor | Larger | Write | High — HITL |
-| Critic | Medium | None | Catches bad drafts |
+Role ke hisaab se model aur risk bhi alag: researcher chhota model bhi chal jaata hai (low risk), executor bada model + HITL (high risk), aur optional critic medium model bina kisi tool ke (bure drafts pakadne ke liye). Critic kab worth hai? High-stakes external email ya legal text pe haan; internal lookup summary pe overhead, skip kar do.
 
-**Critic kab worth it:**
-- High-stakes external email / legal text → worth
-- Internal lookup summary → overhead, skip
-
-> **→ Practice A1** complete
+> **→ Practice A1** complete.
 
 ---
 
 ### §4. HITL gates — LangGraph interrupt
 
-**Destructive actions list (Project B):**
-- `send_payment`, `write_webhook`, `delete_record`, `issue_refund`
-- **NOT HITL:** `search_docs`, `summarize`, `list_orders`
-
-```mermaid
-stateDiagram-v2
-    [*] --> Proposed
-    Proposed --> AwaitingHuman: destructive tool
-    AwaitingHuman --> Approved: human approves
-    AwaitingHuman --> Rejected: human rejects
-    Approved --> Executed
-    Rejected --> Replan
-    Executed --> [*]
-```
+Pehle saaf karo kaunse actions gate ke peeche hain. **Destructive (HITL chahiye):** `send_payment`, `write_webhook`, `delete_record`, `issue_refund`. **Non-destructive (no HITL):** `search_docs`, `summarize`, `list_orders`. Ab LangGraph mein gate `interrupt_before` se banta hai — graph us node se *pehle* ruk jaata hai aur state save kar deta hai:
 
 ```python
-from langgraph.checkpoint.memory import MemorySaver
-
-memory = MemorySaver()
-app = graph.compile(
-    checkpointer=memory,
-    interrupt_before=["execute_destructive"],  # is node se PEHLE pause
-)
-
+app = graph.compile(checkpointer=MemorySaver(), interrupt_before=["execute_destructive"])
 config = {"configurable": {"thread_id": "run-xyz"}}
 
-# Run until interrupt
-app.invoke(initial_state, config)
-# State saved — human UI shows proposal
-
-# Approve path
-app.invoke({"approve": True}, config)  # resume — execute runs
-
-# Reject path — alag invoke ya Command pattern
-app.invoke({"approve": False}, config)  # → replan edge
+app.invoke(initial_state, config)   # interrupt tak chala — ab state saved, human UI proposal dikhata hai
+app.invoke({"approve": True}, config)    # approve → execute chalega
+app.invoke({"approve": False}, config)   # reject → replan edge
 ```
 
-**Line-by-line:**
+`interrupt_before` graph ko named node se pehle STOP karta hai; `checkpointer` pause pe state persist karta hai; `thread_id` resume key hai; aur `approve: True/False` human input hai jo agla edge decide karta hai. Yeh checkpoint (Module 07) ke upar hi bana hai — bina checkpointer ke resume possible hi nahi.
 
-| Line | Matlab |
-|------|--------|
-| `interrupt_before=[...]` | Named node se pehle graph STOP |
-| `checkpointer` | Pause pe state disk/memory mein |
-| `thread_id` | Resume key — same run |
-| `approve: True/False` | Human input — next edge decide |
+Product level pe do flavours hain: **sync HITL** (user screen pe "Approve?" button dekhता hai, fast decisions, high trust) aur **async HITL** (Slack/email approval, run kai din pause reh sakta hai — long enterprise workflows). Ek critical detail: execute node ko **idempotent** banao (`idempotency_key`), warna approve pe double-execute ka risk hai.
 
-**Sync vs Async HITL (product):**
+#### §4 common errors
 
-| Mode | UX | Kab |
-|------|-----|-----|
-| **Sync** | User screen pe wait — "Approve?" button | High trust, fast decisions |
-| **Async** | Email/Slack approval — run days tak pause | Long workflows, enterprise |
-
-| Error message | Kyun | Fix |
-|---------------|------|-----|
+| Error | Kyun | Fix |
+|-------|------|-----|
 | Resume without checkpoint | `checkpointer=None` | `MemorySaver` / Postgres |
-| Double execute on approve | Idempotency missing | `idempotency_key` on execute |
-| Interrupt never hits | Node name typo | `interrupt_before` exact match |
+| Approve pe double execute | Idempotency missing | Execute pe `idempotency_key` |
+| Interrupt kabhi hit nahi hota | Node name typo | `interrupt_before` exact match |
 
-> **→ Practice A2** (pass: reject → replan path works)
+> **→ Practice A2** (pass: reject → replan path kaam kare).
 
 ---
 
 ### §5. Audit log — har step traceable
 
-**Problem:** Customer support: "Yeh refund kyun hua?" — production mein jawab audit se aata hai.
+Production mein customer support poochhega "yeh refund kyun hua?" — aur jawab guess se nahi, **audit log** se aata hai. Har significant step ka ek structured entry:
 
 ```json
-{
-  "run_id": "run_abc",
-  "step": 3,
-  "agent": "executor",
-  "action": "propose_refund",
+{ "run_id": "run_abc", "step": 3, "agent": "executor", "action": "propose_refund",
   "payload": {"order_id": "o_1", "amount": 500},
-  "hitl_status": "approved",
-  "approved_by": "user_42",
-  "timestamp": "2026-06-26T10:00:00Z"
-}
+  "hitl_status": "approved", "approved_by": "user_42", "timestamp": "2026-06-26T10:00:00Z" }
 ```
 
 ```python
-def append_audit(state: TeamState, agent: str, action: str, payload: dict) -> list:
-    entry = {
-        "run_id": state["run_id"],
-        "step": len(state["step_log"]) + 1,
-        "agent": agent,
-        "action": action,
-        "payload": payload,
-        "timestamp": datetime.utcnow().isoformat() + "Z",
-    }
+def append_audit(state, agent, action, payload):
+    entry = {"run_id": state["run_id"], "step": len(state["step_log"]) + 1,
+             "agent": agent, "action": action, "payload": payload,
+             "timestamp": datetime.utcnow().isoformat() + "Z"}
     return state["step_log"] + [entry]
 ```
 
-**Rollback on reject:**
-- Proposed action **execute nahi hua** — koi side effect nahi
-- State `next_worker = "supervisor"` — replan
-- Audit: `hitl_status: "rejected"`
+Yahan ek elegant property hai — **reject pe rollback "free" hai.** Kyun? Kyunki HITL gate ne action ko execute node tak pahunchने hi nahi diya — koi side-effect hua hi nahi. State bas `next_worker = "supervisor"` ho jaata hai (replan), aur audit mein `hitl_status: "rejected"` log hota hai. Koi DB rollback nahi, kyunki kuch commit hua hi nahi. (Ek privacy rule: audit mein full card number/PII redact karo.)
 
-**Query pattern:**
-```python
-def get_trail(run_id: str, logs: list) -> list:
-    return [e for e in logs if e["run_id"] == run_id]
-```
-
-| Error message | Kyun | Fix |
-|---------------|------|-----|
-| Audit gap | Node ne log skip kiya | Har node exit pe `step_log` update |
-| PII in logs | Full card number logged | Redact sensitive fields |
-
-> **→ Practice A3** (pass: `run_id` se poora trail query)
+> **→ Practice A3** (pass: `run_id` se poora trail query).
 
 ---
 
 ### §6. Production patterns — sync UI, kill switch, quotas
 
-Module practice CLI approve use karta hai. Production mein teen cheezein extra:
-
-#### 6.1 HITL UI contract
-
-```
-Graph pause hone pe API return:
-{
-  "status": "awaiting_approval",
-  "run_id": "run_xyz",
-  "proposal": { "tool": "issue_refund", "args": {...} },
-  "expires_at": "2026-06-28T12:00:00Z"
-}
-
-Approve POST /runs/run_xyz/approve  → graph resume
-Reject  POST /runs/run_xyz/reject   → replan edge
-```
-
-| Field | Kyun |
-|-------|------|
-| `expires_at` | Stale proposals auto-reject — security |
-| `proposal` | Human exactly kya approve kar raha hai dekhe |
-| `run_id` | Audit + resume key |
-
-#### 6.2 Kill switch (OWASP excessive agency)
+Practice CLI-approve use karta hai; production mein teen cheezein extra chahiye. **HITL UI contract:** jab graph pause ho, API ek proposal return kare (`status: awaiting_approval`, `proposal`, `run_id`, aur `expires_at` — stale proposals auto-reject, security ke liye), aur `POST /runs/{id}/approve` ya `/reject` se resume ho. **Kill switch** (OWASP excessive-agency): ek admin toggle (feature flag / Redis) jo bina deploy ke saare writes rok de — aur ise **har write node pe** check karo, sirf start pe nahi (warna race). **Per-tenant quota:** multi-agent loops quota jaldi khaते hain, isliye supervisor `max_delegations` + cost cap (Module 10) se link karo.
 
 ```python
-TENANT_KILL_SWITCH = os.getenv("AGENT_EXECUTION_ENABLED", "true") == "true"
-
-def executor_node(state: TeamState) -> dict:
-    if not TENANT_KILL_SWITCH:
-        return {"messages": state["messages"] + [
-            {"role": "assistant", "content": "Execution disabled by admin."}
-        ]}
+def executor_node(state):
+    if os.getenv("AGENT_EXECUTION_ENABLED", "true") != "true":
+        return {"messages": state["messages"] + [{"role": "assistant", "content": "Execution disabled by admin."}]}
     ...
 ```
 
-Ops team ek toggle se saare writes rok sakti hai — bina deploy ke (feature flag / Redis).
+#### §6 common errors
 
-#### 6.3 Per-tenant execution quota
-
-```
-if tenant.monthly_runs >= tenant.plan_limit:
-    return error — hard stop (Phase 2 spine)
-```
-
-Multi-agent loops mein quota jaldi exhaust — supervisor `max_delegations` + cost cap Module 10 se link.
-
-| Error message | Kyun | Fix |
-|---------------|------|-----|
+| Error | Kyun | Fix |
+|-------|------|-----|
 | Orphaned paused run | User ne approve nahi kiya | Expiry job + notify |
-| Kill switch race | Check only at start | Check har write node pe |
+| Kill switch race | Sirf start pe check | Har write node pe check |
 
 ---
 
 ## Practice
 
-> **Saare assignments**: [`practice/README.md`](practice/README.md)  
+> **Saare assignments**: [`practice/README.md`](practice/README.md). Code **tum** likhoge.
 > Stuck? `@modules/09-multi-agent-hitl/MODULE.md` + error paste.
 
 | # | Theory § | File | Pass when |
 |---|----------|------|-----------|
-| A1 | §1–§3 | `practice/supervisor_router.py` | 8/10 tasks sahi specialist |
-| A2 | §4 | `practice/hitl_gate.py` | Interrupt + approve/reject paths |
-| A3 | §5 | `practice/audit_log.py` | Queryable trail by `run_id` |
+| A1 | §1–§3 | `supervisor_router.py` | 8/10 tasks sahi specialist pe |
+| A2 | §4 | `hitl_gate.py` | Interrupt + approve/reject paths |
+| A3 | §5 | `audit_log.py` | `run_id` se queryable trail |
 
 ---
 
 ## Active recall (khud jawab likho NOTES mein)
 
-1. HITL sync vs async — product impact ek example each?
-2. Critic agent kab worth it vs skip?
+1. HITL sync vs async — ek-ek product example?
+2. Critic agent kab worth hai vs skip?
 3. Multi-agent cost control — 3 strategies?
-4. Reject ke baad rollback kyun "safe" hai — execute node touch hua?
+4. Reject ke baad rollback kyun "safe" hai — execute node chhua hi nahi?
 
-**Chat drill** (optional): "Module 09 — refund HITL flow whiteboard"
+**Chat drill** (optional): "Module 09 — refund HITL flow whiteboard."
 
 ---
 
@@ -438,5 +235,4 @@ Multi-agent loops mein quota jaldi exhaust — supervisor `max_delegations` + co
 
 - [LangGraph Multi-agent](https://langchain-ai.github.io/langgraph/concepts/multi_agent/)
 - [LangGraph Human-in-the-loop](https://langchain-ai.github.io/langgraph/how-tos/human_in_the_loop/)
-- Module 07 checkpoints — HITL resume foundation
-- Module 11 M4 — production HITL + credential vault
+- Module 07 checkpoints · Module 11 M4 — production HITL + credential vault
