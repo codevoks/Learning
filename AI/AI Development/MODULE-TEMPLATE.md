@@ -24,18 +24,19 @@
 ## Theory
 
 ### §0. [Syntax OR "Terms pehli baar"]
-- Har naya symbol/term define BEFORE use
-- TS/infra parallel where helpful
+- Har naya symbol/term define BEFORE use — **prose mein**, table-row mein nahi
+- TS/infra parallel wakya ke andar (table cell mein nahi)
 - Terminal/curl try block with expected output
-- Common errors table
+- Common errors table (yeh table reference hai — rakho)
 - §0 checkpoint questions
 
 ### §1. [First concrete concept — problem pehle]
-- "Problem kya hai" paragraph
-- Code with | Line | Matlab | table
-- Step flow 1→2→3
-- curl / python / go run test
-- Common errors
+- "Problem/kyun seekh rahe ho" paragraph se shuru
+- Code block ke baad **narration** — sahi 2–3 cheezein + kyun (line-by-line table NAHI)
+- Ek worked example numbers ke saath develop karo
+- 1–2 "ruko socho" beats
+- curl / python / go run test with expected output
+- Common errors table (reference)
 - → Practice A1
 
 ### §2…§N
@@ -56,4 +57,4 @@
 
 **Code modules (00a–00e):** §0 = syntax or tooling from zero.
 
-**Banned:** section that is only bullet list + code dump without line table.
+**Banned:** har concept ko table-row mein define karna; code ke neeche mechanical line-by-line table. Prose pehle, table sirf reference (errors/params/compare) ke liye. Voice copy: [`modules/01-llm-apis/MODULE.md`](modules/01-llm-apis/MODULE.md).
