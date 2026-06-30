@@ -1,8 +1,20 @@
 [
   {
-    "id": "q1",
-    "input": "TODO: example question",
-    "expected_output": "TODO: golden answer",
-    "metadata": { "topic": "example" }
+    "id": "q1_overdue_email",
+    "input": "Every morning check overdue invoices and email clients",
+    "expected_steps": ["query_overdue_invoices", "send_email"],
+    "actual_steps": ["query_overdue_invoices", "send_email"]
+  },
+  {
+    "id": "q2_refund_with_approval",
+    "input": "If a charge is disputed, refund 50% after approval",
+    "expected_steps": ["get_order", "propose_refund", "hitl", "execute_refund"],
+    "actual_steps": ["get_order", "propose_refund", "hitl", "execute_refund"]
+  },
+  {
+    "id": "q3_refund_skipped_hitl",
+    "input": "Refund overpaid order o_55 after approval",
+    "expected_steps": ["get_order", "propose_refund", "hitl", "execute_refund"],
+    "actual_steps": ["get_order", "propose_refund", "execute_refund"]
   }
 ]

@@ -49,7 +49,7 @@ cp .env.example .env 2>/dev/null || true
 | **Theory §** | §5 |
 | **File** | `pydantic_tools.py` |
 | **Kya** | Pydantic-validated tool args |
-| **Pass** | Invalid args rejected pre-execute |
+| **Pass** | `python pydantic_tools.py` → `_check()` asserts pass (invalid args rejected) |
 
 ---
 

@@ -65,7 +65,7 @@ pip install langgraph pydantic python-dotenv
 |---|---|
 | **File** | `audit_log.py` |
 | **Kya** | Log each agent step |
-| **Pass** | Queryable decision trail by `run_id` |
+| **Pass** | `python audit_log.py` → `_check()` asserts pass (trail by `run_id`) |
 
 ---
 

@@ -62,7 +62,7 @@ Redis: `redis://localhost:6379` (00a compose)
 |---|---|
 | **File** | `circuit_breaker.py` |
 | **Kya** | Breaker wrapper around flaky call |
-| **Pass** | 3 fails → open; half-open retry |
+| **Pass** | `python circuit_breaker.py` → `_check()` asserts pass (OPEN + half-open probe) |
 
 ### Hints
 

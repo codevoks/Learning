@@ -55,7 +55,7 @@ Each entry: `input`, `expected_output`, optional `expected_steps` for trajectory
 |---|---|
 | **File** | `trajectory_scorer.py` |
 | **Kya** | Compare expected vs actual steps |
-| **Pass** | Pass/fail report printed |
+| **Pass** | `python trajectory_scorer.py` → `_check()` asserts pass (exact-order + report) |
 
 ### Run
 

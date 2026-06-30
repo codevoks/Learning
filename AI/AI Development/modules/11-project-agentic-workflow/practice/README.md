@@ -91,7 +91,7 @@ Prior modules: 06–10 concepts used here.
 |---|---|
 | **File** | `outbox_stub.py` |
 | **Kya** | Idempotent execution via outbox pattern |
-| **Pass** | Duplicate enqueue → single side effect |
+| **Pass** | `python outbox_stub.py` → `_check()` asserts pass (exactly-once) |
 
 ---
 

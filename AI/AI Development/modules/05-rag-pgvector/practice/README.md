@@ -40,7 +40,7 @@ pip install openai python-dotenv psycopg2-binary numpy httpx fastapi uvicorn
 | **Theory §** | §3 |
 | **File** | `chunker.py` |
 | **Kya** | Document loader + chunker with overlap |
-| **Pass** | Chunks with overlap produced |
+| **Pass** | `python chunker.py` → `_check()` ke asserts pass (overlap + coverage) |
 
 ### Hints
 
