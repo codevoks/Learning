@@ -1,465 +1,228 @@
 # Module 02 — LLM Infra Patterns
 
-> **Padho**: Isi file mein **Theory** — bahar mat jao.  
-> **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
+> **Padho**: Isi file mein **Theory** — bahar mat jao.
+> **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`
 > **Nav**: ← [Module 01](../01-llm-apis/MODULE.md) · Next → [Module 03](../03-project-llm-gateway/MODULE.md)
 
-> **Format**: Textbook — **§0 terms pehle** (rate limit, cache, circuit breaker). Architecture baad mein. Standard: `@MODULE-TEACHING-STANDARD.md`
-
-> **Kaun ke liye:** Module 01 complete. TS/Node + Redis exposure (00a). Zero AI infra background OK.
+> **Format**: Textbook — §0 terms pehle (rate limit, cache, circuit breaker), prose mein. Voice: `@MODULE-TEACHING-STANDARD.md`
 
 ## At a glance
 
 | | |
 |---|---|
-| Prerequisites | Module 01 · 00a Redis (`docker compose up -d`). 01 skip kiya toh pehle §0 + Module 01 §0 terms |
+| Prerequisites | Module 01 · 00a Redis (`docker compose up -d`) |
 | Duration | ~4–6 sessions |
 | Project? | No |
 | Exit test | Cache + circuit breaker design bina notes ke whiteboard karo |
 
-## Visual map (simple — detail §0 ke baad)
+## Yeh module kis baare mein hai
+
+Module 01 mein tumne ek route se seedha OpenAI ko call kiya — seekhne ke liye perfect, par production mein **kabhi** aisा nahi karte. Kyun? Kyunki seedhа call mein na rate-limiting hai, na caching, na koi protection jab provider down ho. Yeh module wo **protective layer** sikhata hai jo har real LLM product mein hota hai — woh patterns jinke bina ek galat tenant tumhara poora bill aur sabke users uda dega.
+
+Mental model: har request seedhа provider ko nahi jaati, balki ek **gate** se guzarti hai. Pehle "ruko, zyada to nahi bhej rahe?" (rate limit), phir "yeh jawab pehle se paas hai kya?" (cache), phir "provider zinda hai kya?" (circuit breaker), tab jaake provider. §0 mein in saare shabdon ko zero se samjhaunga.
 
 ```
-request → [rate limit] → [cache hit?] ──yes──► response (fast, cheap)
-                              │
-                             miss
-                              ↓
-                         [circuit breaker closed?]
-                              ↓
-                         LLM provider
-                              ↓
-                         cache store + respond
+request → [rate limit] → [cache hit?] ──yes──► response (fast, sasta)
+                            │ miss
+                            ▼
+                       [circuit breaker closed?] → LLM provider → cache store + respond
 ```
 
-**Mental model**: Har request pehle **gate** se guzarti hai (rate limit), phir **cheap path** (cache), phir **risk control** (circuit breaker), tab provider. Direct API call learning ke liye tha — production mein yeh layer mandatory.
-
-**Redraw challenge**: Request → rate limiter → cache → circuit breaker → provider chain bina dekhe draw karo.
+**Redraw challenge**: Request → rate limiter → cache → circuit breaker → provider — bina dekhe banao.
 
 ---
 
-## Read order (strict — session table)
+## Read order (strict)
 
 | Session | Padho | Karo |
 |---------|-------|------|
-| 1 | §0 Terms (rate limit, cache, circuit breaker, fallback) | Redis ping — `redis-cli PING` |
+| 1 | §0 Terms | `redis-cli PING` se Redis check |
 | 2 | §1 Proxy layer + §2 Rate limiting | **A1** rate limiter |
-| 3 | §3 Semantic cache + exact cache intro | **A2** exact cache |
+| 3 | §3 Semantic cache + exact cache | **A2** exact cache |
 | 4 | §4 Circuit breaker | **A3** breaker wrapper |
 | 5 | §5 Fallback + §6 Cost tracking | NOTES — cost JSON schema |
-| 6 | §7 Observability + active recall | **A4** request middleware |
+| 6 | §7 Observability + recall | **A4** request middleware |
 
 ---
 
 ## Learning hooks (fintech parallels)
 
-| Pattern | Tera parallel |
-|---------|---------------|
-| Token bucket rate limit | Order submission throttle per client |
-| Exact cache | Identical order idempotency hit |
-| Semantic cache | Fuzzy match in **bank reconciliation** |
-| Circuit breaker | Venue down → stop sending orders |
-| Fallback provider | Secondary **liquidity source** |
-| Per-tenant budget | Account **trading limits** / credit line |
-| OTEL spans | Prometheus `/metrics` + trace_id in logs |
-| Structured cost log | **Billing event** per fill |
+Yeh saare patterns tumhare trading background mein already maujood hain, bas alag naam se: token-bucket rate limit ≈ per-client order throttle; exact cache ≈ idempotent order replay; semantic cache ≈ bank reconciliation ka fuzzy match; circuit breaker ≈ venue down hone pe orders rokna; fallback provider ≈ secondary liquidity source; per-tenant budget ≈ account trading limits; structured cost log ≈ har fill ka billing event.
 
 ---
 
 ## Theory
 
-### §0. Terms pehli baar — infra words architecture se pehle (35 min)
+### §0. Terms pehli baar — infra words (35 min)
 
-Module 01 mein tumne **provider API** direct call kiya. Ab production **patterns** — pehle vocabulary, phir diagrams.
+**Rate limiting.** Yeh ek fixed window mein zyada-se-zyada N requests allow karta hai; uske baad reject (aam taur pe HTTP **429 Too Many Requests**), taaki client backoff kare. Tumhare exchange waale din se seedha — HFT client ek second mein 1000 orders nahi bhej sakta; yahan ek tenant ek second mein 60 LLM calls. Tum yeh limit alag levels pe laga sakte ho: IP pe (anonymous abuse), API key/user pe (fair use per customer), ya tenant pe (SaaS multi-tenant). Sabse common algorithm **token bucket** hai (§2 mein detail).
 
-#### 0.1 Rate limiting — zyada requests rokna
+**Cache.** Pehle compute kiya hua jawab store karna, taaki agli baar provider call **skip** ho jaaye. Key mil gayi = **cache hit** (stored response wapas), nahi mili = **cache miss** (provider call karo, phir store). Har entry ki ek **TTL** (time-to-live) hoti hai. Do tarah ka cache hota hai: **exact** (bilkul same string prompt → hit) aur **semantic** (similar *matlab* waला prompt → hit, embeddings se, §3). Semantic zyada powerful hai par khatarnak bhi — galat match (**false positive**) galat jawab serve kar dega.
 
-**Rate limit** = fixed window mein max N requests allow; uske baad reject (usually HTTP **429 Too Many Requests**).
+**Circuit breaker.** Ek wrapper jo provider ki failures ginता hai; bahut fail ho jaayein to **OPEN** ho jaata hai aur requests turant reject karne lagta hai (provider ko call hi nahi karta). Teen states hain: **CLOSED** (normal, requests jaa rahi hain), **OPEN** (fail fast — sick provider ko hammer mat karo, latency aur paisa bachao), aur **HALF-OPEN** (ek test "probe" request — success hua to wapas CLOSED, fail hua to wapas OPEN). Yeh bilkul matching-engine connectivity monitor jaisा hai: venue down → routing roko, beech-beech mein ek probe order se check karo recover hua ya nahi.
 
-| Term | Matlab |
-|------|--------|
-| **Quota** | Total allowance — e.g. 1000 req/day |
-| **Throttle** | Slow down or reject when over limit |
-| **429** | HTTP status — client ko backoff karna chahiye |
-| **Token bucket** | Algorithm — bucket mein tokens, har request ek consume (§2) |
-| **Sliding window** | Last N seconds count — precise, thoda zyada memory |
+**Fallback.** Primary provider fail kare (5xx ya breaker OPEN) to secondary provider/model try karna — jaise Anthropic fail to OpenAI, dono fail to stale cache ya graceful 503. Ek **bahut zaroori rule**: `400` (bad request) pe fallback **mat** karo — wo user/prompt ki galti hai, doosra provider bhi fail karega, bas tum do baar paisa jala doge.
 
-**Fintech analogy:** Exchange **order rate limit** — HFT client second mein 1000 orders nahi bhej sakta; yahan tenant second mein 60 LLM calls.
+**Observability terms.** `trace_id` ek request ki poori journey ko jodne wali UUID hai; **span** ek operation ka timed slice (cache lookup, provider call); **OTEL** (OpenTelemetry) vendor-neutral tracing standard; aur **structured log** matlab JSON fields (grep/aggregate-friendly), na ki ek lambi string.
 
-**Level kahan lagate hain:**
+> **Ruko, socho:** Rate limit aur budget limit — dono "roko" karte hain, par farak kya hai? (Jawab: rate limit *speed* control karta hai — per second/minute kitni requests. Budget limit *total kharcha* control karta hai — is mahine $X se zyada nahi. Ek tez burst rokта hai, doosra mahine ka bill.)
 
-| Level | Key example | Kab |
-|-------|-------------|-----|
-| IP | `rl:ip:1.2.3.4` | Anonymous abuse |
-| User / API key | `rl:key:sk-abc` | Fair use per customer |
-| Tenant | `rl:tenant:org_42` | SaaS multi-tenant |
+#### §0 common galatfehmiyaan
 
-#### 0.2 Cache — purana jawab dubara compute mat karo
-
-**Cache** = pehle compute kiya hua result store — next time **provider call skip**.
-
-| Term | Matlab |
-|------|--------|
-| **Cache hit** | Key mil gayi — stored response return |
-| **Cache miss** | Nahi mila — provider call karo, phir store |
-| **TTL** | Time-to-live — entry kitni der valid |
-| **Exact cache** | Same string prompt → hit |
-| **Semantic cache** | **Similar meaning** prompt → hit (embeddings, §3) |
-| **False positive** | Galat match — wrong answer served |
-
-**Fintech analogy:** Exact cache = same **ISIN + qty + price** order replay. Semantic cache = "refund policy?" vs "how do refunds work?" — human alag, meaning same → **recon fuzzy match**.
-
-#### 0.3 Circuit breaker — provider sick hai toh fail fast
-
-**Circuit breaker** = wrapper jo provider failures track karta hai; bahut fail → **OPEN** → requests turant reject (provider call nahi).
-
-| State | Matlab |
-|-------|--------|
-| **CLOSED** | Normal — requests provider ko jati hain |
-| **OPEN** | Fail fast — save latency + money, don't hammer sick service |
-| **HALF-OPEN** | Probe — ek test request; success → CLOSED, fail → OPEN |
-
-**Fintech analogy:** Primary **matching engine** connectivity monitor — venue down → stop routing, periodic **probe order** se check recovery.
-
-#### 0.4 Fallback — plan B provider
-
-**Fallback** = primary fail (5xx, breaker OPEN) → secondary provider/model try karo.
-
-```
-Primary: Anthropic
-    ↓ fail
-Secondary: OpenAI
-    ↓ fail
-Tertiary: cached stale OR graceful 503
-```
-
-**Rule:** 400 (bad request) pe fallback **mat** karo — user error hai, doosra provider bhi fail karega.
-
-#### 0.5 Observability terms (intro)
-
-| Term | Matlab |
-|------|--------|
-| **trace_id** | Ek request ki poori journey track — UUID |
-| **Span** | Ek operation ka timed slice (cache lookup, provider call) |
-| **OTEL** | OpenTelemetry — vendor-neutral tracing standard |
-| **Structured log** | JSON fields — grep/aggregate friendly |
-
-#### 0.6 §0 checkpoint (NOTES)
-
-1. Rate limit vs budget limit mein farq?
-2. Semantic cache false positive dangerous kyun?
-3. Circuit breaker OPEN mein provider ko call kyun nahi karte?
-
-**Common errors (concept level):**
-
-| Confusion | Sahi |
+| Galat soch | Sach |
 |-----------|------|
-| "Cache hamesha safe" | Stale policy / wrong semantic match risk |
-| "429 = bug" | Expected under load — backoff design karo |
-| "Breaker = retry" | Breaker **stops** calls; retry alag policy |
+| "Cache hamesha safe" | Stale data / galat semantic match ka risk |
+| "429 = bug" | Load pe expected — backoff design karo |
+| "Breaker = retry" | Breaker calls **roकता** hai; retry alag policy hai |
 
 ---
 
-### §1. Kyun proxy layer chahiye — direct API call production mein nahi
+### §1. Proxy layer kyun chahiye — seedhа API call production mein nahi
 
-#### Problem kya hai?
-
-Module 01: ek FastAPI route → OpenAI. Production: 10 microservices, har ek apni key, retry, logging copy-paste. Key leak, inconsistent cost data, no central throttle — **operational chaos**.
+Module 01 mein ek FastAPI route OpenAI ko call kar raha tha. Ab socho jab 10 microservices hain, har ek apni key, apna retry, apna logging copy-paste kar raha hai. Result: keys 10 jagah (leak risk), cost data har jagah alag-alag (CFO ko jawab nahi de paoge), aur koi central throttle nahi (ek service pagal ho jaaye to sab affected). Yeh operational chaos hai.
 
 ```
-❌ 10 services × (API key + retry + logging + cache logic)
+❌ 10 services × (API key + retry + logging + cache)
 ✅ 10 services → 1 LLM proxy/gateway → providers
 ```
 
-**Fintech analogy:** Har desk apna **direct market access** vs bank ka central **OMS** — compliance, limits, audit ek jagah.
+Tumhare trading parallel mein: har desk ka apna direct-market-access vs bank ka central OMS — compliance, limits, aur audit ek jagah. Proxy layer wahi central OMS hai: rate limit, cache, circuit breaker, cost log, aur traces — sab ek jagah, sabके liye consistent. Request ka flow ban jaata hai: service proxy ko call karta hai → proxy auth + rate limit → cache lookup → breaker check → provider call → cost log + cache store + return. Yahi poora module is flow ke ek-ek tukde ko bharta hai.
 
-#### Proxy layer responsibilities
-
-| Responsibility | Kyun centralize |
-|----------------|-----------------|
-| Rate limit | Fair use + abuse stop |
-| Cache | Cost cut + latency cut |
-| Circuit breaker | Provider outage isolate |
-| Cost log | Per-tenant billing (Module 03) |
-| Traces | Debug slow requests |
-
-#### Request flow (with proxy)
-
-```
-Step 1 → Service calls internal proxy (not provider directly)
-Step 2 → Proxy: auth + rate limit
-Step 3 → Proxy: cache lookup
-Step 4 → Proxy: circuit breaker check
-Step 5 → Proxy: provider call
-Step 6 → Proxy: log cost, update cache, return
-```
-
-**Common errors:**
-
-| Mistake | Impact | Fix |
-|---------|--------|-----|
-| Provider key in frontend | Key steal → bankruptcy | Server-side proxy only |
-| Each team own retry logic | Retry storm on 503 | Central exponential backoff |
-| No request ID | Can't debug | trace_id middleware (§7) |
-
-> **→ Practice A4** (later — trace_id + structured logs tie-in)
+Ek galti jo product ko maar deti hai: provider key kabhi **frontend** mein mat daalo — wo chori hui to koi tumhare paise se model chala lega. Key hamesha server-side proxy mein.
 
 ---
 
-### §2. Rate limiting — token bucket vs sliding window
+### §2. Rate limiting — token bucket
 
-#### Problem kya hai?
+Maan lo ek tenant galti se (ya jaanboojh ke) ek loop mein 10,000 LLM calls bhej deta hai. Do cheezein hongi: tumhara bill spike, aur provider 429 dene lagega — jisse **sabके** users affected. Isliye per-tenant throttle Redis pe chahiye.
 
-Ek tenant loop mein 10,000 LLM calls bhej de → bill spike + provider 429 → sab users affect. **Per-tenant throttle** chahiye Redis pe.
-
-```mermaid
-stateDiagram-v2
-    [*] --> Bucket: tokens refill over time
-    Bucket --> Allowed: token available
-    Bucket --> Denied429: bucket empty
-    Allowed --> Bucket: consume 1 token
-```
-
-#### Token bucket (line-by-line mental model)
+Sabse common algorithm **token bucket** hai, jo ek simple intuition pe khada hai. Ek bucket socho jisme tokens hain. Har request ek token kharch karti hai. Bucket time ke saath dheere-dheere refill hota hai. Bucket khaali = 429.
 
 ```
-Bucket capacity = 60 tokens
-Refill rate     = 1 token per second
-Each request    = costs 1 token
+Bucket capacity = 60 tokens       (max burst — ek baar mein 60 OK)
+Refill rate     = 1 token/second  (sustained rate)
+Har request     = 1 token kharch
 
-t=0:  bucket=60 → 60 requests burst OK
-t=1:  refilled +1 if below cap
-empty bucket → HTTP 429 + Retry-After header
+t=0: bucket=60 → 60 ka burst allowed
+t=1: +1 refill (cap tak)
+khaali bucket → HTTP 429 + Retry-After header
 ```
 
-| Concept | Matlab |
-|---------|--------|
-| Capacity | Max burst — short spike allow |
-| Refill rate | Sustained throughput cap |
-| Consume | Har allowed request −1 token |
-
-**Sliding window:** "Last 60 seconds mein kitni requests?" — precise, Redis memory zyada. Production mein dono mix ho sakte hain.
-
-#### Redis pattern (simple counter — learning)
+Yahan capacity short spikes allow karti hai (user ko thoda burst de do), aur refill rate sustained throughput ko cap karti hai. Learning ke liye Redis pe ek simple per-minute counter kaafi hai:
 
 ```python
-# Pseudocode — key per tenant per minute window
-key = f"rl:{tenant_id}:{current_minute}"
-count = redis.incr(key)
+key = f"rl:{tenant_id}:{current_minute}"   # tenant + window scoped
+count = redis.incr(key)                     # atomic +1
 if count == 1:
-    redis.expire(key, 60)
+    redis.expire(key, 60)                   # pehli baar pe TTL set
 if count > LIMIT:
     raise HTTPException(429, "Rate limit exceeded")
 ```
 
-| Line | Matlab |
-|------|--------|
-| `rl:{tenant_id}:{current_minute}` | Scoped key — tenant isolate |
-| `INCR` | Atomic count badhao |
-| `EXPIRE 60` | Window ke baad key auto delete |
-| `count > LIMIT` | Over limit → 429 |
+Do cheezein dhyaan se. Key mein `tenant_id` hona **zaroori** hai — warna sab tenants ek hi counter share karenge aur ek tenant ki burst sabko 429 de degi. Aur `EXPIRE` pehli `INCR` pe set karo — warna window kabhi reset nahi hoga aur tenant hamesha ke liye blocked.
 
-**Full request flow:**
+> **Ruko, socho:** Agar tum `redis.expire(key, 60)` har `INCR` pe call karo (sirf `count == 1` pe nahi), to kya bug aa sakta hai? (Jawab: window kabhi expire hi nahi hoga — har naye request pe TTL 60s pe reset ho jaayega, jab tak traffic aata rahega key zinda rahegi. TTL sirf pehli baar set karo.)
 
-```
-1 → Extract tenant_id from API key
-2 → Build Redis key for window
-3 → INCR — if first, set TTL
-4 → If over limit → 429 + Retry-After
-5 → Else → pass to next middleware (cache)
-```
+#### §2 common errors
 
-**Common errors:**
+| Symptom | Kyun | Fix |
+|---------|------|-----|
+| Sab ko 429 mil raha | Key sab tenants ke liye same | Key mein `tenant_id` daalo |
+| Limit kabhi reset nahi | `EXPIRE` missing | Pehli `INCR` pe TTL set |
+| Redis connection refused | 00a compose nahi chal raha | `docker compose up -d` |
 
-| Error / symptom | Kyun | Fix |
-|-----------------|------|-----|
-| Everyone gets 429 | Key same for all tenants | Include tenant_id in key |
-| Limit never resets | EXPIRE missing | Set TTL on first INCR |
-| Burst then starve | Bucket too small | Tune capacity vs refill |
-| Redis connection refused | 00a compose not running | `docker compose up -d` in 00a |
-
-> **→ Practice A1** (pass: N requests/min ke baad 429)
+> **→ Practice A1** (pass: N requests/min ke baad 429).
 
 ---
 
-### §3. Semantic cache — embedding similarity se cache hit
+### §3. Semantic cache — meaning se cache hit
 
-#### Problem kya hai?
+Exact cache ki ek seemा hai: user "refund policy?" aur "Refund policy?" — capital R ke wajah se string alag, cache miss, LLM dobara call (latency + cost). Insaan ke liye dono same sawaal hain. **Semantic cache** isi gap ko bharta hai — meaning similar hua to hit.
 
-Exact cache: user "refund policy?" vs "Refund policy?" — miss (string different). LLM dubara call → **latency + cost**. Semantic cache: **meaning similar** → hit.
-
-```mermaid
-flowchart LR
-    Q["New query"] --> Emb["Embed query → vector"]
-    Emb --> Search["Find similar vectors in Redis/vector DB"]
-    Search -->|similarity > 0.92| Hit["Return cached response"]
-    Search -->|miss| LLM["Call LLM"]
-    LLM --> Store["Store embedding + response"]
-```
-
-#### Similarity example
+Kaise? Query ko embed karke vector banao (Module 00d), phir cache mein paas waale vectors dhoondho. Agar kisi stored query se cosine similarity threshold (jaise 0.92) se upar hai, wo cached jawab return kar do — LLM call hi mat karo:
 
 ```
 Query A: "What is your refund policy?"
 Query B: "How do refunds work?"
-
-embed(A) · embed(B) → cosine_similarity ≈ 0.95
-Threshold 0.92 → CACHE HIT (skip LLM)
+cosine(embed(A), embed(B)) ≈ 0.95   → threshold 0.92 → CACHE HIT, LLM skip
 ```
 
-| Term | Matlab |
-|------|--------|
-| **Embedding** | Text → float vector — meaning capture |
-| **Cosine similarity** | 0–1 — 1 = same direction |
-| **Threshold** | Kitna similar chahiye hit ke liye — usually 0.92+ |
+Exact vs semantic dono Module 03 gateway mein use honge: exact ki key `hash(prompt + model)` hai (byte-identical pe hit), semantic ki "key" embedding ka nearest-neighbor (paraphrase pe hit).
 
-#### Exact vs semantic (Module 03 gateway dono use karega)
+Par yahan **dhyaan se** — semantic cache ke real risks hain. Sabse bada **false positive**: agar threshold bahut neeche rakha, to do alag-alag matlab waले sawaal galti se match ho jaayenge aur tum galat jawab serve kar doge. Tumhare trading parallel mein yeh "galat counterparty se trade match" jaisा catastrophic hai — isliye threshold conservative (0.92+) rakho. Doosra risk: stale data (purani refund policy serve ho jaaye — TTL + cache key mein version daalo). Aur sabse important: **side-effects waale calls kabhi cache mat karo** — "Transfer $100" jaisा action cache karoge to disaster. Cache sirf read-only/idempotent answers ke liye.
 
-| Type | Key | Hit when |
-|------|-----|----------|
-| Exact | `hash(prompt + model)` | Byte-identical prompt |
-| Semantic | embedding nearest neighbor | Paraphrase similar |
-
-#### Risks
-
-| Risk | Production impact | Mitigation |
-|------|-------------------|------------|
-| False positive (threshold low) | **Wrong answer** — legal/compliance risk | Threshold 0.92+; human review bucket |
-| Stale TTL | Old refund policy served | TTL + version in cache key |
-| Cache poisoning | Attacker plants bad Q→A | Auth required; tenant-scoped keys |
-| Side effects cached | "Transfer $100" cached — disaster | **Never cache** tool/action side effects |
-
-**Fintech analogy:** False positive = wrong **trade matched** to wrong counterparty — catastrophic; threshold conservative rakho.
-
-**Common errors:**
+#### §3 common errors
 
 | Symptom | Kyun | Fix |
 |---------|------|-----|
-| Never hits | Threshold too high | Tune on labeled query pairs |
-| Wrong answers | Threshold too low | Raise threshold; A/B measure |
-| Cross-tenant leak | Key without tenant_id | Always scope `tenant_id` prefix |
+| Kabhi hit nahi hota | Threshold bahut high | Labeled query pairs pe tune |
+| Galat jawab serve | Threshold bahut low | Threshold badhao; A/B measure |
+| Cross-tenant leak | Key mein `tenant_id` nahi | Hamesha `tenant_id` prefix |
 
-> **→ Practice A2** (pass: exact duplicate prompt → second call skips LLM — semantic Module 03 M4)
+> **→ Practice A2** (pass: exact duplicate prompt → doosra call LLM skip kare. Semantic version Module 03 M4 mein).
 
 ---
 
 ### §4. Circuit breaker — closed, open, half-open
 
-#### Problem kya hai?
+Socho provider 503 de raha hai aur tum har request pe 30s timeout wait kar rahe ho. Kya hoga? Requests queue mein pile up, users gussa, aur timeout retries se **bill bhi** badh raha. Circuit breaker isका ilaaj hai — jab provider unhealthy ho, **fail fast** karo.
 
-Provider 503 de raha hai; tum har request 30s timeout wait karte ho → **queue pile-up**, users angry, **bill bhi** timeout retries se. Breaker **fail fast** when unhealthy.
-
-```mermaid
-stateDiagram-v2
-    [*] --> Closed
-    Closed --> Open: N failures in window
-    Open --> HalfOpen: timeout elapsed
-    HalfOpen --> Closed: probe succeeds
-    HalfOpen --> Open: probe fails
-    Closed --> Closed: success resets failure count
-```
-
-#### States explained
+Teen states ka flow yaad rakho:
 
 ```
-CLOSED     → Normal. Count consecutive failures.
-OPEN       → Reject immediately. No provider HTTP call.
-HALF-OPEN  → Allow ONE probe request.
-             Success → CLOSED, failure count reset
-             Fail    → OPEN again
+CLOSED     → Normal. Consecutive failures gino.
+OPEN       → Turant reject. Provider ko HTTP call hi nahi.
+HALF-OPEN  → Sirf EK probe request allow.
+             Success → CLOSED (failure count reset)
+             Fail    → wapas OPEN
 ```
 
-**Parameters (typical learning values):**
-
-| Param | Example | Matlab |
-|-------|---------|--------|
-| `failure_threshold` | 3 | Itni fail → OPEN |
-| `open_duration_sec` | 30 | Kitni der OPEN before half-open probe |
-| `success_threshold` | 1 | Probes to close |
-
-#### Wrapper pseudocode (line-by-line)
+Teen parameters ise control karte hain: `failure_threshold` (jaise 3 — itni fail pe OPEN), `open_duration_sec` (jaise 30 — kitni der OPEN rahe probe se pehle), aur `success_threshold` (kitne probes close karein). Wrapper ka core logic:
 
 ```python
 def call_with_breaker(fn):
     if state == OPEN:
         if now - opened_at > open_duration:
-            state = HALF_OPEN
+            state = HALF_OPEN          # probe ka time aa gaya
         else:
-            raise ServiceUnavailable("Circuit open")
-
+            raise ServiceUnavailable("Circuit open")   # fail fast
     try:
-        result = fn()          # actual provider call
-        on_success()           # reset failure count, maybe CLOSED
+        result = fn()                  # asli provider call
+        on_success()                   # failure count reset, maybe CLOSED
         return result
     except ProviderError:
-        on_failure()           # increment; maybe trip OPEN
+        on_failure()                   # count++, maybe OPEN
         raise
 ```
 
-| Line | Matlab |
-|------|--------|
-| `state == OPEN` | Fail fast path |
-| `HALF_OPEN` | Single probe allowed |
-| `fn()` | Real LLM HTTP call |
-| `on_failure()` | Track failures — trip if threshold |
+**Half-open kyun zaroori hai?** Agar breaker hamesha OPEN rehta, to provider recover hone ke baad bhi tum kabhi try nahi karte — permanently stuck. Probe ek chhota "health-check trade" hai: ek test request bhejo, kaam kiya to poora traffic wapas khol do. Ek aur common galti: breaker tabhi "fail" ginо jab provider ki asli 5xx/timeout ho — agar tum har exception (jaise user ki 400) ko fail gino, breaker galat khulega.
 
-**Half-open kyun?** OPEN forever = provider recover ho gaya par tum kabhi try nahi karte. Probe = **health check trade** — chhota test before full traffic.
+> **Ruko, socho:** Tumhare breaker mein har exception `on_failure()` trigger kar raha hai, aur breaker baar-baar OPEN ho raha hai jabki provider theek hai. Kya galat hai? (Jawab: tum client errors (400/422) ko bhi provider-failure samajh rahe ho. Sirf 5xx aur timeouts gino — wahi provider ki sehat batate hain.)
 
-**Common errors:**
-
-| Symptom | Kyun | Fix |
-|---------|------|-----|
-| Breaker never opens | Catching all exceptions as success | Only count provider 5xx/timeouts |
-| Stuck OPEN | open_duration too long | Tune; log state transitions |
-| Shared state lost | In-memory per process | Production: Redis-backed state |
-
-> **→ Practice A3** (pass: 3 simulated fails → open; half-open retry works)
+> **→ Practice A3** (pass: 3 simulated fails → OPEN; half-open retry kaam kare).
 
 ---
 
 ### §5. Fallback provider chain
 
-#### Problem kya hai?
-
-Ek provider outage = tumhara product down. Secondary **liquidity** chahiye — Module 01 API knowledge yahan wire hoti hai.
+Ek provider ka outage tumhara poora product gira de — isliye secondary "liquidity" chahiye. Module 01 ka API knowledge yahan wire hota hai:
 
 ```
-Step 1 → Try primary (e.g. Anthropic)
-Step 2 → If 5xx OR breaker OPEN → secondary (OpenAI)
-Step 3 → If both fail → return 503 + Retry-After
-Step 4 → Log which path: primary | fallback | failed
+1 → Primary try karo (jaise Anthropic)
+2 → 5xx YA breaker OPEN → secondary (OpenAI)
+3 → Dono fail → 503 + Retry-After
+4 → Log karo kaunsा path: primary | fallback | failed
 ```
 
-#### Rules table
+Sabse important fallback ka **rule**: kab karna hai aur kab **nahi**. Primary 503 ya breaker OPEN pe haan (provider ki problem hai). Par `400` (bad request) ya `401` (key config) pe **nahi** — yeh tumhari/prompt ki galti hai, secondary bhi fail karega, bas double bill. Aur jab fallback ho, response mein ek header (jaise `X-Model-Used`) daalo taaki quality drop silent na ho — user ko pata chale alag model ne jawab diya.
 
-| Condition | Fallback? | Kyun |
-|-----------|-----------|------|
-| Primary 503 | Yes | Provider issue |
-| Breaker OPEN | Yes | Primary unhealthy |
-| 400 bad request | **No** | Prompt/schema broken — secondary bhi fail |
-| 401 | **No** | Key config — fix ops |
-| Different model quality | Log it | User expectation manage |
-
-**Idempotency note:** Same user action double-submit ≠ double side effect — Module 06 tools; fallback mein **read-only** calls safer.
-
-**Common errors:**
-
-| Mistake | Fix |
-|---------|-----|
-| Fallback on 400 | Check status code before fallback |
-| Silent quality drop | Response header `X-Model-Used` |
-| Double billing same content | Cache before fallback where safe |
-
-> **→ Practice A3** (breaker integrates with fallback in Module 03 M2)
+> **→ Practice A3** (breaker + fallback ka integration Module 03 M2 mein).
 
 ---
 
 ### §6. Cost tracking per request
 
-#### Problem kya hai?
-
-CFO puche "Tenant X ka mahina kitna?" — bina structured log ke guess. Har LLM call = **billing event** — jaise har fill ka fee record.
-
-#### Structured log shape (line-by-line)
+CFO poochhega "Tenant X ka is mahine ka kitna bill hai?" — aur bina structured log ke tum sirf guess kar paoge. Isliye har LLM call ko ek **billing event** ki tarah record karo — jaise har trade fill ka fee record hota hai. Har request ke baad ek JSON line:
 
 ```json
 {
@@ -475,107 +238,43 @@ CFO puche "Tenant X ka mahina kitna?" — bina structured log ke guess. Har LLM 
 }
 ```
 
-| Field | Matlab |
-|-------|--------|
-| `trace_id` | Request correlation — logs + traces join |
-| `tenant_id` | Who to bill |
-| `prompt_tokens` / `completion_tokens` | From provider `usage` |
-| `cost_usd` | Module 01 formula applied |
-| `cache_hit` | true → LLM cost saved |
-| `provider` | Primary vs fallback attribution |
-| `latency_ms` | SLO monitoring |
+Har field ka maqsad hai: `trace_id` logs aur traces ko jodता hai; `tenant_id` batata hai kise bill karna; `prompt_tokens`/`completion_tokens` provider ke `usage` se aate hain; `cost_usd` Module 01 ka formula lagाke; `cache_hit: true` matlab LLM cost bach gaya; `provider` batata hai primary use hua ya fallback. Yeh JSON lines downstream aggregate hoti hain — daily `SUM(cost_usd) GROUP BY tenant_id`, budget cross pe Slack alert, dashboard pe cache-hit-rate aur p99 latency.
 
-#### Aggregation (downstream)
+Ek precision baat: USD ke liye `float` ki jagah `Decimal` use karo — chhote amounts par float rounding drift jodता jaata hai aur billing galat ho jaati hai.
 
-```
-Daily: SUM(cost_usd) GROUP BY tenant_id
-Alerts: tenant > budget → Slack
-Dashboard: cache hit rate, avg tokens, p99 latency
-```
-
-**Fintech analogy:** Har fill → **outbox event** → billing pipeline. Yahan har LLM response → cost event → Stripe meter (Module 03 / Projects.md).
-
-**Common errors:**
-
-| Symptom | Kyun | Fix |
-|---------|------|-----|
-| Costs don't add up | Stream usage missed | Parse final stream chunk |
-| Missing tenant | Auth middleware order wrong | Resolve tenant before call |
-| Float rounding drift | Use Decimal for USD | `decimal.Decimal` in Python |
-
-> **→ Practice A4** (pass: JSON log with trace_id + token fields per request)
+> **→ Practice A4** (pass: per request JSON log with trace_id + token fields).
 
 ---
 
-### §7. Observability — structured logs + OTEL intro
+### §7. Observability — structured logs + OTEL
 
-#### Problem kya hai?
-
-"p99 latency 3s ho gaya" — cache break hua? Opus routing badh gaya? Provider slow? Bina spans ke **guesswork**.
-
-```mermaid
-flowchart LR
-    Req["HTTP request"] --> Span["span: llm.chat"]
-    Span --> C1["child: cache.lookup"]
-    Span --> C2["child: provider.call"]
-    Span --> Export["Jaeger / Langfuse / logs"]
-```
-
-#### Structured logging example
+"p99 latency 3 second ho gaya" — ab kya? Cache toot gaya? Bade model pe zyada routing ho raha? Provider slow? Bina **spans** ke yeh sab guesswork hai. Observability ka idea: ek request ko uske andar ke har step ke saath measure karo.
 
 ```python
-logger.info(
-    "llm_request_complete",
-    extra={
-        "trace_id": trace_id,
-        "tenant_id": tenant_id,
-        "latency_ms": 420,
-        "tokens_in": 100,
-        "tokens_out": 50,
-        "cache_hit": False,
-        "cost_usd": 0.0023,
-    },
-)
+logger.info("llm_request_complete", extra={
+    "trace_id": trace_id, "tenant_id": tenant_id,
+    "latency_ms": 420, "tokens_in": 100, "tokens_out": 50,
+    "cache_hit": False, "cost_usd": 0.0023,
+})
 ```
 
-| Field | Matlab |
-|-------|--------|
-| `"llm_request_complete"` | Event name — grep friendly |
-| `extra={...}` | Structured fields — not string concat |
-| `trace_id` | Same ID OTEL span mein bhi |
+Gaur karo — yahan ek **event name** (`"llm_request_complete"`, grep-friendly) hai aur `extra={...}` mein structured fields, na ki ek lambi concatenated string. Yahi structured logging hai. Aage tool choices hain: plain JSON logs (MVP ke liye — Module 03 M6 yahan se), Langfuse (LLM-specific — prompts + eval scores), ya raw OTEL + Jaeger (custom dashboards). Ek privacy rule: poora prompt log mat karo (PII leak) — uska hash + length log karo.
 
-#### Tool pick
-
-| Tool | Kab |
-|------|-----|
-| Raw OTEL + Jaeger | Infra team, custom dashboards |
-| Langfuse | LLM-specific — prompts, eval scores |
-| Plain JSON logs | MVP — Module 03 M6 start here |
-
-**Common errors:**
-
-| Symptom | Kyun | Fix |
-|---------|------|-----|
-| Can't correlate | trace_id missing in log | Middleware inject at edge |
-| Span gap | Cache hit path no child span | Span around every branch |
-| PII in logs | Full prompt logged | Log hash + length only |
-
-> **→ Practice A4** (pass: one request → structured JSON line with trace_id)
+> **→ Practice A4** (pass: ek request → structured JSON line with trace_id).
 
 ---
 
 ## Practice
 
-> **Saare assignments ek jagah**: [`practice/README.md`](practice/README.md) — **§0 se start**.  
-> Code **tum** likhoge Cursor mein. Stubs `practice/` mein (`TODO` search).  
-> Stuck? Chat: `@modules/02-llm-infra/MODULE.md` + error paste karo.
+> **Saare assignments**: [`practice/README.md`](practice/README.md). Code **tum** likhoge.
+> Stuck? `@modules/02-llm-infra/MODULE.md` + error paste.
 
-| # | Theory (Theory §) | File | Kya karna hai | Pass when |
-|---|--------------|------|---------------|-----------|
-| A1 | §2 | `practice/rate_limiter.py` | Redis token bucket | 429 after N req/min |
-| A2 | §3 | `practice/exact_cache.py` | Exact prompt cache | Cache hit skips LLM |
-| A3 | §4, §5 | `practice/circuit_breaker.py` | Breaker wrapper | Opens after 3 fails, half-open retry |
-| A4 | §6, §7 | `practice/request_middleware.py` | trace_id + token counters | Structured JSON logs |
+| # | Theory § | File | Pass when |
+|---|----------|------|-----------|
+| A1 | §2 | `rate_limiter.py` | 429 after N req/min |
+| A2 | §3 | `exact_cache.py` | Cache hit LLM skip kare |
+| A3 | §4, §5 | `circuit_breaker.py` | 3 fails pe OPEN, half-open retry |
+| A4 | §6, §7 | `request_middleware.py` | trace_id + token JSON logs |
 
 ### Setup
 
@@ -591,27 +290,27 @@ pip install redis httpx fastapi uvicorn python-dotenv
 ## Active recall (khud jawab likho NOTES mein)
 
 1. Semantic cache false positive ka production impact kya hai?
-2. Circuit breaker half-open state kyun chahiye?
-3. Rate limit user-level vs IP-level — kab kya?
-4. Proxy layer direct provider call se cost/latency kaise better karta hai (2 reasons)?
+2. Circuit breaker ko half-open state kyun chahiye?
+3. Rate limit user-level vs IP-level — kab kaunsa?
+4. Proxy layer seedhe provider call se cost/latency 2 tareeke se kaise behtar karta hai?
 
-**Chat drill** (optional): "Module 02 recall — 4 questions test karo"
+**Chat drill** (optional): "Module 02 recall — 4 questions mujhse poochh."
 
 ---
 
 ## Progress checklist
 
-- [ ] §0 terms padh liye — checkpoint NOTES mein
-- [ ] Theory §1–§7 padh liya (section → practice rhythm)
-- [ ] Redraw challenge kiya
+- [ ] §0 terms + checkpoint NOTES mein
+- [ ] Theory §1–§7 padha (section → practice rhythm)
+- [ ] Redraw challenge
 - [ ] Practice A1–A4 pass
-- [ ] Active recall NOTES mein likha
+- [ ] Active recall NOTES mein
 - [ ] NOTES session log updated
 
 ---
 
 ## Optional appendix (zarurat ho tab)
 
-- [Martin Fowler — Circuit Breaker](https://martinfowler.com/bliki/CircuitBreaker.html) — state machine deep dive
-- [Redis rate limiting patterns](https://redis.io/glossary/rate-limiting/) — token bucket implementation
-- [OpenTelemetry concepts](https://opentelemetry.io/docs/concepts/) — traces vs metrics
+- [Martin Fowler — Circuit Breaker](https://martinfowler.com/bliki/CircuitBreaker.html)
+- [Redis rate limiting patterns](https://redis.io/glossary/rate-limiting/)
+- [OpenTelemetry concepts](https://opentelemetry.io/docs/concepts/)

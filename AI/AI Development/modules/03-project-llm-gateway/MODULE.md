@@ -1,14 +1,11 @@
 # Module 03 — LLM Gateway (concepts → Project C)
 
-> **Padho**: Isi file mein **Theory** — bahar mat jao.  
-> **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`  
+> **Padho**: Isi file mein **Theory** — bahar mat jao.
+> **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`
 > **Nav**: ← [Module 02](../02-llm-infra/MODULE.md) · Next → [Module 04](../04-prompt-engineering/MODULE.md)
 
-> **Format**: Textbook — **§0 terms pehle** (gateway, BFF, router). Architecture baad mein. Standard: `@MODULE-TEACHING-STANDARD.md`
-
-> **Ship spec**: `@Projects.md` **Project C** (Go). Yeh module patterns sikhata hai; production ship Go mein, portfolio order ke hisaab se.
-
-> **Kaun ke liye:** Modules 01–02 complete. 00e Go platform intro helpful.
+> **Format**: Textbook — §0 terms pehle (gateway, BFF, router), prose mein. Voice: `@MODULE-TEACHING-STANDARD.md`
+> **Ship spec**: `@Projects.md` **Project C** (Go). Yeh module patterns sikhata hai; production ship Go mein.
 
 ## At a glance
 
@@ -17,38 +14,34 @@
 | Prerequisites | Modules 01–02 · `@Projects.md` · 00a Redis · 00e Go (Phase 2 ship) |
 | Duration | ~2–3 weeks (7 milestones) |
 | Project? | Yes — learning sandbox Python; ship Project C Go |
-| Exit test | Gateway architecture + "40% cost cut" defend bina notes ke |
+| Exit test | Gateway architecture + "40% cost cut" claim bina notes ke defend karo |
 
-## Visual map (simple — detail §0 ke baad)
+## Yeh module kis baare mein hai
+
+Module 01 ne provider call sikhaya, 02 ne protective patterns (rate limit, cache, breaker). Ab in sab ko **ek product** mein bundle karte hain — **LLM Gateway**. Yeh wahi single service hai jisko saari client apps call karti hain, aur jo andar se routing, caching, budgets, fallback, aur billing sambhalti hai. Yeh tumhara flagship Project C hai (Go mein ship hoga); yeh module uske patterns Python sandbox mein wire karwata hai.
+
+Mental model: gateway ek **bank ka branch counter** hai — client ko ek hi address milta hai, andar ka routing/limits/audit/billing sab chhupa rehta hai. Sabse important — provider keys client ke paas kabhi nahi hoti, sirf gateway ke paas. §0 mein gateway, BFF, router jaise shabd zero se.
 
 ```
-Clients (web, mobile, internal services)
-   │
-   ▼
-┌─────────────────────────────────┐
-│  LLM GATEWAY (single front door)│
-│  auth │ rate limit │ cache      │
-│  router │ budget │ breaker │ OTEL│
-└──────────┬──────────────────────┘
-           ▼
-    Provider A → (fail) → Provider B
+Clients (web, mobile, internal) → LLM GATEWAY (single front door)
+   auth │ rate limit │ cache │ router │ budget │ breaker │ OTEL
+                          ▼
+                  Provider A → (fail) → Provider B
 ```
 
-**Mental model**: Gateway = **bank branch counter** — client ko ek address; andar routing, limits, audit, billing sab yahi. Provider keys client ke paas nahi.
-
-**Redraw challenge**: Full gateway — router, cache, budgets, fallback chain, OTEL — sab boxes ke saath draw karo.
+**Redraw challenge**: Poora gateway — router, cache, budgets, fallback chain, OTEL — sab boxes ke saath bina dekhe banao.
 
 ---
 
-## Read order (strict — session table)
+## Read order (strict)
 
 | Session | Padho | Karo |
 |---------|-------|------|
-| 1 | §0 Terms (gateway, BFF, router, tenant) | Read `@Projects.md` Project C overview |
-| 2 | §1 Thesis + §2 Request lifecycle | **M1** gateway skeleton |
+| 1 | §0 Terms | `@Projects.md` Project C overview |
+| 2 | §1 Thesis + §2 Lifecycle | **M1** gateway skeleton |
 | 3 | §3 Model router | **M3** complexity router |
 | 4 | §4 Cache + §5 Budgets | **M4**, **M5** |
-| 5 | §6 Fallback + §2 recap | **M2** fallback router |
+| 5 | §6 Fallback | **M2** fallback router |
 | 6 | §7 Tracing | **M6** tracing stub |
 | 7 | §8 Milestones + SSE | **M7** stream passthrough + interview NOTES |
 
@@ -56,17 +49,7 @@ Clients (web, mobile, internal services)
 
 ## Learning hooks (fintech parallels)
 
-| Feature | Tera parallel |
-|---------|---------------|
-| LLM Gateway | Central **OMS** — orders ek pipe se |
-| BFF (Backend-for-Frontend) | Mobile-specific API aggregation layer |
-| Complexity router | Matching engine **price tiers** — simple vs complex instruments |
-| Semantic cache | Hot path **order book** quote cache |
-| Circuit breaker | Exchange connectivity monitor |
-| Per-tenant budget | Account **credit limit** / margin |
-| Token metering | Per-fill **commission** aggregation → invoice |
-| OTEL spans | Trade lifecycle trace — order → fill → settlement |
-| Outbox billing events | Usage event → Stripe (Projects.md spine) |
+Gateway ≈ central OMS (orders ek pipe se); complexity router ≈ matching-engine price tiers (simple vs complex order alag venue); per-tenant budget ≈ account credit limit/margin; token metering ≈ per-fill commission → invoice; outbox billing events ≈ usage event → Stripe.
 
 ---
 
@@ -74,215 +57,75 @@ Clients (web, mobile, internal services)
 
 ### §0. Terms pehli baar — gateway vocabulary (40 min)
 
-Modules 01–02 ne **provider call** aur **infra patterns** sikhaye. Ab un patterns ko **ek product** mein bundle karte hain — pehle words.
+**Gateway.** Ek HTTP service jisko saari client apps call karti hain, aur jo andar se OpenAI/Anthropic/etc. ko forward karti hai. Client gateway ke public URL + gateway-issued API key se baat karta hai; provider keys sirf gateway ke paas. Ek gateway kai backends (multi-provider) sambhal sakti hai, aur har customer org ek **tenant** hota hai (`org_42`) jiska billing aur cache alag rehta hai. Tumhara app seedhe NYSE ko order nahi bhejta — broker gateway se; LLM gateway ka role bilkul wahi hai.
 
-#### 0.1 Gateway — single front door
+**BFF (Backend-for-Frontend).** Ek related idea — client-type-specific API layer (mobile ke liye alag shape, web ke liye alag). Project C gateway BFF-jaisा hai par AI domain ke liye, jiska focus routing/cache/cost hai, na ki UI shaping. (Yeh distinction interview mein poochha ja sakta hai — gateway sirf proxy nahi, balki proxy + cache + limits + billing + observability hai.)
 
-**Gateway** (yahan **LLM Gateway**) = ek HTTP service jisko saari client apps call karti hain; andar se yeh OpenAI, Anthropic, etc. ko forward karti hai.
+**Router.** Gateway ka decision engine: incoming query dekhkar **model tier** aur **provider** chunता hai — simple FAQ Haiku pe (sasta), summarize Sonnet pe (balanced), 200-line code Opus pe (mehenga, smart). Matching-engine parallel: chhota retail order internalize, bada block trade specialized venue pe — complexity ke hisaab se routing.
 
-| Term | Matlab |
-|------|--------|
-| **Front door** | Public URL + API keys — clients isi se baat karte hain |
-| **Passthrough** | Request mostly as-is provider ko — learning M1 |
-| **Multi-provider** | Ek gateway, multiple backends |
-| **Tenant** | Customer org — `org_42`, billing isolate |
+**Metering aur budget.** Metering matlab har request ke tokens ginकar accumulate karna. **Soft budget** ek warning hai (abhi allow, par header se bata do), **hard budget** ek stop (402 Payment Required ya 429). `402 Payment Required` quota khatam hone ka SaaS-common pattern hai.
 
-**Fintech analogy:** Tumhara app directly **NYSE** ko nahi bhejta — **broker gateway** se. Wahi role LLM gateway ki.
+> **Ruko, socho:** Client ke perspective se, seedhe OpenAI call karne ke bajaye gateway ke through jaane ke do faayde kya hain? (Jawab: (1) ek hi gateway key — provider keys app mein leak nahi hote; (2) automatic cost savings + cost visibility — router/cache + per-request billing data, jo seedhe call mein milta hi nahi.)
 
-#### 0.2 BFF — Backend-for-Frontend (related idea)
+#### §0 common galatfehmiyaan
 
-**BFF** = client-type specific API layer — mobile ke liye alag shape, web ke liye alag.
-
-| | Monolith API | BFF | LLM Gateway |
-|---|--------------|-----|-------------|
-| Purpose | General CRUD | UI-tailored aggregation | **AI calls** centralize |
-| Example | `/users` | `/mobile/home-feed` | `/v1/chat` |
-
-Project C gateway **BFF-like** hai AI domain ke liye — lekin focus: routing, cache, cost, not HTML shaping.
-
-#### 0.3 Router — kaunsa model / provider
-
-**Router** = decision engine: incoming query dekh ke **model tier** + **provider** pick karo.
-
-```
-Simple FAQ   → Haiku  (cheap)
-Summarize    → Sonnet (balanced)
-200-line code → Opus   (expensive)
-```
-
-**Fintech analogy:** Matching engine — small retail order **internalize**, large block **route to dark pool**. Complexity ke hisaab se venue/tier.
-
-#### 0.4 Metering & budget terms
-
-| Term | Matlab |
-|------|--------|
-| **Metering** | Har request pe tokens count → accumulate |
-| **Soft budget** | Warning header — abhi allow |
-| **Hard budget** | Stop — 402/429 |
-| **402 Payment Required** | Quota khatam — SaaS common pattern |
-
-#### 0.5 Security terms
-
-| Term | Matlab |
-|------|--------|
-| **API key (tenant)** | Gateway issue karta hai — provider key nahi |
-| **Key rotation** | Periodic new key — leak damage kam |
-| **Per-tenant cache scope** | Tenant A ka cache B ko kabhi na mile |
-
-#### 0.6 §0 checkpoint (NOTES)
-
-1. Gateway vs direct provider call — client perspective se 2 faiday?
-2. Router "matching engine tiers" se parallel kaise hai?
-3. BFF aur LLM gateway same cheez hain?
-
-**Common errors (concept):**
-
-| Confusion | Sahi |
+| Galat soch | Sach |
 |-----------|------|
-| "Gateway = just proxy" | Proxy + cache + limits + billing + observability |
-| "One global cache" | Tenant-scoped mandatory |
-| "Router = load balancer only" | Model **quality/cost** routing bhi |
+| "Gateway = bas proxy" | Proxy + cache + limits + billing + observability |
+| "Ek global cache" | Tenant-scoped mandatory |
+| "Router = sirf load balancer" | Model quality/cost routing bhi |
 
 ---
 
-### §1. Gateway kya hai — Project C thesis
+### §1. Gateway kya hai — Project C ki thesis
 
-#### Problem kya hai?
+Problem yeh hai: dev teams alag-alag OpenAI keys use kar rahi hain, alag retry, alag cost tracking — company FinOps-blind hai aur security risk hai. Product thesis simple hai: **LLM Gateway as a Service** — har team ko ek gateway key do, andar se cost bachao (router + cache), usage dashboard + Stripe billing do, aur observability (trace_id, cost per request) do.
 
-Dev teams alag-alag OpenAI keys, alag retry, alag cost tracking — **FinOps blind**, security risk. Product thesis: **LLM Gateway as a Service**.
-
-```
-Product value:
-  Step 1 → One API key per team (gateway-issued)
-  Step 2 → Automatic cost savings (router + cache)
-  Step 3 → Usage dashboard + Stripe billing
-  Step 4 → Observability — trace_id, cost per request
-```
-
-**Phases:**
-
-| Phase | Stack | Goal |
-|-------|-------|------|
-| Learning (yeh module) | Python FastAPI sandbox | Patterns wire karo M1–M7 |
-| Ship (Project C) | Go platform (00e) | Multi-tenant SaaS |
-
-**Fintech analogy:** Product = **prime brokerage API** — clients trade through you; you manage venue relationships, limits, statements.
-
-#### Who calls whom
+Do phases mein banta hai: pehle yeh module (Python FastAPI sandbox) jahan tum M1–M7 patterns wire karte ho, phir Project C (Go platform, 00e) jahan yeh multi-tenant SaaS ban jaata hai. Sabse zaroori security shape:
 
 ```
-❌ Mobile app ──sk-openai──► OpenAI  (key in app = leak)
+❌ Mobile app ──sk-openai──► OpenAI        (key app mein = leak)
 ✅ Mobile app ──gw_key──► LLM Gateway ──provider_key──► OpenAI
-                              │
                               ├── Redis (cache, limits, budget)
                               └── OTEL / billing outbox
 ```
 
-> **→ Practice M1** (pass: health + single provider passthrough curl)
+> **→ Practice M1** (pass: health + single provider passthrough curl).
 
 ---
 
-### §2. Architecture layers — request lifecycle
+### §2. Architecture — request lifecycle
 
-#### Problem kya hai?
-
-Bina ordered pipeline ke middleware random order mein chalega — budget check cache ke baad? Auth missing? **Lifecycle define karo** pehle.
-
-#### Full sequence diagram (detail — §0 ke baad)
-
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant G as Gateway
-    participant R as Redis
-    participant P as Provider
-    C->>G: POST /v1/chat + X-API-Key
-    G->>G: 1 authenticate → tenant_id
-    G->>R: 2 rate limit check
-    G->>R: 3 budget check
-    G->>R: 4 cache lookup
-    alt cache hit
-        R-->>G: cached response
-        G-->>C: 200 + X-Cache-Hit: true
-    else cache miss
-        G->>G: 5 router picks model
-        G->>G: 6 circuit breaker wrap
-        G->>P: 7 forward request
-        P-->>G: body/stream + usage
-        G->>R: 8 store cache + INCR budget
-        G-->>C: response + trace_id
-    end
-```
-
-#### Step flow (numbered — interview whiteboard)
+Yeh module ka dil hai, aur interview mein tumhe yeh whiteboard karna aayega. Bina ek **ordered pipeline** ke middleware random order mein chalegा — budget check cache ke baad ho gaya to galat. Isliye lifecycle pehle define karo. Har request in steps se guzarti hai:
 
 ```
-1 → Authenticate API key → resolve tenant_id
-2 → Rate limit (Redis) — over → 429
-3 → Budget check — hard over → 402
-4 → Cache lookup (exact then semantic)
-   4a → HIT → return + X-Cache-Hit: true, skip 5–7
-5 → Router → model + provider
-6 → Circuit breaker — OPEN → fallback path (§6)
-7 → Call provider (SSE passthrough if stream)
-8 → Parse usage → cost_usd
-9 → Update Redis budget + cache store
-10 → Emit OTEL span + structured log
-11 → Return response + trace_id header
+1  → API key authenticate → tenant_id resolve
+2  → Rate limit (Redis) — over → 429
+3  → Budget check — hard over → 402
+4  → Cache lookup (exact phir semantic)
+   4a → HIT → return + X-Cache-Hit: true (steps 5–7 skip)
+5  → Router → model + provider pick
+6  → Circuit breaker wrap — OPEN → fallback (§6)
+7  → Provider call (stream ho to SSE passthrough)
+8  → usage parse → cost_usd
+9  → Redis budget update + cache store
+10 → OTEL span + structured log emit
+11 → Response + trace_id header return
 ```
 
-#### Response headers (client contract)
+Order pe gaur karo — **rate limit aur budget step 7 (provider call) se pehle** hain. Yeh jaanboojhke hai: agar budget check provider call ke *baad* karo, to tum paisa already kharch kar chuke ho, stop ka koi matlab nahi raha. Pehle gate, phir kharcha. Aur cache hit (4a) seedhe return karta hai — provider ko chhuता hi nahi, yahi sabse sasta path hai. Client ko response headers se transparency milti hai: `X-Trace-Id` (debug), `X-Cache-Hit`, `X-Model-Used` (kaunsा model actually chala), `X-Budget-Warning`.
 
-| Header | Matlab |
-|--------|--------|
-| `X-Trace-Id` | Support/debug correlation |
-| `X-Cache-Hit` | `true` / `false` |
-| `X-Model-Used` | Actual model after routing |
-| `X-Budget-Warning` | Soft limit approaching |
+> **Ruko, socho:** Agar tum budget check ko step 9 pe (provider call ke baad) le jao, to product mein kya tootega? (Jawab: budget kabhi enforce nahi hoga effectively — tenant pehle hi tokens kharch kar chuka hoga jab tak tum "stop" karte ho. Hard stop ko kharche se pehle hona zaroori hai.)
 
-**Common errors:**
-
-| Symptom | Kyun | Fix |
-|---------|------|-----|
-| Budget never enforced | Check after provider call | Budget **before** step 7 |
-| Cache cross-tenant | Key missing tenant_id | `cache:{tenant_id}:...` |
-| Auth bypass on /health | Public route too wide | Only `/health` public |
-
-> **→ Practice M1, M7** (skeleton + SSE E2E)
+> **→ Practice M1, M7** (skeleton + SSE end-to-end).
 
 ---
 
 ### §3. Model router — complexity-based routing
 
-#### Problem kya hai?
+Agar har query Opus pe bhejoge, margin zero (Opus mehenga). Har query Haiku pe bhejoge, complex code fail ho jaayega (Haiku weak). Isliye **automatic tier-pick** chahiye — query ki complexity dekhkar sahi model.
 
-Har query Opus pe bhejoge → **margin zero**. Har query Haiku pe → complex code fail. **Automatic tier pick** chahiye.
-
-```mermaid
-flowchart TD
-    Q["Incoming query"] --> Class["Classifier"]
-    Class -->|simple| H["Haiku — cheap, fast"]
-    Class -->|medium| S["Sonnet — balanced"]
-    Class -->|complex| O["Opus — expensive, smart"]
-```
-
-#### Complexity buckets
-
-| Bucket | Signals | Example query |
-|--------|---------|---------------|
-| Simple | Short, FAQ, classify | "What are your hours?" |
-| Medium | Summarize, multi-step | "Summarize this email" |
-| Complex | Code, reasoning, long ctx | "Debug this 200-line function" |
-
-#### Classifier options
-
-| Method | Pros | Cons |
-|--------|------|------|
-| Rules (`len`, keywords) | Free, fast | Brittle |
-| Small LLM call | Flexible | Extra cost/latency |
-| Embedding vs exemplars | Tunable | Setup needed |
-
-**Starter rule (M3):**
+Teen buckets: **simple** (short, FAQ, classify — "What are your hours?"), **medium** (summarize, multi-step — "Summarize this email"), **complex** (code, reasoning, long context — "Debug this 200-line function"). Classify karne ke kai tareeke hain: rules (`len`, keywords — free aur fast par brittle), ek chhota LLM call (flexible par extra cost), ya embedding-vs-exemplars (tunable par setup chahiye). Starter ke liye simple rules kaafi hain:
 
 ```python
 def classify(query: str) -> str:
@@ -293,279 +136,143 @@ def classify(query: str) -> str:
     return "medium"          # → sonnet tier
 ```
 
-| Line | Matlab |
-|------|--------|
-| `len(query) < 50` | Short → likely FAQ |
-| `"```" in query` | Code block marker → complex |
-| `len(query) > 500` | Long context → heavier model |
-| return strings | Map to provider model IDs in config |
+Logic seedha hai: chhote queries aksar FAQ hote hain (haiku), code-block marker ya bahut lambा input heavy model maangता hai (opus), baaki beech mein (sonnet). Yeh return strings config mein actual model IDs se map hote hain.
 
-**Fintech analogy:** Retail **market order** internalized; large **block trade** smart router sends to specialized desk.
-
-#### "40% cost cut" defend (interview)
+Ab interview ka classic sawaal — **"40% cost cut" kaise defend karoge?** Jawab measurement se aata hai, dawe se nahi: before/after average cost per request naapo, cache-hit-rate dekho (jitne zyada hits, utne kam provider calls), aur model-mix shift dekho (zyada haiku, kam opus). Ek example math:
 
 ```
-Measure before/after:
-  - Average cost per request = avg(cost_usd)
-  - Cache hit rate ↑ → fewer provider calls
-  - Model mix shift → more haiku, less opus
-  - A/B same query set — quality score vs cost
-
-Claim math example:
-  Before: 100% sonnet-equivalent
-  After:  50% haiku, 35% sonnet, 15% opus + 25% cache hit
-  → blended cost drop ~35–45% (measure on YOUR traffic)
+Before: 100% sonnet-equivalent traffic
+After:  50% haiku + 35% sonnet + 15% opus, + 25% cache-hit rate
+→ blended cost ~35–45% kam — par YOUR traffic pe measure karo, ratta mat maro
 ```
 
-> **→ Practice M3** (pass: test set routes to 3 buckets correctly)
+> **→ Practice M3** (pass: test set 3 buckets mein sahi route ho).
 
 ---
 
 ### §4. Cache — exact + semantic, tenant-scoped
 
-#### Problem kya hai?
-
-Gateway pe traffic repeat hoti hai — "password reset steps?" hazaron baar. Bina cache **provider bill** aur **latency** dono badhe.
-
-#### Key strategies (line-by-line)
+Gateway pe traffic repeat hoti hai — "password reset steps?" hazaron baar aata hai. Bina cache provider bill aur latency dono badhte hain. Do tarah ka cache (Module 02 §3 se):
 
 ```
-Exact cache key:
-  cache_key = f"{tenant_id}:exact:{sha256(prompt)}:{model}"
-
-Semantic cache:
-  store: { tenant_id, embedding_vector, response, ttl }
-  lookup: nearest neighbor where cosine_sim > 0.92
+Exact:    cache_key = f"{tenant_id}:exact:{sha256(prompt)}:{model}"
+Semantic: store {tenant_id, embedding, response, ttl}; lookup nearest where cosine > 0.92
 ```
 
-| Piece | Matlab |
-|-------|--------|
-| `tenant_id` prefix | **Mandatory** — no cross-tenant bleed |
-| `sha256(prompt)` | Exact match fingerprint |
-| `model` in key | Same words, different model → different answer |
-| `embedding_vector` | Semantic lookup index |
-| `0.92` threshold | Conservative — Module 02 §3 |
+Cache key mein teen cheezein critical hain. `tenant_id` prefix **mandatory** hai — bina iske Tenant A ka cached jawab Tenant B ko mil sakta hai (security incident). `sha256(prompt)` exact fingerprint deta hai. Aur `model` key mein hona chahiye — same words par alag model alag jawab dega, to unhe alag cache karo. Invalidation ke rules: default TTL (FAQ ke liye 24h, compliance policy ke liye 1h — kyunki wo badalti hai), prompt version bump pe prefix bust (`tenant:v2:*`), tool side-effects (payments/writes) **kabhi cache nahi**, aur ek admin endpoint jo tenant ka cache purge kar sake.
 
-#### Invalidation rules
-
-```
-Rule 1 → TTL default (e.g. 24h FAQ, 1h policy)
-Rule 2 → Prompt version bump → bust prefix `tenant:v2:*`
-Rule 3 → Never cache tool side effects (payments, writes)
-Rule 4 → Admin endpoint to purge tenant cache
-```
-
-**Fintech analogy:** Quote cache **per client tier** — institutional quote retail ko nahi dikhta.
-
-**Common errors:**
+#### §4 common errors
 
 | Symptom | Kyun | Fix |
 |---------|------|-----|
-| Stale policy answer | TTL too long | Shorter TTL on compliance content |
-| Cache miss always | Model in key changes every route | Stabilize routed model in key |
-| Security incident | Shared global semantic index | Partition by tenant_id |
+| Stale policy jawab | TTL bahut lamba | Compliance content pe chhota TTL |
+| Hamesha cache miss | Model key har route pe badal raha | Routed model ko key mein stabilize karo |
+| Cross-tenant leak | Global semantic index | `tenant_id` se partition |
 
-> **→ Practice M4** (pass: near-duplicate prompt → cache hit, LLM skipped)
+> **→ Practice M4** (pass: near-duplicate prompt → cache hit, LLM skip).
 
 ---
 
 ### §5. Rate limits + token budgets
 
-#### Problem kya hai?
-
-Ek tenant loop / bug → **unlimited tokens** → tumhara provider bill + doosre tenants slow. **Credit limit** jaisa hard stop chahiye.
-
-#### Controls table
-
-| Control | Type | HTTP response |
-|---------|------|---------------|
-| Requests/min | Rate limit | 429 Too Many Requests |
-| Tokens/day soft | Budget warn | 200 + `X-Budget-Warning: 90%` |
-| Tokens/day hard | Budget stop | 402 Payment Required |
-
-#### Redis budget pattern
+Ek tenant ka loop/bug → unlimited tokens → tumhara provider bill + doosre tenants slow. Credit-limit jaisा hard stop chahiye. Teen controls hain alag-alag responses ke saath: requests/min (rate limit → 429), tokens/day soft (warning → 200 + `X-Budget-Warning: 90%`), tokens/day hard (stop → 402 Payment Required). Redis pattern:
 
 ```python
-key_used = f"budget:{tenant_id}:tokens_used"
-key_limit = f"budget:{tenant_id}:limit"
-
-used = redis.incrby(key_used, completion_tokens)
-limit = int(redis.get(key_limit) or DEFAULT_LIMIT)
-
+used = redis.incrby(f"budget:{tenant_id}:tokens_used", completion_tokens)
+limit = int(redis.get(f"budget:{tenant_id}:limit") or DEFAULT_LIMIT)
 if used > limit:
-    raise HTTPException(402, "Token budget exceeded")
+    raise HTTPException(402, "Token budget exceeded")     # hard stop
 elif used > limit * 0.9:
-    response.headers["X-Budget-Warning"] = "90%"
+    response.headers["X-Budget-Warning"] = "90%"          # soft warn
 ```
 
-| Line | Matlab |
-|------|--------|
-| `incrby(..., completion_tokens)` | After successful call, add billable output |
-| `402` | Hard stop — SaaS "upgrade plan" |
-| `0.9` soft warn | Ops alert before hard stop |
+Ek subtle bug se bacho: budget sirf **successful (200) calls** pe increment karo — agar failed calls bhi count karein to "budget drift" ho jaayega aur tenant ko galat charge milega. Yeh sab billing spine mein feed karta hai: har response → cost event `{tenant_id, tokens, cost_usd, idempotency_key}` → outbox table → worker → Stripe metered billing (Projects.md).
 
-#### Billing spine (Projects.md)
-
-```
-LLM response
-  → cost event { tenant_id, tokens, cost_usd, idempotency_key }
-  → outbox table
-  → worker → Stripe metered billing
-```
-
-**Fintech analogy:** Real-time **margin check** before order accept; post-trade **position update**.
-
-**Common errors:**
-
-| Symptom | Kyun | Fix |
-|---------|------|-----|
-| Budget drift | Failed calls still increment | Only increment on 200 + usage |
-| Midnight reset wrong | UTC vs local | Document timezone; cron UTC |
-| 402 on free tier | limit=0 | Seed limits on tenant create |
-
-> **→ Practice M5** (pass: over-budget → 402 or 429 hard stop)
+> **→ Practice M5** (pass: over-budget → 402/429 hard stop).
 
 ---
 
 ### §6. Fallback chain + circuit breaker
 
-#### Problem kya hai?
+Primary provider outage = product down + revenue loss. Module 02 ke patterns yahan wire hote hain. Flow: primary call breaker mein wrapped → 5xx/timeout pe breaker increment → breaker OPEN ya primary 503 pe secondary provider → span pe `fallback_used=true` log → dono fail to 503 + Retry-After (fake success kabhi nahi).
 
-Primary provider outage = product down + revenue loss. Module 02 patterns yahan **wire** hote hain.
-
-```
-Step 1 → Primary call wrapped in circuit breaker
-Step 2 → 5xx or timeout → increment breaker
-Step 3 → Breaker OPEN OR primary 503 → secondary provider
-Step 4 → Log span attribute fallback_used=true
-Step 5 → Both fail → 503 + Retry-After + no fake success
-```
-
-#### Decision table
+Decision table yaad rakho — kab fallback, kab nahi:
 
 | Primary result | Action |
 |----------------|--------|
 | 200 OK | Return; breaker success |
-| 503 / timeout | Retry secondary; log fallback |
-| Breaker OPEN | Skip primary; secondary immediately |
-| 400 bad prompt | **No fallback** — return 400 to client |
+| 503 / timeout | Secondary try; fallback log |
+| Breaker OPEN | Primary skip; seedhe secondary |
+| 400 bad prompt | **No fallback** — client ko 400 |
 
 ```python
-# Pseudocode shape
 try:
     return call_primary_with_breaker(req)
 except (ProviderError, CircuitOpen):
-    return call_secondary(req)  # different model OK if disclosed
+    return call_secondary(req)   # alag model OK agar disclose karo
 ```
 
-**Cost attribution:** Fallback model alag rate — `cost_usd` recalc with secondary model pricing.
+Ek detail: fallback model ka rate alag hoga, to `cost_usd` secondary model ki pricing se recalc karo — warna billing galat.
 
-> **→ Practice M2** (pass: simulate primary 5xx → secondary succeeds)
+> **→ Practice M2** (pass: primary 5xx simulate → secondary succeed).
 
 ---
 
-### §7. Tracing — OpenTelemetry + cost in span
+### §7. Tracing — OpenTelemetry + cost span mein
 
-#### Problem kya hai?
-
-"p99 2.8s" — kahan gaya time? Interview mein **breakdown defend** karna hai.
-
-```mermaid
-flowchart LR
-    Span["span: gateway.chat"] --> A1["tenant_id, model"]
-    Span --> A2["tokens_in, tokens_out"]
-    Span --> A3["cost_usd, cache_hit"]
-    Span --> A4["fallback_used"]
-    Span --> Export["Langfuse / Jaeger / logs"]
-```
-
-#### Span attributes (line-by-line)
+"p99 2.8s ho gaya" — time kahan gaya? Interview mein yeh breakdown defend karna hai, aur wo tabhi possible hai jab har request ek span emit kare uske cost/timing attributes ke saath:
 
 ```json
 {
   "name": "gateway.chat",
   "attributes": {
-    "tenant_id": "org_42",
-    "model": "claude-3-haiku",
-    "tokens_in": 120,
-    "tokens_out": 45,
-    "cost_usd": 0.00012,
-    "cache_hit": true,
-    "latency_ms": 8,
-    "fallback_used": false
+    "tenant_id": "org_42", "model": "claude-3-haiku",
+    "tokens_in": 120, "tokens_out": 45, "cost_usd": 0.00012,
+    "cache_hit": true, "latency_ms": 8, "fallback_used": false
   }
 }
 ```
 
-| Attribute | Defend question |
-|-----------|-----------------|
-| `cache_hit` | "Spike?" → hit rate dropped |
-| `model` | "Cost up?" → more opus routing |
-| `latency_ms` | p99 = mostly LLM when miss |
-| `fallback_used` | Reliability vs quality tradeoff |
+In attributes se tum har incident debug kar sakte ho: latency spike? `cache_hit` rate gira hoga. Cost up? `model` distribution mein zyada opus aa gaya. Reliability problem? `fallback_used` dekho. Typical latency budget yaad rakho: cache hit ~5–20ms, haiku miss ~400–900ms, opus miss ~2–5s. Isliye interview line banti hai: "latency spike ka matlab ya cache-miss rate badh gaya, ya complexity router zyada queries opus tier pe bhej raha hai."
 
-#### Latency budget (typical)
-
-| Path | p99-ish |
-|------|---------|
-| Cache hit | ~5–20 ms |
-| Haiku miss | ~400–900 ms |
-| Opus miss | ~2–5 s |
-| + Redis/network | ~5–50 ms |
-
-**Interview line:** "Latency spike = cache miss rate up **OR** complexity router sending more to opus tier."
-
-> **→ Practice M6** (pass: local trace/log shows cost fields)
+> **→ Practice M6** (pass: local trace/log mein cost fields dikhein).
 
 ---
 
-### §8. Feature matrix → milestones map
+### §8. Feature matrix → milestones
 
-#### Problem kya hai?
-
-Project C bada hai — **incremental ship** bina overwhelm ke. Har milestone ek skill prove karta hai.
+Project C bada hai, isliye **incremental** ship karo — har milestone ek skill prove karta hai aur ek baithak mein ek milestone ideal hai:
 
 | Feature | Milestone | Theory § |
 |---------|-----------|----------|
 | Passthrough + `/health` | M1 | §1, §2 |
-| Dual provider fallback | M2 | §6 |
+| Dual-provider fallback | M2 | §6 |
 | Complexity classifier | M3 | §3 |
 | Redis semantic cache | M4 | §4 |
 | Rate limit + budget | M5 | §5 |
 | OTEL + cost span | M6 | §7 |
 | SSE streaming E2E | M7 | §2 step 7 |
 
-#### Milestone dependency graph
+Dependency: M1 base sab ka neeche; M3 (router) → M4 (cache); M5 (budget) → M6 (tracing); M7 ko sirf M1 base chahiye. Go ship note: Python sandbox logic prove karta hai; Project C wahi pipeline chi router + middleware (00e) mein dobara banayega.
 
-```
-M1 (skeleton)
-  → M2 (fallback)
-  → M3 (router) ──→ M4 (cache)
-  → M5 (budget) ──→ M6 (tracing)
-  → M7 (streaming) — needs M1 base
-```
-
-**Go ship note:** Python sandbox proves logic; Project C same pipeline **chi router + middleware** (00e) mein.
-
-> **→ Practice M1–M7** — ek milestone per session ideal
+> **→ Practice M1–M7** — ek milestone per session.
 
 ---
 
 ## Practice
 
-> **Saare assignments ek jagah**: [`practice/README.md`](practice/README.md) — **§0 se start**.  
-> Learning sandbox Python; ship `@Projects.md` Project C (Go) alag.  
-> Stuck? Chat: `@modules/03-project-llm-gateway/MODULE.md @Projects.md`
+> **Saare assignments**: [`practice/README.md`](practice/README.md). Learning sandbox Python; ship `@Projects.md` Project C (Go).
+> Stuck? `@modules/03-project-llm-gateway/MODULE.md @Projects.md`
 
-| # | Theory § | File | Kya karna hai | Pass when |
-|---|----------|------|---------------|-----------|
-| M1 | §1, §2 | `practice/gateway_skeleton.py` | Health + passthrough | curl works |
-| M2 | §6 | `practice/fallback_router.py` | Primary fail → secondary | 5xx sim → secondary OK |
-| M3 | §3 | `practice/complexity_router.py` | 3-bucket classifier | test set routes OK |
-| M4 | §4 | `practice/semantic_cache.py` | Similar prompt → hit | LLM skip on near-dup |
-| M5 | §5 | `practice/budget_middleware.py` | Over-budget stop | 402/429 hard stop |
-| M6 | §7 | `practice/tracing_stub.py` | Span + cost fields | trace visible locally |
-| M7 | §2 | `practice/stream_passthrough.py` | SSE end-to-end | `curl -N` token stream |
+| # | Theory § | File | Pass when |
+|---|----------|------|-----------|
+| M1 | §1, §2 | `gateway_skeleton.py` | Health + passthrough curl |
+| M2 | §6 | `fallback_router.py` | 5xx sim → secondary OK |
+| M3 | §3 | `complexity_router.py` | Test set 3 buckets OK |
+| M4 | §4 | `semantic_cache.py` | Near-dup → LLM skip |
+| M5 | §5 | `budget_middleware.py` | Over-budget → 402/429 |
+| M6 | §7 | `tracing_stub.py` | Trace + cost fields visible |
+| M7 | §2 | `stream_passthrough.py` | `curl -N` token stream |
 
 ### Setup
 
@@ -573,34 +280,34 @@ M1 (skeleton)
 cd modules/03-project-llm-gateway/practice
 python3 -m venv .venv && source .venv/bin/activate
 pip install fastapi uvicorn httpx redis python-dotenv openai
-# 00a Redis + optional Postgres for outbox later
+# 00a Redis chalao
 ```
 
 ### Interview prep (NOTES — M3+ ke baad)
 
-- "40% cost cut" — cache hit % + model mix before/after numbers
-- Cache invalidation strategy (§4 rules)
-- Per-tenant key rotation procedure
+- "40% cost cut" — cache-hit % + model-mix before/after numbers
+- Cache invalidation strategy (§4)
+- Per-tenant key rotation
 - Request lifecycle 11 steps whiteboard
 
 ---
 
 ## Active recall (khud jawab likho NOTES mein)
 
-1. Gateway router matching engine price tiers se kaise parallel hai?
+1. Gateway router matching-engine price tiers se kaise parallel hai?
 2. Per-tenant cache scoping kyun mandatory hai?
-3. "40% cost cut" claim kaise measure aur defend karoge?
-4. Request lifecycle mein budget check provider call se **pehle** kyun?
+3. "40% cost cut" claim kaise measure + defend karoge?
+4. Lifecycle mein budget check provider call se **pehle** kyun?
 
-**Chat drill** (optional): "Module 03 architecture whiteboard karo — 11 steps"
+**Chat drill** (optional): "Module 03 architecture whiteboard — 11 steps."
 
 ---
 
 ## Progress checklist
 
-- [ ] §0 terms padh liye — gateway vs BFF clear
-- [ ] Theory §1–§8 padh liya
-- [ ] Redraw challenge kiya
+- [ ] §0 terms — gateway vs BFF clear
+- [ ] Theory §1–§8 padha
+- [ ] Redraw challenge
 - [ ] Practice M1–M7 pass
 - [ ] Active recall + interview bullets NOTES mein
 - [ ] NOTES architecture decisions logged
@@ -610,5 +317,5 @@ pip install fastapi uvicorn httpx redis python-dotenv openai
 ## Optional appendix (zarurat ho tab)
 
 - [`@Projects.md` Project C](../../Projects.md) — full ship spec
-- [OpenTelemetry Python](https://opentelemetry.io/docs/languages/python/) — M6 stuck pe
+- [OpenTelemetry Python](https://opentelemetry.io/docs/languages/python/)
 - Module 02 — rate limit, breaker, cache deep dive
