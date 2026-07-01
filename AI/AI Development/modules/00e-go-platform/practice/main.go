@@ -11,11 +11,13 @@ func main() {
 	r := chi.NewRouter()
 
 	// TODO A2: r.Use(requestIDMiddleware)
+	r.Use(requestIDMiddleware)
 	// TODO A2: r.Use(tenantAuthMiddleware)
 
 	// TODO A1: GET /health → {"ok":true}
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		http.Error(w, "not implemented", http.StatusNotImplemented)
+		// http.Error(w, "not implemented", http.StatusNotImplemented)
+		w.Write([]byte(`{"ok":true}`))
 	})
 
 	// TODO A3: POST /v1/query → proxyToRAG(w, r)
