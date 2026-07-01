@@ -6,6 +6,7 @@
 
 > **Format**: Textbook — §0 terms zero se, prose mein. Voice: `@MODULE-TEACHING-STANDARD.md`
 > **Track 3 (foundations & internals):** LLM ko black-box API se aage — andar kya chal raha hai. Top labs (OpenAI/Anthropic) yeh depth poochhte hain.
+> ⏭️ **SKIP for application/product jobs** — products build karne ke liye nahi chahiye; "kaise kaam karta" curiosity / lab-interview ke liye. Priority: [PRIORITY.md](../../PRIORITY.md).
 
 ## At a glance
 

@@ -6,6 +6,7 @@
 
 > **Format**: Textbook — §0 terms zero se, prose mein. Voice: `@MODULE-TEACHING-STANDARD.md`
 > **Track 2 (advanced):** 00d ka "training awareness" ab decision-ready depth.
+> ⭐ **EDGE — §1 decision MUST, baaki skim** — application eng rarely fine-tunes, par "prompt vs RAG vs finetune" interview mein aata hai. Priority: [PRIORITY.md](../../PRIORITY.md).
 
 ## At a glance
 
@@ -123,7 +124,9 @@ Related — **quantization** (model weights ko kam precision, jaise 4-bit, mein 
 
 ---
 
-### §4. Preference tuning (DPO) — behtar vs bura sikhana
+### §4. Preference tuning (DPO) — behtar vs bura sikhana  ⏭️ SKIP-able
+
+> ⏭️ **Application job ke liye skim** — awareness kaafi; poora RL/DPO depth Module 22 (optional) mein.
 
 SFT ek "sahi answer" sikhata hai, par kuch cheezein absolute-right nahi hoti — helpfulness, tone, safety. Yahan **preference tuning** aata hai: model ko `(prompt, chosen, rejected)` triples do — "is prompt pe yeh output us output se behtar hai". Model preferences seekhता hai, single answers nahi.
 

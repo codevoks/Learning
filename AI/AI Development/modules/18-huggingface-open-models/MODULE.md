@@ -6,6 +6,7 @@
 
 > **Format**: Textbook — §0 terms zero se, prose mein. Voice: `@MODULE-TEACHING-STANDARD.md`
 > **Track 3 (internals):** API se aage — open models khud chalao.
+> ⏭️ **SKIP for application/product jobs** — sirf jab open models self-host karne hon (cost/privacy). Warna closed API kaafi. Priority: [PRIORITY.md](../../PRIORITY.md).
 
 ## At a glance
 

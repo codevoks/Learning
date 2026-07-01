@@ -7,6 +7,7 @@
 > **Format**: Textbook — §0 Go syntax pehle (`:=`, `err`, pointers), prose mein. Voice: `@MODULE-TEACHING-STANDARD.md`
 
 > **Role**: **Go = platform** (auth, tenants, billing, public API). **Python = AI** (RAG, agents, module 00c).
+> ⭐ **EDGE — skip if pure-Python AI roles** — do if platform/polyglot/backend roles target karo. Priority: [PRIORITY.md](../../PRIORITY.md).
 
 ## At a glance
 

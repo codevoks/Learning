@@ -6,6 +6,7 @@
 
 > **Format**: Textbook — §0 terms zero se, prose mein. Voice: `@MODULE-TEACHING-STANDARD.md`
 > **Track 3 (internals):** Yeh wo module hai jo "LLM kaise kaam karta hai" ka jawab deta hai. Top-lab interviews mein sabse zyada poochha jaata hai.
+> ⏭️ **SKIP for application/product jobs** — interview-gold **labs ke liye**, application-build ke liye nahi. Time ho to sirf §2 (attention intuition) padh lo. Priority: [PRIORITY.md](../../PRIORITY.md).
 
 ## At a glance
 

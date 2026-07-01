@@ -194,7 +194,9 @@ Yahan `<=>` pgvector ka cosine **distance** operator hai (0 = identical), isliye
 
 ---
 
-### §5. Hybrid search — dense + keyword
+### §5. Hybrid search — dense + keyword  ⏭️ (deeper in Module 13)
+
+> ⏭️ **Skim OK** — hybrid search + RRF ka poora treatment Module 13 mein hai. Yahan concept samajhо, depth wahan.
 
 Pure embedding (dense) search ki bhi ek seemа hai. User `"Invoice #INV-8842"` poochhe — semantic search exact IDs pe weak hai (number ka koi "meaning" nahi). Ulta, `"return policy for damaged goods"` jaisी paraphrase pe keyword-only search weak hai. **Hybrid search** dono ko jodता hai: embedding search + keyword search (Postgres ka `tsvector`/BM25), phir scores merge.
 

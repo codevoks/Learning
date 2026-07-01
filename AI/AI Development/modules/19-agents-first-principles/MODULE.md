@@ -6,6 +6,7 @@
 
 > **Format**: Textbook — §0 terms zero se, prose mein. Voice: `@MODULE-TEACHING-STANDARD.md`
 > **Track 3 (internals):** Module 07 ne LangGraph *use* karna sikhaya; yeh andar kya hai wo sikhata hai.
+> ⏭️ **OPTIONAL for application jobs** — 07 (LangGraph) job-need cover karta hai; yeh understanding ke liye. Skim OK. Priority: [PRIORITY.md](../../PRIORITY.md).
 
 ## At a glance
 

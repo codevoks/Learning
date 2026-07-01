@@ -230,7 +230,9 @@ RAG retrieval poora flow:
 
 ---
 
-### §6. TensorFlow/Keras — minimal hello (training ki awareness)
+### §6. TensorFlow/Keras — minimal hello (training ki awareness)  ⏭️ SKIP-able
+
+> ⏭️ **Application/product job ke liye skip kar sakte ho** — tum train nahi karte. Awareness ke liye ek baar padh lo, practice A3 optional.
 
 Interview ya docs mein `model.fit`, `Dense`, `Sequential` dikhega — ek baar haath se chala lo taaki training code **padh sako**. Yeh daily kaam nahi, sirf literacy. Ek toy AND-gate model:
 

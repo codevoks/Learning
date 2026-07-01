@@ -6,6 +6,7 @@
 
 > **Format**: Textbook — §0 terms zero se, prose mein. Voice: `@MODULE-TEACHING-STANDARD.md`
 > **Track 2 (advanced):** text/backend se aage — vision + voice.
+> ⏭️ **SKIP for application/product jobs** — voice niche hai; vision kabhi useful. Voice/vision product banao tabhi. Priority: [PRIORITY.md](../../PRIORITY.md).
 
 ## At a glance
 

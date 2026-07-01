@@ -15,7 +15,11 @@ Har module = **ek naya Cursor agent**. Same coaching rules (`@Memory.md`), alag 
 2. `@modules/XX-.../MODULE.md` — theory + practice
 3. `@Projects.md` — SaaS ship spec
 
-**Naye ho?** **00a → 00b → 00c → 00d → 00e → 01...**
+**Naye ho?** **00a → 00b → 00c → 00d → 01...** (00e Go optional — pure-Python AI roles ke liye skip OK)
+
+> 🎯 **Kitna zaroori hai? Kya skip karein?** → **[PRIORITY.md](../PRIORITY.md)** padho.
+> Target = **application/product AI eng** (YC/remote-US). Legend: 🎯 CORE (must) · ⭐ EDGE (recommended) · ⏭️ OPTIONAL (skip for job — internals/niche; har optional module ke header pe badge hai).
+> **Minimum job-ready path:** 00a–00d + 01–07 + 09–13 + 20. Track 3 (16–22) mostly ⏭️ optional.
 
 ## Module list
 
@@ -53,6 +57,7 @@ Har module = **ek naya Cursor agent**. Same coaching rules (`@Memory.md`), alag 
 ### Track 3 — Deep Foundations & Internals (from-scratch / research-adjacent)
 
 > "AI ko andar se samjho + scratch se banao." Top labs (OpenAI/Anthropic) + Devin/framework-builder roles yeh depth poochhte hain. NumPy-heavy, code-from-scratch.
+> ⏭️ **Application/product jobs ke liye mostly OPTIONAL** — sirf **20 (Memory & Context)** recommended. Baaki (16, 17, 18, 19, 21, 22) skip OK; curiosity/lab-prep ke liye. Dekho [PRIORITY.md](../PRIORITY.md).
 
 | # | Path | Focus |
 |---|------|-------|

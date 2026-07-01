@@ -6,6 +6,7 @@
 
 > **Format**: Textbook — §0 terms zero se, prose mein. Voice: `@MODULE-TEACHING-STANDARD.md`
 > **Track 3:** agents ka naya frontier — computer/browser control (Devin, Operator jaise).
+> ⏭️ **SKIP for application/product jobs** — emerging/niche. Computer-use ya browser-agent product banao tabhi. Priority: [PRIORITY.md](../../PRIORITY.md).
 
 ## At a glance
 

@@ -6,6 +6,7 @@
 
 > **Format**: Textbook — §0 terms zero se, prose mein. Voice: `@MODULE-TEACHING-STANDARD.md`
 > **Track 3:** Module 14 §4 (DPO intro) ka poora — preference/RL fine-tuning depth.
+> ⏭️ **SKIP for application/product jobs** — research-adjacent; application eng mein rarely. Lab/research prep ke liye. Priority: [PRIORITY.md](../../PRIORITY.md).
 
 ## At a glance
 
