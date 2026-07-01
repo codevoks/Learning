@@ -2,7 +2,7 @@
 
 > **Padho**: Isi file mein **Theory** — bahar mat jao.
 > **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`
-> **Nav**: ← [Module 10](../10-evals-llmops/MODULE.md) · End
+> **Nav**: ← [Module 10](../10-evals-llmops/MODULE.md) · Next → [Module 12 (advanced)](../12-guardrails-safety/MODULE.md)
 > **Ship**: **Python** agents `services/agent/` · **Go** platform from Project A (`@Projects.md` Project B).
 
 > **Format**: Textbook — §0 terms + milestones zero se, prose mein. Voice: `@MODULE-TEACHING-STANDARD.md`

@@ -39,6 +39,17 @@ Har module = **ek naya Cursor agent**. Same coaching rules (`@Memory.md`), alag 
 | 04–10 | prompts → evals | Python AI depth |
 | 11 | [11-project-agentic-workflow](./11-project-agentic-workflow/MODULE.md) | **Project B** ship |
 
+### Track 2 — Advanced (high-paying-role specializations)
+
+> Core 01–11 ke baad. Yeh topics interview mein alag kar dete hain.
+
+| # | Path | Focus |
+|---|------|-------|
+| 12 | [12-guardrails-safety](./12-guardrails-safety/MODULE.md) | Guardrails, PII, injection defense, OWASP LLM Top 10 |
+| 13 | [13-advanced-retrieval](./13-advanced-retrieval/MODULE.md) | Reranking, hybrid search, RRF, HyDE, retrieval eval |
+| 14 | [14-finetuning](./14-finetuning/MODULE.md) | SFT, LoRA, DPO, prompt-vs-RAG-vs-finetune decision |
+| 15 | [15-voice-multimodal](./15-voice-multimodal/MODULE.md) | Vision, STT/TTS, voice pipeline, latency, multimodal RAG |
+
 Full plan: `@LEARNING-PLAN.md` · Spec: `@Projects.md`
 
 > **Padhai quality:** Har MODULE = textbook (`@MODULE-TEACHING-STANDARD.md`). §0 pehle — syntax (Track 0) ya terms (Track 1). Cheat sheet style banned.
