@@ -298,7 +298,9 @@ curl -X POST http://localhost:8080/v1/query -H "X-API-Key: test" \
 
 ---
 
-### §6. Goroutines — parallel calls (awareness)
+### §6. Goroutines — parallel calls (awareness)  ⏭️ SKIP-able
+
+> ⏭️ **Skip OK** — explicitly awareness; Project C gateway mein aayega. Abhi zaroori nahi.
 
 Kabhi ek request pe do Python calls parallel chahiye (RAG + embed). Go isके liye **goroutines** deta hai — `go func() { ... }` ek lightweight thread shuru karta hai (Kafka consumer jaisा), aur results **channels** se wapas aate hain:
 

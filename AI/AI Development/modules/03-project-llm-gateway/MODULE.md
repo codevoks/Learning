@@ -218,7 +218,9 @@ Ek detail: fallback model ka rate alag hoga, to `cost_usd` secondary model ki pr
 
 ---
 
-### §7. Tracing — OpenTelemetry + cost span mein
+### §7. Tracing — OpenTelemetry + cost span mein  ⏭️ SKIM-able
+
+> ⏭️ **Skim OK** — "cost + timing span mein daalo" concept kaafi; deep OTEL setup MVP ke baad.
 
 "p99 2.8s ho gaya" — time kahan gaya? Interview mein yeh breakdown defend karna hai, aur wo tabhi possible hai jab har request ek span emit kare uske cost/timing attributes ke saath:
 

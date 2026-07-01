@@ -246,7 +246,9 @@ Ek precision baat: USD ke liye `float` ki jagah `Decimal` use karo — chhote am
 
 ---
 
-### §7. Observability — structured logs + OTEL
+### §7. Observability — structured logs + OTEL  ⏭️ SKIM-able
+
+> ⏭️ **Skim OK** — structured-logging concept zaroori; deep OTEL/Jaeger setup baad mein (Module 10 mein bhi aata).
 
 "p99 latency 3 second ho gaya" — ab kya? Cache toot gaya? Bade model pe zyada routing ho raha? Provider slow? Bina **spans** ke yeh sab guesswork hai. Observability ka idea: ek request ko uske andar ke har step ke saath measure karo.
 

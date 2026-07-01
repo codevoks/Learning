@@ -110,7 +110,9 @@ Har line mein wahi shape jo tum inference pe use karoge — system (task/persona
 
 ---
 
-### §3. LoRA / PEFT — sasti fine-tuning
+### §3. LoRA / PEFT — sasti fine-tuning  ⏭️ SKIM-able
+
+> ⏭️ **Skim OK** — awareness kaafi (LoRA = sasti fine-tuning); tum khud rarely fine-tune karoge.
 
 Poore model ke billions weights update karna GPU + memory ka pahaad hai. **LoRA** ka insight: original weights ko chhedो mat (freeze), unke saath chhote **adapter** matrices jodo aur sirf woh train karo. Yeh total params ka ~0.1–1% hota hai, isliye:
 
@@ -151,7 +153,9 @@ Aur eval — fine-tune ke baad Module 10 ka harness chalao: holdout pe pass-rate
 
 ---
 
-### §6. Distillation + serving
+### §6. Distillation + serving  ⏭️ SKIM-able
+
+> ⏭️ **Skim OK** — "bade model se chhota clone karke cost bachao" concept jaan lo, kaafi.
 
 **Distillation** cost ka bada lever hai. Ek bada model (GPT-4) tumhare task pe accha hai par mehenga. Uske outputs ko training data bana ke ek chhote model ko fine-tune karo — ab chhota model us task pe bade jaisा, par 10-50x sasta aur fast. Yeh "capability ko compress" karna hai. YC startups aksar prototype GPT-4 pe karte hain, phir hot paths ko distilled chhote model pe le jaate hain (margin ke liye).
 

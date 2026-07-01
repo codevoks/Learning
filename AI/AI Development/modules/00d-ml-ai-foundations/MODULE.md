@@ -278,7 +278,9 @@ Practically tumhare projects mein: LLM Gateway, RAG app, aur agents — teeno me
 
 ---
 
-### §8. Hugging Face hub — model card padhna
+### §8. Hugging Face hub — model card padhna  ⏭️ SKIM-able
+
+> ⏭️ **Skim OK** — light HF awareness; poora Module 18 (optional) mein. Embedding model choose karna aa jaaye, kaafi.
 
 "Kaunsa model use karun?" — iska jawab Hugging Face pe **model cards** padhke milta hai. Models hub pe publish hote hain apni size, license, aur task ke saath. Embedding ke liye `bge-small` ya `all-MiniLM-L6-v2` jaise search karoge. Card mein chaar cheezein dekho: **task** (`sentence-similarity` chahiye, `text-generation` nahi), **dimensions** (DB schema se match kare), **license** (commercial use OK?), aur **size** (laptop pe chalega?).
 

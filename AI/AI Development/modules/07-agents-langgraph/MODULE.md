@@ -208,7 +208,9 @@ app.invoke(None, config)            # same thread_id → state wahi se resume
 
 ---
 
-### §6. Memory patterns — short vs long term
+### §6. Memory patterns — short vs long term  ⏭️ (deeper in Module 20)
+
+> ⏭️ **Skim OK** — short/long-term memory ka poora treatment Module 20 (recommended) mein. Yahan bas concept.
 
 Do tarah ki memory hoti hai aur inhe alag rakhna zaroori hai. **Short-term** `state["messages"]` mein hai — is run ki conversation + tool results, jo checkpoint ke saath persist ho sakta hai, par context-window limit ke kaaran purane messages ko summarize/truncate karna padta hai. **Long-term** ek alag store (vector DB / SQL) mein hai — cross-session facts jaise "User Hinglish prefer karta hai" ya "Acme ka billing contact Raj hai" — jise ek retrieve node se inject karte ho. Current turn ka tool output short-term mein, user preference long-term mein, workflow progress checkpoint mein. Module 11 mein workflow history Postgres mein jaayegi — wahi long-term hai.
 

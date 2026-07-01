@@ -66,14 +66,20 @@ Yeh 17 modules tumhe portfolio banane + core interviews clear karne ke liye kaaf
 
 ## Skippable SECTIONS within CORE/EDGE modules
 
-Yeh modules karo, par yeh sections **skim ya skip** kar sakte ho:
+Yeh modules karo, par yeh sections **skim ya skip** kar sakte ho (har section ke heading pe bhi ⏭️ badge laga hai — galti se nahi padhoge):
 
 | Module | Skip/skim section | Kyun |
 |--------|-------------------|------|
-| 00d | §6 TensorFlow/Keras hello | "Awareness only" — tum train nahi karte |
-| 14 | §3 LoRA detail, §4 DPO, §6 distillation | §1 decision + §2 SFT format + §5 dataset kaafi hai |
+| 00d | §6 TensorFlow/Keras hello | Awareness only — tum train nahi karte |
+| 00d | §8 Hugging Face hub | Light awareness; Module 18 mein deeper |
+| 00e | §6 Goroutines | Awareness; Project C mein aayega |
+| 02 | §7 Observability deep-dive | Structured-logs concept kaafi; deep OTEL baad mein |
+| 03 | §7 Tracing deep-dive | Cost-in-span concept kaafi; deep setup MVP ke baad |
 | 05 | §5 Hybrid search | Module 13 mein deeper — wahan padho |
-| 02 | §7 Observability deep-dive | Concept kaafi; deep OTEL setup baad mein |
+| 07 | §6 Memory patterns | Module 20 mein poora |
+| 14 | §3 LoRA, §4 DPO, §6 distillation | §1 decision + §2 SFT + §5 dataset kaafi |
+
+> **⚠️ Honest note:** CORE modules ke **baaki saare sections essential hain** — inhe maine optional **nahi** mark kiya, kyunki quota bharने ke liye important cheez optional bana dena tumhe galti se zaroori topic skip kara dega. Jis section pe ⏭️ badge **nahi** hai = **padho**. Skippable sirf upar wali table + ⏭️-badged headings hain. (Optional MODULES 15–19, 21, 22 poore skip — unke andar kuch mark karne ki zaroorat nahi.)
 
 ---
 
