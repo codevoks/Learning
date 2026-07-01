@@ -50,6 +50,20 @@ Har module = **ek naya Cursor agent**. Same coaching rules (`@Memory.md`), alag 
 | 14 | [14-finetuning](./14-finetuning/MODULE.md) | SFT, LoRA, DPO, prompt-vs-RAG-vs-finetune decision |
 | 15 | [15-voice-multimodal](./15-voice-multimodal/MODULE.md) | Vision, STT/TTS, voice pipeline, latency, multimodal RAG |
 
+### Track 3 — Deep Foundations & Internals (from-scratch / research-adjacent)
+
+> "AI ko andar se samjho + scratch se banao." Top labs (OpenAI/Anthropic) + Devin/framework-builder roles yeh depth poochhte hain. NumPy-heavy, code-from-scratch.
+
+| # | Path | Focus |
+|---|------|-------|
+| 16 | [16-dl-foundations](./16-dl-foundations/MODULE.md) | NN, backprop, gradient descent, RNN/LSTM/CNN, road to transformers |
+| 17 | [17-transformers-scratch](./17-transformers-scratch/MODULE.md) | Self-attention (Q/K/V), multi-head, positional, KV cache, GQA, MLA ⭐ |
+| 18 | [18-huggingface-open-models](./18-huggingface-open-models/MODULE.md) | Hub, pipeline/AutoModel, tokenizers, quantization, vLLM/Ollama |
+| 19 | [19-agents-first-principles](./19-agents-first-principles/MODULE.md) | Agent loop + tool registry from scratch (no framework) |
+| 20 | [20-memory-context](./20-memory-context/MODULE.md) | Short/long-term memory, summarization, context engineering |
+| 21 | [21-computer-use](./21-computer-use/MODULE.md) | Perception-action loop, grounding, browser agents, safety |
+| 22 | [22-rl-finetuning](./22-rl-finetuning/MODULE.md) | RLHF, reward models, PPO/DPO/GRPO, reward hacking, RL evals |
+
 Full plan: `@LEARNING-PLAN.md` · Spec: `@Projects.md`
 
 > **Padhai quality:** Har MODULE = textbook (`@MODULE-TEACHING-STANDARD.md`). §0 pehle — syntax (Track 0) ya terms (Track 1). Cheat sheet style banned.

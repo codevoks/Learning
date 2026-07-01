@@ -2,7 +2,7 @@
 
 > **Padho**: Isi file mein **Theory** — bahar mat jao.
 > **Likho**: `practice/` folder. **Pucho**: Cursor chat `@MODULE.md`
-> **Nav**: ← [Module 14](../14-finetuning/MODULE.md) · End
+> **Nav**: ← [Module 14](../14-finetuning/MODULE.md) · Next → [Module 16 (Track 3: internals)](../16-dl-foundations/MODULE.md)
 
 > **Format**: Textbook — §0 terms zero se, prose mein. Voice: `@MODULE-TEACHING-STANDARD.md`
 > **Track 2 (advanced):** text/backend se aage — vision + voice.
