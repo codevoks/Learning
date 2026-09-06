@@ -106,22 +106,24 @@ exact hashed action, then still have to clear budget before it actually runs.
 
 ```mermaid
 sequenceDiagram
-    participant TR as tool_runtime (worker)
+    participant TR as tool_runtime worker
     participant PG as Postgres
-    participant H as Human (approver, ≠ requester)
+    participant H as Human approver
     participant API as apps/api
 
     TR->>PG: risk=simulated_effect detected
-    TR->>PG: INSERT approval_requests (approval_binding_hash = SHA256(sorted-key JSON))
+    TR->>PG: INSERT approval_requests with approval_binding_hash
     TR->>PG: task/attempt -> waiting_approval
-    Note over TR: worker attempt ends here; no polling loop
-    H->>API: POST /v1/approvals/{id}:decide
-    API->>API: reject if approver == requester (approval_self_forbidden)
-    API->>PG: BEGIN: write decision, mark request resolved (1 txn, commits before response)
+    Note over TR: worker attempt ends here
+    Note over TR: no polling loop
+    H->>API: POST decide endpoint, approver must not equal requester
+    API->>API: reject if approver equals requester
+    API->>PG: BEGIN write decision, mark request resolved
+    Note over API,PG: commits before response is returned
     PG-->>API: committed
-    API->>PG: emit new outbox message (resume)
+    API->>PG: emit new outbox message to resume
     Note over PG: worker re-claims resumed task
-    TR->>PG: check approval CONSUMED? no -> consume now, proceed
+    TR->>PG: check approval CONSUMED, if not consume now
     TR->>PG: execute adapter, mark approval CONSUMED
 ```
 
