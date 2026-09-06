@@ -68,7 +68,8 @@ sequenceDiagram
     W->>PG: execute (tool_runtime or agent_runtime)
     W->>PG: BEGIN: write result + execution_event (1 txn)
     PG-->>W: committed
-    Note over W,PG: if W crashes here, lease expires;<br/>recovery scan reclaims + republishes
+    Note over W,PG: if W crashes here, lease expires
+    Note over W,PG: recovery scan reclaims + republishes
 ```
 
 Redraw check: can you say *why* a worker crash between "claim" and "commit result" is safe? (Lease
